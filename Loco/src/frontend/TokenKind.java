@@ -32,6 +32,7 @@ public enum TokenKind {
 	loopToken,
 	anToken,
 	
+	eolToken,
 	eofToken,
 	miscToken
 }

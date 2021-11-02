@@ -44,8 +44,11 @@ public class Main {
 		}
 		*/
 		
+		//lexer.scanLine();
 		lexer.scanLine();
 		lexer.viewState();
+		
+		
 		
 		
 	}

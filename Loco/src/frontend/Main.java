@@ -13,18 +13,8 @@ public class Main {
 		Scanner sc = new Scanner(System.in);
 		File fp = new File("src/sample.lol");
 		
-		Lexer lexer = new Lexer(fp);
 		
-		
-		while (true) {
-			Token token = lexer.nextToken();
-			
-			if (token.getKind() == TokenKind.eofToken) {
-				break;
-			}
-			
-			if (token.getKind() != TokenKind.miscToken) token.viewToken();
-		}
+		Parser parser = new Parser(fp);
 
 	}
 }

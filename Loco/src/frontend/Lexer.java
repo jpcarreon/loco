@@ -45,19 +45,13 @@ public class Lexer {
 	private void next() {
 		position++;
 	}
-	
+
 	private void peek(int offset) {
 		position = position + offset;
 	}
 
 	private String currentLexeme() {
 		return lexemes.get(position);
-	}
-
-	public void viewLexemes() {
-		int count = 0;
-		for (String i : lexemes)
-			System.out.println("Lexeme #" + ++count + ": " + i);
 	}
 
 	private String readMultiLength(int length) {
@@ -99,6 +93,12 @@ public class Lexer {
 		}
 
 		return new Token(TokenKind.miscToken, currentLexeme(), position++);
+	}
+
+	public void viewLexemes() {
+		int count = 0;
+		for (String i : lexemes)
+			System.out.println("Lexeme #" + ++count + ": " + i);
 	}
 
 }

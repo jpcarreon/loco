@@ -10,112 +10,95 @@ import java.util.regex.Pattern;
 
 public class Lexer {
 	private File file;
-	private ArrayList<Token> lexemes;
-	private ArrayList<String> lines;
+	private ArrayList<String> lexemes;
 	private int position;
-	
+
 	Lexer(File file) {
 		this.file = file;
 
-		this.lexemes = new ArrayList<Token>();
-		this.lines = new ArrayList<String>();
+		this.lexemes = new ArrayList<String>();
 		parseFile();
 
 	}
-	
+
 	private void parseFile() {
 		try {
 			Scanner sc = new Scanner(new File("src/sample.lol"));
 			while (sc.hasNextLine()) {
-				String temp = sc.nextLine();
-				temp = temp.replaceAll("\t", "");
-				if (!temp.isBlank()) lines.add(temp);
+				String curLine = sc.nextLine();
+
+				for (String i : curLine.split("\s")) {
+					i = i.replaceAll("\t", "");
+					lexemes.add(i);
+				}
+
+				if (!curLine.isBlank() && sc.hasNextLine())
+					lexemes.add("\n");
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+
 	}
-	
+
 	private void next() {
 		position++;
 	}
 	
-	private String currentLine() {
-		return lines.get(position);
-	}
-	
-	public void viewState() {
-		for (Token i : lexemes) {
-			i.viewToken();
-		}
-		System.out.println();
-	}
-	
-	private void findMatches(String regex, TokenKind kind) {
-		Pattern pattern = Pattern.compile(regex);
-		Matcher matcher = pattern.matcher(currentLine());
-		
-		while(matcher.find()) {
-			Token newToken = new Token(kind, currentLine().substring(matcher.start(), matcher.end()), position);
-			
-			lexemes.add(newToken);
-		}
-		lines.set(position, currentLine().replaceAll(regex, ""));
+	private void peek(int offset) {
+		position = position + offset;
 	}
 
-	public void scanLine() {
-		Token newToken;
-		
-		while (position < lines.size() - 1) {
-			
-			//	Start keywords
-			findMatches("HAI", TokenKind.haiToken);
-			
-			//	Literal Strings and Bool
-			findMatches("\".+?\"", TokenKind.yarnToken);
-			findMatches("(WIN|FAIL)", TokenKind.troofToken);
-			
-			//	Comment keywords
-			findMatches("BTW", TokenKind.btwToken);
-			findMatches("OBTW", TokenKind.obtwToken);
-			findMatches("TLDR", TokenKind.tldrToken);
-			
-			//	Var declaration keyword
-			findMatches("I\sHAS\sA", TokenKind.ihasToken);
-			
-			
-			//	Arithmetic keywords
-			findMatches("SUM\sOF", TokenKind.sumOpToken);
-			findMatches("DIFF\sOF", TokenKind.diffOpToken);
-			findMatches("PRODUKT\sOF", TokenKind.mulOpToken);
-			findMatches("QUOSHUNT\sOF", TokenKind.divOpToken);
-			
-			//	Conjunction keyword
-			findMatches("AN", TokenKind.anToken);
+	private String currentLexeme() {
+		return lexemes.get(position);
+	}
 
-			
-			findMatches("(?<=(IM\\sIN\\sYR\\s))[a-zA-Z][a-zA-Z0-9_]*", TokenKind.loopIdToken);
-			
-			findMatches("IM\sIN\sYR", TokenKind.loopToken);
-			
-			findMatches("[a-zA-Z][a-zA-Z0-9_]*", TokenKind.varIdToken);
-			
-			//	Literal int and float
-			findMatches("-?[0-9]+\\.[0-9]+", TokenKind.numbarToken);
-			findMatches("-?[0-9]+", TokenKind.numbrToken);
-			
-			findMatches("[a-zA-Z0-9]+", TokenKind.miscToken);
-			
-			newToken = new Token(TokenKind.eolToken, "\n", position);
-			lexemes.add(newToken);
-			
+	public void viewLexemes() {
+		int count = 0;
+		for (String i : lexemes)
+			System.out.println("Lexeme #" + ++count + ": " + i);
+	}
+
+	private String readMultiLength(int length) {
+		String multiLex = new String();
+
+		if (length < 0) {
+			if (currentLexeme().matches("\".+?\"")) {
+				return currentLexeme();
+			}
+
+			do {
+				multiLex = multiLex + currentLexeme() + " ";
+				next();
+			} while (!currentLexeme().matches(".+?\""));
+
+			return multiLex + currentLexeme();
+		}
+
+		while (length-- > 0) {
+			multiLex = multiLex + currentLexeme() + " ";
 			next();
 		}
-		findMatches("KTHXBYE", TokenKind.byeToken);
+		peek(-1);
+
+		return multiLex.trim();
 	}
-	
-	
-	
+
+	public Token nextToken() {
+		if (position >= lexemes.size()) {
+			return new Token(TokenKind.eofToken, "\0", position);
+		}
+
+		for (TokenKind kind : TokenKind.values()) {
+			if (currentLexeme().matches(kind.getRegex()) && kind.getLength() == 1) {
+				return new Token(kind, currentLexeme(), position++);
+			} else if (currentLexeme().matches(kind.getRegex())) {
+				return new Token(kind, readMultiLength(kind.getLength()), position++);
+			}
+		}
+
+		return new Token(TokenKind.miscToken, currentLexeme(), position++);
+	}
+
 }

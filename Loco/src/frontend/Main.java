@@ -13,26 +13,9 @@ public class Main {
 		Scanner sc = new Scanner(System.in);
 		File fp = new File("src/sample.lol");
 		
-		
-		
-		/*
-		Lexer lexer = new Lexer(text);
-		
-		while (true) {
-			Token token = lexer.nextToken();
-			
-			
-			if (token.getKind() == TokenKind.eofToken) {
-				break;
-			}
-			token.viewToken();
-			
-		}
-		*/
-		
 		Lexer lexer = new Lexer(fp);
 		
-		/*
+		
 		while (true) {
 			Token token = lexer.nextToken();
 			
@@ -40,19 +23,8 @@ public class Main {
 				break;
 			}
 			
-			token.viewToken();
+			if (token.getKind() != TokenKind.miscToken) token.viewToken();
 		}
-		*/
-		
-		//lexer.scanLine();
-		lexer.scanLine();
-		lexer.viewState();
-		
-		
-		
-		
-	}
-	
-	
 
+	}
 }

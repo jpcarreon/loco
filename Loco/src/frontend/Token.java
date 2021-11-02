@@ -15,6 +15,10 @@ public class Token {
 		return this.tokenKind;
 	}
 	
+	public String getValue() {
+		return this.value;
+	}
+	
 	public void viewToken() {
 		System.out.println(tokenKind + ": " + value);
 	}

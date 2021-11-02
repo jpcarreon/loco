@@ -15,6 +15,8 @@ public class Main {
 		
 		
 		Parser parser = new Parser(fp);
+		
+		parser.viewTokens();
 
 	}
 }

@@ -27,7 +27,7 @@ public class Parser {
 				}
 			}
 			
-			if (curToken.getKind() != TokenKind.miscToken) {
+			if (curToken.getKind() != TokenKind.badToken) {
 				tokens.add(curToken);
 			}
 			

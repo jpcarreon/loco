@@ -9,15 +9,24 @@ import java.util.regex.Pattern;
 public class Main {
 
 	public static void main(String[] args) {
-		String text = new String();
-		Scanner sc = new Scanner(System.in);
 		File fp = new File("src/sample.lol");
 		
+		//Parser parser = new Parser(fp);
 		
-		Parser parser = new Parser(fp);
-		
-		parser.parse();
-		parser.viewErrors();
+		//parser.parse();
+		//parser.viewErrors();
 
+		Lexer lexer = new Lexer(fp);
+
+		Token token;
+		
+		
+		do {
+			token = lexer.nextToken();
+			
+			if (token.getKind() != TokenKind.badToken) token.viewToken();
+		} while (token.getKind() != TokenKind.eofToken);
+		
+		
 	}
 }

@@ -1,0 +1,21 @@
+program: 
+    | haiToken eolToken statement eolToken byeToken
+	;
+
+statement: expression
+    | statement eolToken statement 
+    ;
+
+expression:
+    | mathOp
+    ;
+
+mathOp: literal
+	| sumOpToken mathOp AN mathOp
+	| diffOpToken mathOp AN mathOp
+	| mulOpToken mathOp AN mathOp
+	| divOpToken mathOp AN mathOp
+	| minOpToken mathOp AN mathOp
+	| maxOpToken mathOp AN mathOp
+	;
+	

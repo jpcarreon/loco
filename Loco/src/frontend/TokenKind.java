@@ -32,10 +32,35 @@ public enum TokenKind {
 	isNowToken("IS\sNOW\sA", 3),
 	maekToken("MAEK", 1),
 	aToken("^A$", 1),
+	anToken("^AN$", 1), 
 	
-	anToken("^AN$", 1), printToken("VISIBLE", 1),
+	printToken("VISIBLE", 1),
+	scanToken("GIMMEH", 1),
 	
-	varIdToken("[a-zA-Z][a-zA-Z0-9_]*", 1), loopIdToken("(?<=(IM\sIN\sYR\s))[a-zA-Z][a-zA-Z0-9_]*", 1),
+	ifStartToken("O\sRLY\\?", 2),
+	
+	ifBlockToken("YA\sRLY", 2),
+	elifBlockToken("MEBBE", 1),
+	elseBlockToken("NO\sWAI", 2),
+	
+	switchToken("WTF\\?", 1),
+	caseToken("^OMG$", 1),
+	defaultToken("OMGWTF", 1),
+	breakToken("GTFO", 1),
+	
+	ifEndToken("OIC", 1),
+	
+	loopStartToken("IM\sIN\sYR", 3),
+	
+	incToken("UPPIN", 1),
+	decToken("NERFIN", 1),
+	yrToken("^YR$", 1),
+	tilToken("TIL", 1),
+	wileToken("WILE", 1),
+	
+	loopEndToken("IM\sOUTTA\sYR", 3),
+	
+	idToken("[a-zA-Z][a-zA-Z0-9_]*", 1), 
 
 	quoteToken("\"", 1), 
 	

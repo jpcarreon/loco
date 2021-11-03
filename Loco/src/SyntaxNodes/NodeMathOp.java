@@ -14,19 +14,19 @@ public class NodeMathOp extends SyntaxNode{
 	}
 	
 	public void printChildren(int tab) {
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("{");
 		
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("MathOP: " + operation.getKind());
-		super.printTab(tab);
+		printTab(tab);
 		System.out.print("0: ");
 		operand1.printChildren(tab + 1);
-		super.printTab(tab);
+		printTab(tab);
 		System.out.print("1: ");
 		operand2.printChildren(tab + 1);
 		
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("}");
 		
 	}

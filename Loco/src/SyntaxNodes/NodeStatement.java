@@ -10,19 +10,19 @@ public class NodeStatement extends SyntaxNode{
 	}
 	
 	public void printChildren(int tab) {
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("{");
 		
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("Statement Node");
 		System.out.print("0: ");
-		super.printTab(tab);
+		printTab(tab);
 		operand1.printChildren(tab + 1);
 		System.out.print("1: ");
-		super.printTab(tab);
+		printTab(tab);
 		operand2.printChildren(tab + 1);
 		
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("}");
 		
 	}

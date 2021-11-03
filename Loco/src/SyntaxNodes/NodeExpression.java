@@ -9,14 +9,14 @@ public class NodeExpression extends SyntaxNode {
 	}
 	public void printChildren(int tab) {
 		System.out.println();
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("{");
 		
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("Expression Node: ");
 		node.printChildren(tab + 1);
 		
-		super.printTab(tab);
+		printTab(tab);
 		System.out.println("}");
 	}
 }

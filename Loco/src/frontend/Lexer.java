@@ -54,13 +54,9 @@ public class Lexer {
 		String newLexeme = new String();
 		
 		for (String i : lexemes) {
-
-			//if (i == "\n") System.out.println("NewLine");
-
 			if (i.matches("[^\s\"\n]")) {
 				newLexeme = newLexeme + i;
 			} else {
-				
 				if (!newLexeme.isBlank()) {
 					fixedList.add(newLexeme);
 					newLexeme = new String();
@@ -75,7 +71,7 @@ public class Lexer {
 			}
 		}
 		
-		//for (String i : fixedList) System.out.println("S: "+i);
+		if (!newLexeme.isBlank()) fixedList.add(newLexeme);
 		lexemes = fixedList;
 		
 	}
@@ -92,21 +88,6 @@ public class Lexer {
 
 	private String currentLexeme() {
 		return peek(0);
-	}
-
-	//	Scan a TokenType that has multiple 'words' e.g. SUM OF, I HAS A
-	private String readMultiLength(int length) {
-		String multiLex = new String();
-		next();
-		
-		while (length-- > 0) {
-			
-		}
-
-		peek(-1);
-		
-
-		return multiLex.trim();
 	}
 
 	//	Get next token from the list of lexemes

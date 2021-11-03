@@ -18,6 +18,10 @@ public class Token {
 	public String getValue() {
 		return this.value;
 	}
+	
+	public int getPosition() {
+		return this.position;
+	}
 
 	public void viewToken() {
 		System.out.println(tokenKind + ": " + value);

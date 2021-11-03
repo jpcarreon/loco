@@ -15,6 +15,7 @@ public class Lexer {
 
 	Lexer(File file) {
 		this.file = file;
+		this.position = 0;
 
 		this.lexemes = new ArrayList<String>();
 		parseFile();

@@ -8,7 +8,6 @@ public class NodeExpression extends SyntaxNode {
 		
 	}
 	public void printChildren(int tab) {
-		System.out.println();
 		printTab(tab);
 		System.out.println("{");
 		

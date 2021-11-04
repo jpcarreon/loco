@@ -21,6 +21,7 @@ public class Parser {
 		do {
 			curToken = lexer.nextToken();
 			
+			// ignore single line comment
 			if (curToken.getKind() == TokenKind.btwToken) {
 				while (curToken.getKind() != TokenKind.eolToken) {
 					curToken = lexer.nextToken();
@@ -64,17 +65,27 @@ public class Parser {
 	}
 	
 	public SyntaxNode parse() {
+		NodeRoot root;
+		
 		Token start = match(TokenKind.haiToken);
 		match(TokenKind.eolToken);
-		//if (current().getKind() != TokenKind.byeToken) {
+		consumeEOL();
+		
+		if (current().getKind() != TokenKind.byeToken) {
 			SyntaxNode statement = parseStatement();
-		//}
-		Token end = match(TokenKind.byeToken);
+			Token end = match(TokenKind.byeToken);
+			
+			root = new NodeRoot (start, statement, end);
+		} else {
+			Token end = match(TokenKind.byeToken);
+			root = new NodeRoot (start, end);
+		}
+		
+		
 		Token endOfFile = match(TokenKind.eofToken);
+		root.printChildren(0);
 		
-		statement.printChildren(0);
-		
-		return statement;
+		return root;
 	}
 	
 	private boolean isMathOp() {
@@ -85,6 +96,14 @@ public class Parser {
 			current().getKind() == TokenKind.modOpToken ||
 			current().getKind() == TokenKind.minOpToken ||
 			current().getKind() == TokenKind.maxOpToken) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isComment() {
+		if (current().getKind() == TokenKind.obtwToken) {
 			return true;
 		}
 		
@@ -104,6 +123,7 @@ public class Parser {
 	
 	private void consumeEOL() {
 		while (current().getKind() == TokenKind.eolToken) {
+			current().viewToken();
 			nextToken();
 		}
 	}
@@ -122,7 +142,9 @@ public class Parser {
 	private SyntaxNode parseExpression() {
 		if (isMathOp()) {
 			return new NodeExpression(parseMathOp());
-		} 
+		} else if (isComment()) {
+			return new NodeExpression(parseComment());
+		}
 		
 		return new NodeLiteral(nextToken());
 	}
@@ -136,7 +158,20 @@ public class Parser {
 		
 		return new NodeMathOp(operation, operand1, operand2);
 		
-	} 
+	}
+	
+	private SyntaxNode parseComment() {
+		ArrayList<Token> inner = new ArrayList<Token>();
+		Token start = nextToken();
+		
+		while (current().getKind() != TokenKind.tldrToken) {
+			
+			inner.add(nextToken());
+		}
+		Token end = match(TokenKind.tldrToken);
+		
+		return new NodeComment(start, inner, end);
+	}
 	
 	private SyntaxNode parseLiteral() {
 		if (isMathOp()) {

@@ -8,6 +8,7 @@ statement: expression
 
 expression:
     | mathOp
+    | comment
     ;
 
 mathOp: literal
@@ -17,5 +18,9 @@ mathOp: literal
 	| divOpToken mathOp AN mathOp
 	| minOpToken mathOp AN mathOp
 	| maxOpToken mathOp AN mathOp
+	;
+
+comment:
+	| obtwToken statement tldrToken
 	;
 	

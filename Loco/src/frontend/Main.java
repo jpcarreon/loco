@@ -15,10 +15,6 @@ public class Main {
 		//startLexer(fp);
 		startParser(fp);
 		
-		
-		
-		
-		
 	}
 	
 	static void startLexer(File fp) {

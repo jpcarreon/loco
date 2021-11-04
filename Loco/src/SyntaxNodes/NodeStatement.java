@@ -15,11 +15,13 @@ public class NodeStatement extends SyntaxNode{
 		
 		printTab(tab);
 		System.out.println("Statement Node");
-		System.out.print("0: ");
+		
 		printTab(tab);
+		System.out.println("0: ");
 		operand1.printChildren(tab + 1);
-		System.out.print("1: ");
+		
 		printTab(tab);
+		System.out.println("1: ");
 		operand2.printChildren(tab + 1);
 		
 		printTab(tab);

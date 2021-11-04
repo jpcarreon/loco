@@ -109,6 +109,17 @@ public class Parser {
 		return false;
 	}
 	
+	private boolean isBoolOp() {
+		if (current().getKind() == TokenKind.bothOpToken ||
+			current().getKind() == TokenKind.eitherOpToken||
+			current().getKind() == TokenKind.wonOpToken ||
+			current().getKind() == TokenKind.notOpToken) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	private boolean isComment() {
 		if (current().getKind() == TokenKind.obtwToken) {
 			return true;
@@ -155,11 +166,13 @@ public class Parser {
 	
 	private SyntaxNode parseExpression() {
 		if (isMathOp()) {
-			return new NodeExpression(parseMathOp());
+			return new NodeExpression(parseMathOp(), lineCounter);
 		} else if (isComment()) {
-			return new NodeExpression(parseComment());
+			return new NodeExpression(parseComment(), lineCounter);
 		} else if (isAssignment()) {
-			return new NodeExpression(parseAssignment());
+			return new NodeExpression(parseAssignment(), lineCounter);
+		} else if (isBoolOp()) {
+			return new NodeExpression(parseBoolOp(), lineCounter);
 		}
 		
 		return new NodeLiteral(nextToken());
@@ -172,7 +185,7 @@ public class Parser {
 		match(TokenKind.anToken);
 		SyntaxNode operand2 = parseLiteral();
 		
-		return new NodeMathOp(operation, operand1, operand2);
+		return new NodeOperation(operation, operand1, operand2);
 		
 	}
 	
@@ -201,10 +214,13 @@ public class Parser {
 			} else if (isMathOp()) {
 				return new NodeAssignment(operation, varid, parseMathOp());
 			} else if (current().getKind() == TokenKind.idToken) {
-				
+				if (current().getValue() != varid.getValue()) {
+					//	TODO symbol table for variables
+					return new NodeAssignment(operation, varid);
+				}
 			}
 			
-			diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected Literal/VarId/Expression");
+			diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected valid Literal/VarId/Expression");
 			
 		}
 		
@@ -212,16 +228,33 @@ public class Parser {
 
 	}
 	
+	private SyntaxNode parseBoolOp() {
+		Token operation = nextToken();
+		
+		if (operation.getKind() != TokenKind.notOpToken) {
+			SyntaxNode operand1 = parseLiteral();
+			match(TokenKind.anToken);
+			SyntaxNode operand2 = parseLiteral();
+			
+			return new NodeOperation(operation, operand1, operand2);
+		} else {
+			SyntaxNode operand1 = parseLiteral();
+			
+			return new NodeOperation(operation, operand1);
+		}
+	}
+	
 	private SyntaxNode parseLiteral() {
 		if (isMathOp()) {
 			return parseMathOp();
+		} else if (isBoolOp()) {
+			return parseBoolOp();
 		} else if (isLiteral()) {
 			return new NodeLiteral(nextToken());
 		}
 		
 		return new NodeLiteral(match(TokenKind.numbrToken));
-	}
-	
+	}	
 	
 	
 }

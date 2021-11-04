@@ -10,15 +10,18 @@ expression:
     | mathOp
     | comment
     | vardec
+    | boolOp
     ;
 
-mathOp: literal
-	| sumOpToken mathOp AN mathOp
-	| diffOpToken mathOp AN mathOp
-	| mulOpToken mathOp AN mathOp
-	| divOpToken mathOp AN mathOp
-	| minOpToken mathOp AN mathOp
-	| maxOpToken mathOp AN mathOp
+mathOp: 
+	| sumOpToken mathOp anToken mathOp
+	| diffOpToken mathOp anToken mathOp
+	| mulOpToken mathOp anToken mathOp
+	| divOpToken mathOp anToken mathOp
+	| minOpToken mathOp anToken mathOp
+	| maxOpToken mathOp anToken mathOp
+	| literal
+	| idToken
 	;
 
 comment:
@@ -31,6 +34,22 @@ vardec:
 	| ihasToken idToken itzToken mathOp
 	| ihasToken idToken itzToken idToken
 	;
+	
+infArOp:
+	| anyOpToken boolOp anToken boolOp
+	| allOpToken boolOp antoken boolOp
+	;
+	
+boolOp:
+	| bothOpToken boolOp anToken boolOp
+	| eitherOpToken boolOp anToken boolOp
+	| wonOpToken boolOp anToken boolOp
+	| notOpToken boolOp 
+	| literal
+	| idToken
+	;
+	
+
 	
 literal:
 	| numbrToken

@@ -14,6 +14,12 @@ public class NodeStatement extends SyntaxNode{
 	}
 	
 	public void printChildren(int tab) {
+		operand1.printChildren(tab);
+		operand2.printChildren(tab);
+	}
+	
+	private void printTree(int tab) {
+		
 		printTab(tab);
 		System.out.println("{");
 		
@@ -30,6 +36,4 @@ public class NodeStatement extends SyntaxNode{
 		System.out.println("}");
 		
 	}
-	
-	
 }

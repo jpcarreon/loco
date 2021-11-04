@@ -2,9 +2,11 @@ package SyntaxNodes;
 
 public class NodeExpression extends SyntaxNode {
 	SyntaxNode node;
+	int lineCounter;
 	
-	public NodeExpression(SyntaxNode node) {
+	public NodeExpression(SyntaxNode node, int lineCounter) {
 		this.node = node;
+		this.lineCounter = lineCounter;
 		
 	}
 	public void printChildren(int tab) {
@@ -12,7 +14,7 @@ public class NodeExpression extends SyntaxNode {
 		System.out.println("{");
 		
 		printTab(tab);
-		System.out.println("Expression Node: ");
+		System.out.println("Line "+lineCounter+": ");
 		node.printChildren(tab + 1);
 		
 		printTab(tab);

@@ -2,16 +2,16 @@ package SyntaxNodes;
 
 import frontend.Token;
 
-public class NodeAssignment extends SyntaxNode {
+public class NodeDeclaration extends SyntaxNode {
 	Token operation, varid;
 	SyntaxNode value;
 	
-	public NodeAssignment(Token operation, Token varid) {
+	public NodeDeclaration(Token operation, Token varid) {
 		this.operation = operation;
 		this.varid = varid;
 	}
 	
-	public NodeAssignment(Token operation, Token varid, SyntaxNode value) {
+	public NodeDeclaration(Token operation, Token varid, SyntaxNode value) {
 		this.operation = operation;
 		this.varid = varid;
 		this.value = value;
@@ -23,7 +23,7 @@ public class NodeAssignment extends SyntaxNode {
 		System.out.println("{");
 		
 		printTab(tab);
-		System.out.println("Assignment: " + operation.getKind());
+		System.out.println(operation.getValue() + ": ");
 		printTab(tab);
 		System.out.print("varID: ");
 		System.out.println(varid.getValue());

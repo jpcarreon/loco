@@ -1,3 +1,4 @@
 HAI
-	SMOOSH "Fff" AN "FFF" AN 154
+	I HAS A var1
+	var1 R 154
 KTHXBYE

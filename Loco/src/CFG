@@ -2,19 +2,42 @@ program:
     | haiToken eolToken statement eolToken byeToken
 	;
 
-statement: expression
+statement: 
     | expression eolToken statement 
+    | assignment eolToken statement
+    | flowcontrol eolToken statement
+    | expression
+    | assignment
+    | flowcontrol
     ;
 
 expression:
     | mathOp
     | comment
-    | vardec
     | boolOp
     | cmpOp
     | concat
+    | vardec
+    | print
     ;
+    
+assignment:
+	| vardec
+	| varassign
+	| typecast
+	;
 
+flowcontrol:
+	;
+
+varassign:
+	| idToken rToken terminal
+	;
+	
+typecast:
+	| idToken isNowToken typeToken
+	;
+	
 mathOp: 
 	| sumOpToken mathOp anToken mathOp
 	| diffOpToken mathOp anToken mathOp
@@ -69,6 +92,21 @@ concat:
 	
 mulliteral: literal
 	| literal AN mulliteral
+	;
+	
+print:
+	| printToken terminal
+	;
+	
+multerminal: terminal
+	| multerminal multerminal
+	;
+	
+terminal:
+	| literal
+	| mathOp
+	| cmpOp
+	| boolOp
 	;
 	
 literal:

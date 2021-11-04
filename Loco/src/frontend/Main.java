@@ -30,7 +30,9 @@ public class Main {
 	static void startParser(File fp) {
 		Parser parser = new Parser(fp);
 		
+		//parser.viewTokens();
 		parser.parse();
 		parser.viewErrors();
+		
 	}
 }

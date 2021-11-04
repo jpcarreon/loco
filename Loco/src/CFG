@@ -12,6 +12,7 @@ expression:
     | vardec
     | boolOp
     | cmpOp
+    | concat
     ;
 
 mathOp: 
@@ -61,13 +62,23 @@ boolOp:
 	| literal
 	| idToken
 	;
-	
 
+concat:
+	| smooshToken mulliteral
+	;
+	
+mulliteral: literal
+	| literal AN mulliteral
+	;
 	
 literal:
 	| numbrToken
 	| numbarToken
-	| yarnToken
+	| yarnLiteral
 	| troofToken
+	;
+	
+yarnLiteral:
+	| quoteToken statement quoteToken
 	;
 	

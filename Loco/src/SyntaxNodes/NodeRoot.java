@@ -24,7 +24,7 @@ public class NodeRoot extends SyntaxNode {
 		System.out.println("{");
 		
 		printTab(tab);
-		System.out.println("ROOT");
+		System.out.println("PARSE TREE");
 		System.out.print("0: ");
 		printTab(tab);
 		System.out.println(start.getValue());

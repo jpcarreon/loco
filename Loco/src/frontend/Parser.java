@@ -9,11 +9,13 @@ public class Parser {
 	private ArrayList<Token> tokens;
 	private ArrayList<String> diagnostics;
 	private int position;
+	private int lineCounter;
 	
 	Parser (File file) {
 		this.tokens = new ArrayList<Token>();
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
+		this.lineCounter = 1;
 		
 		Lexer lexer = new Lexer(file);
 		Token curToken;
@@ -50,9 +52,14 @@ public class Parser {
 	}
 	
 	private Token match(TokenKind kind) {
-		if (current().getKind() == kind) return nextToken();
 		
-		diagnostics.add("Error: Unexpected Token <"+ current().getKind() + "> expected <"+ kind + ">");
+		if (current().getKind() == kind) {
+			if (kind == TokenKind.eolToken) lineCounter++;
+			return nextToken();
+		}
+		
+		diagnostics.add("Line "+ lineCounter + ": Unexpected Token <"+ current().getKind() 
+						+ "> expected <"+ kind + ">");
 		return new Token(kind, null, current().getPosition());
 	}
 	
@@ -121,9 +128,16 @@ public class Parser {
 		return false;
 	}
 	
+	private boolean isAssignment() {
+		if (current().getKind() == TokenKind.ihasToken) {
+			return true;
+		}
+		return false;
+	}
+	
 	private void consumeEOL() {
 		while (current().getKind() == TokenKind.eolToken) {
-			current().viewToken();
+			lineCounter++;
 			nextToken();
 		}
 	}
@@ -144,6 +158,8 @@ public class Parser {
 			return new NodeExpression(parseMathOp());
 		} else if (isComment()) {
 			return new NodeExpression(parseComment());
+		} else if (isAssignment()) {
+			return new NodeExpression(parseAssignment());
 		}
 		
 		return new NodeLiteral(nextToken());
@@ -173,9 +189,32 @@ public class Parser {
 		return new NodeComment(start, inner, end);
 	}
 	
+	private SyntaxNode parseAssignment() {
+		Token operation = nextToken();
+		Token varid = match(TokenKind.idToken);
+		
+		if (current().getKind() == TokenKind.itzToken) {
+			nextToken();
+			
+			if (isLiteral()) {
+				return new NodeAssignment(operation, varid, parseLiteral());
+			} else if (isMathOp()) {
+				return new NodeAssignment(operation, varid, parseMathOp());
+			} else if (current().getKind() == TokenKind.idToken) {
+				
+			}
+			
+			diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected Literal/VarId/Expression");
+			
+		}
+		
+		return new NodeAssignment(operation, varid);
+
+	}
+	
 	private SyntaxNode parseLiteral() {
 		if (isMathOp()) {
-			return parseExpression();
+			return parseMathOp();
 		} else if (isLiteral()) {
 			return new NodeLiteral(nextToken());
 		}

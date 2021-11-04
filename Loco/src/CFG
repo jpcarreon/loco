@@ -9,6 +9,7 @@ statement: expression
 expression:
     | mathOp
     | comment
+    | vardec
     ;
 
 mathOp: literal
@@ -22,5 +23,19 @@ mathOp: literal
 
 comment:
 	| obtwToken statement tldrToken
+	;
+	
+vardec: 
+	| ihasToken idToken
+	| ihasToken idToken itzToken literal
+	| ihasToken idToken itzToken mathOp
+	| ihasToken idToken itzToken idToken
+	;
+	
+literal:
+	| numbrToken
+	| numbarToken
+	| yarnToken
+	| troofToken
 	;
 	

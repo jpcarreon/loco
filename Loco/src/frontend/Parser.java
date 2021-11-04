@@ -89,7 +89,7 @@ public class Parser {
 		}
 		
 		
-		Token endOfFile = match(TokenKind.eofToken);
+		match(TokenKind.eofToken);
 		root.printChildren(0);
 		
 		return root;
@@ -114,6 +114,24 @@ public class Parser {
 			current().getKind() == TokenKind.eitherOpToken||
 			current().getKind() == TokenKind.wonOpToken ||
 			current().getKind() == TokenKind.notOpToken) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	private boolean isInfArOp() {
+		if (current().getKind() == TokenKind.anyOpToken ||
+			current().getKind() == TokenKind.allOpToken) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isCmpOp() {
+		if (current().getKind() == TokenKind.bothSameOpToken ||
+			current().getKind() == TokenKind.diffrntOpToken) {
 			return true;
 		}
 		
@@ -173,8 +191,15 @@ public class Parser {
 			return new NodeExpression(parseAssignment(), lineCounter);
 		} else if (isBoolOp()) {
 			return new NodeExpression(parseBoolOp(), lineCounter);
+		} else if (isInfArOp()) {
+			SyntaxNode infAr = new NodeExpression(parseInfArOp(nextToken()), lineCounter);
+			match(TokenKind.mkayToken);
+			return infAr;
+		} else if (isCmpOp()) {
+			return new NodeExpression(parseCmpOp(), lineCounter);
 		}
 		
+		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
 		return new NodeLiteral(nextToken());
 	}
 	
@@ -242,6 +267,27 @@ public class Parser {
 			
 			return new NodeOperation(operation, operand1);
 		}
+	}
+	
+	private SyntaxNode parseInfArOp(Token operation) {
+		SyntaxNode operand1 = parseLiteral();
+		
+		while (current().getKind() != TokenKind.mkayToken) {
+			match(TokenKind.anToken);
+			operand1 = new NodeOperation(operation, operand1, parseInfArOp(operation));
+		}
+		
+		return operand1;
+	}
+	
+	private SyntaxNode parseCmpOp() {
+		Token operation = nextToken();
+		
+		SyntaxNode operand1 = parseLiteral();
+		match(TokenKind.anToken);
+		SyntaxNode operand2 = parseLiteral();
+		
+		return new NodeOperation(operation, operand1, operand2);
 	}
 	
 	private SyntaxNode parseLiteral() {

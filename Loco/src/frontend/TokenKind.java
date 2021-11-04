@@ -31,6 +31,7 @@ public enum TokenKind {
 	
 	isNowToken("IS\sNOW\sA", 3),
 	maekToken("MAEK", 1),
+	mkayToken("MKAY", 1),
 	aToken("^A$", 1),
 	anToken("^AN$", 1), 
 	

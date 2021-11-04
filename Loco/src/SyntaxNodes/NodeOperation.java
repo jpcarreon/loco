@@ -23,7 +23,7 @@ public class NodeOperation extends SyntaxNode{
 		System.out.println("{");
 		
 		printTab(tab);
-		System.out.println("Operation: " + operation.getValue());
+		System.out.println(operation.getValue() + ": ");
 		printTab(tab);
 		System.out.println("0: ");
 		operand1.printChildren(tab + 1);

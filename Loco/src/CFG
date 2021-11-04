@@ -3,7 +3,7 @@ program:
 	;
 
 statement: expression
-    | statement eolToken statement 
+    | expression eolToken statement 
     ;
 
 expression:
@@ -11,6 +11,7 @@ expression:
     | comment
     | vardec
     | boolOp
+    | cmpOp
     ;
 
 mathOp: 
@@ -35,9 +36,21 @@ vardec:
 	| ihasToken idToken itzToken idToken
 	;
 	
+cmpOp:
+	| bothSameOpToken boolOp AN boolOp
+	| diffrntOpToken boolOp AN boolOp
+	;
+
+
 infArOp:
 	| anyOpToken boolOp anToken boolOp
 	| allOpToken boolOp antoken boolOp
+	;
+	
+infArOperand:
+	| infArOperand anToken infArOperand
+	| boolOp
+	| literal
 	;
 	
 boolOp:

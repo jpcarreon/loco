@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -18,29 +19,35 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
+                  <MenuItem mnemonicParsing="false" onAction="#openFile" text="Open" />
+                  <MenuItem mnemonicParsing="false" onAction="#saveFile" text="Save as..." />
+                  <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem mnemonicParsing="false" text="Close" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Program">
             <items>
-                  <MenuItem mnemonicParsing="false" onAction="#changeFont" text="Font Size" />
+                  <MenuItem mnemonicParsing="false" onAction="#foldAll" text="Fold Panels" />
+                  <MenuItem mnemonicParsing="false" onAction="#defaultFold" text="Default Layout" />
+                  <MenuItem mnemonicParsing="false" onAction="#changeFont" text="Set Font Size" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem mnemonicParsing="false" onAction="#runProgram" text="Run" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
-              <MenuItem mnemonicParsing="false" text="About" />
+              <MenuItem mnemonicParsing="false" onAction="#displayAbout" text="About" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
    </top>
    <center>
-      <SplitPane dividerPositions="1.0" orientation="VERTICAL" prefHeight="675.0" prefWidth="160.0" BorderPane.alignment="CENTER">
+      <SplitPane fx:id="verticalSplit" dividerPositions="1.0" orientation="VERTICAL" prefHeight="675.0" prefWidth="160.0" BorderPane.alignment="CENTER">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                <children>
-                  <SplitPane dividerPositions="0.65, 0.825" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane fx:id="horizontalSplit" dividerPositions="0.6, 0.8" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                            <children>
@@ -53,30 +60,30 @@
                         </AnchorPane>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Lexemes" textOrigin="CENTER" AnchorPane.leftAnchor="75.0" AnchorPane.topAnchor="0.0">
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Lexemes" textOrigin="CENTER" AnchorPane.leftAnchor="87.0" AnchorPane.topAnchor="0.0">
                                  <font>
                                     <Font name="Segoe UI Bold" size="15.0" />
                                  </font>
                               </Text>
                               <TableView fx:id="tokenTable" layoutX="2.0" layoutY="32.0" prefHeight="608.0" prefWidth="204.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
                                 <columns>
-                                  <TableColumn fx:id="lexemeColumn" prefWidth="105.0" text="Lexeme" />
-                                  <TableColumn fx:id="tokenKindColumn" prefWidth="105.0" text="TokenKind" />
+                                  <TableColumn fx:id="lexemeColumn" prefWidth="117.0" text="Lexeme" />
+                                  <TableColumn fx:id="tokenKindColumn" prefWidth="117.0" text="TokenKind" />
                                 </columns>
                               </TableView>
                            </children>
                         </AnchorPane>
-                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0">
                            <children>
-                              <Text layoutX="73.0" layoutY="14.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Symbol Table" textOrigin="CENTER" AnchorPane.leftAnchor="57.0" AnchorPane.topAnchor="0.5">
+                              <Text layoutX="73.0" layoutY="14.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Symbol Table" textOrigin="CENTER" AnchorPane.leftAnchor="69.0" AnchorPane.topAnchor="0.5">
                                  <font>
                                     <Font name="Segoe UI Bold" size="15.0" />
                                  </font>
                               </Text>
                               <TableView fx:id="symbolTable" prefHeight="608.0" prefWidth="204.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0">
                                  <columns>
-                                    <TableColumn fx:id="identifierColumn" prefWidth="105.0" text="Identifier" />
-                                    <TableColumn fx:id="valueColumn" prefWidth="105.0" text="Value" />
+                                    <TableColumn fx:id="identifierColumn" prefWidth="117.0" text="Identifier" />
+                                    <TableColumn fx:id="valueColumn" prefWidth="117.0" text="Value" />
                                  </columns>
                               </TableView>
                            </children>

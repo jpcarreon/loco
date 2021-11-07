@@ -1,3 +1,3 @@
 # loco
 
-A simple compiler
+A simple interpreter

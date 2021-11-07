@@ -1,39 +1,30 @@
 package frontend;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-import backend.*;
-
-public class Main {
+public class Main extends Application {
 
 	public static void main(String[] args) {
-		File fp = new File("src/sample.lol");
-		
-		
-		startLexer(fp);
-		//startParser(fp);
-		
+		launch(args);
 	}
 	
-	static void startLexer(File fp) {
-		Lexer lexer = new Lexer(fp);
-		Token token;
-		do {
-			token = lexer.nextToken();
+	@Override
+	public void start(Stage primaryStage) {
+		try {
+			Parent root = FXMLLoader.load(getClass().getResource("Window.fxml"));
+			Scene scene = new Scene(root, WindowController.WINDOW_WIDTH, WindowController.WINDOW_HEIGHT);
 			
-			if (token.getKind() != TokenKind.badToken) token.viewToken();
-		} while (token.getKind() != TokenKind.eofToken);
-	}
-	
-	static void startParser(File fp) {
-		Parser parser = new Parser(fp);
-		
-		parser.parse();
-		parser.viewErrors();
-		
+			//scene.getStylesheets().add(getClass().getResource("Window.css").toExternalForm());
+			
+			primaryStage.setScene(scene);
+			primaryStage.setTitle("Lolcode Interpreter");
+			primaryStage.show();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

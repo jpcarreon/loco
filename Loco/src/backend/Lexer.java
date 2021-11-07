@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 public class Lexer {
 	private File file;
+	private String strFile;
 	private ArrayList<String> lexemes;
 	private int position;
 
@@ -16,6 +17,16 @@ public class Lexer {
 		this.lexemes = new ArrayList<String>();
 		
 		parseFile();
+		fixLexemes();
+
+	}
+	
+	public Lexer(String strFile) {
+		this.strFile = strFile;
+		this.position = 0;
+		this.lexemes = new ArrayList<String>();
+		
+		parseStrFile();
 		fixLexemes();
 
 	}
@@ -47,6 +58,13 @@ public class Lexer {
 			e.printStackTrace();
 		}
 
+	}
+	
+	private void parseStrFile() {
+		for (String i : strFile.split("")) {
+			if (i.contains("\n")) lexemes.add("\n");
+			lexemes.add(i);
+		}
 	}
 	
 	private void fixLexemes() {

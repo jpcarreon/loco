@@ -60,9 +60,17 @@ public class Lexer {
 	}
 	
 	private void parseStrFile() {
-		for (String i : strFile.split("")) {
-			if (i.contains("\n")) lexemes.add("\n");
-			lexemes.add(i);
+		int counter = 0;
+		
+		for (String i : strFile.split("\n")) {
+			if (!i.isBlank() && counter++ > 0) {
+				lexemes.add("\n");
+			}
+			
+			for (String j : i.split("")) {
+				lexemes.add(j);
+			}
+
 		}
 	}
 	

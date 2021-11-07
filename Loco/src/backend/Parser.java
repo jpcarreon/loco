@@ -1,4 +1,4 @@
-package frontend;
+package backend;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ public class Parser {
 	private int position;
 	private int lineCounter;
 	
-	Parser (File file) {
+	public Parser (File file) {
 		this.tokens = new ArrayList<Token>();
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;

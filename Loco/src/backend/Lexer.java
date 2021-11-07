@@ -1,4 +1,4 @@
-package frontend;
+package backend;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -10,7 +10,7 @@ public class Lexer {
 	private ArrayList<String> lexemes;
 	private int position;
 
-	Lexer(File file) {
+	public Lexer(File file) {
 		this.file = file;
 		this.position = 0;
 		this.lexemes = new ArrayList<String>();

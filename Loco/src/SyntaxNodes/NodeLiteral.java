@@ -1,7 +1,7 @@
 package SyntaxNodes;
 
-import frontend.Token;
-import frontend.TokenKind;
+import backend.Token;
+import backend.TokenKind;
 
 public class NodeLiteral extends SyntaxNode {
 	Token literalToken;

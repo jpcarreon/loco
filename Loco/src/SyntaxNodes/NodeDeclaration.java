@@ -1,6 +1,6 @@
 package SyntaxNodes;
 
-import frontend.Token;
+import backend.Token;
 
 public class NodeDeclaration extends SyntaxNode {
 	Token operation, varid;

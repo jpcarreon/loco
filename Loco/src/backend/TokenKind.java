@@ -1,4 +1,4 @@
-package frontend;
+package backend;
 
 public enum TokenKind {
 	haiToken("HAI", 1), byeToken("KTHXBYE", 1),

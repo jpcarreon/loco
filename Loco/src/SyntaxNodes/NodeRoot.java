@@ -1,6 +1,6 @@
 package SyntaxNodes;
 
-import frontend.Token;
+import backend.Token;
 
 public class NodeRoot extends SyntaxNode {
 	Token start, end;

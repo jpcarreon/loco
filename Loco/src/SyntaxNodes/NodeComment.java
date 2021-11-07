@@ -2,7 +2,7 @@ package SyntaxNodes;
 
 import java.util.ArrayList;
 
-import frontend.Token;
+import backend.Token;
 
 public class NodeComment extends SyntaxNode{
 	Token start, end;	

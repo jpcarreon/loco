@@ -6,14 +6,16 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import backend.*;
+
 public class Main {
 
 	public static void main(String[] args) {
 		File fp = new File("src/sample.lol");
 		
 		
-		//startLexer(fp);
-		startParser(fp);
+		startLexer(fp);
+		//startParser(fp);
 		
 	}
 	
@@ -30,7 +32,6 @@ public class Main {
 	static void startParser(File fp) {
 		Parser parser = new Parser(fp);
 		
-		//parser.viewTokens();
 		parser.parse();
 		parser.viewErrors();
 		

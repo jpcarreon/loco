@@ -17,7 +17,6 @@ expression:
     | boolOp
     | cmpOp
     | concat
-    | vardec
     | print
     ;
     
@@ -119,4 +118,6 @@ literal:
 yarnLiteral:
 	| quoteToken statement quoteToken
 	;
+	
+	
 	

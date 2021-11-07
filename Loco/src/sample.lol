@@ -1,4 +1,5 @@
 HAI
 	I HAS A var1
 	var1 R 154
+	SUM OF 1 AN 3
 KTHXBYE

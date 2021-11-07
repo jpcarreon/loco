@@ -10,6 +10,7 @@ public class Lexer {
 	private ArrayList<String> lexemes;
 	private int position;
 
+	//	Lexer can be  initialized by either a File or a String
 	public Lexer(File file) {
 		this.file = file;
 		this.position = 0;
@@ -17,7 +18,6 @@ public class Lexer {
 		
 		parseFile();
 		fixLexemes();
-
 	}
 	
 	public Lexer(String strFile) {
@@ -30,7 +30,7 @@ public class Lexer {
 
 	}
 
-	//	Stores lexemes into the ArrayList lexemes
+	//	Read the file to popular the ArrayList lexemes
 	private void parseFile() {
 		try {
 			Scanner sc = new Scanner(file);
@@ -59,14 +59,18 @@ public class Lexer {
 
 	}
 	
+	//	Read the String to populate the ArrayList lexemes
 	private void parseStrFile() {
 		int counter = 0;
 		
+		//	Evaluate the string line by line
 		for (String i : strFile.split("\n")) {
+			//	Append \n to the end of the every line except the first and last line and empty lines
 			if (!i.isBlank() && counter++ > 0) {
 				lexemes.add("\n");
 			}
 			
+			//	Split the current line to individual characters
 			for (String j : i.split("")) {
 				lexemes.add(j);
 			}
@@ -74,19 +78,23 @@ public class Lexer {
 		}
 	}
 	
+	//	"fix" the ArrayList lexemes because its only characters
 	private void fixLexemes() {
 		ArrayList<String> fixedList = new ArrayList<String>();
 		String newLexeme = new String();
 		
 		for (String i : lexemes) {
+			//	If current character is not whitespace or a quotation mark; build a complete word until it reaches whitespace
 			if (i.matches("[^\s\"\n]")) {
 				newLexeme = newLexeme + i;
 			} else {
+				//	Reached whitespace; append the word to the new ArrayList 
 				if (!newLexeme.isBlank()) {
 					fixedList.add(newLexeme);
 					newLexeme = new String();
 				} 
 				
+				//	Add the newline or quotation mark
 				if (!i.isBlank()) {
 					fixedList.add(i);
 				} else if (i == "\n") {
@@ -96,6 +104,7 @@ public class Lexer {
 			}
 		}
 		
+		//	Append the last word built 
 		if (!newLexeme.isBlank()) fixedList.add(newLexeme);
 		lexemes = fixedList;
 		
@@ -104,8 +113,10 @@ public class Lexer {
 	private void next() {
 		position++;
 	}
-
+	
+	//	Look at the lexeme given an offset based on current position
 	private String peek(int offset) {
+		//	return last lexeme if position + offset is beyond the ArrayList of lexemes 
 		if (position + offset >= lexemes.size()) return lexemes.get(position);
 		
 		return lexemes.get(position + offset);
@@ -124,6 +135,7 @@ public class Lexer {
 		    return new Token(TokenKind.eofToken, "\0", position);
 		}
 		
+		//	Peek at the next 2 lexemes and check if it matches a 3 word keyword
 		lexeme = currentLexeme() + " " + peek(1) + " " + peek(2);
 		for (TokenKind kind : TokenKind.values()) {
 			if (kind.getLength() == 3 && lexeme.matches(kind.getRegex())) {
@@ -132,6 +144,7 @@ public class Lexer {
 			}
 		}
 		
+		//	Peek at the next lexeme and check if it matches a 2 word keyword
 		lexeme = currentLexeme() + " " + peek(1);
 		for (TokenKind kind : TokenKind.values()) {
 			if (kind.getLength() == 2 && lexeme.matches(kind.getRegex())) {
@@ -140,12 +153,14 @@ public class Lexer {
 			}
 		}
 
+		//	Check if current lexeme matches a 1 word keyword
 		for (TokenKind kind : TokenKind.values()) {
 			if (kind.getLength() == 1 && currentLexeme().matches(kind.getRegex())) {
 				return new Token(kind, currentLexeme(), position++);
 			} 
 		}
 		
+		//	Lexeme did not match any of the regex of Token types
 		return new Token(TokenKind.badToken, currentLexeme(), position++);
 	}
 

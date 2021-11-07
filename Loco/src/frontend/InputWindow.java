@@ -12,7 +12,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class AlertWindow {
+public class InputWindow {
 	private Scene scene;
 	private Stage stage;
 	private Group root;
@@ -20,7 +20,7 @@ public class AlertWindow {
 	
 	static private String value = "1";
 	
-	public AlertWindow (String title, String message) {
+	public InputWindow (String title, String message) {
 		this.stage = new Stage();
 		this.root = new Group();
 		this.scene = new Scene(this.root, 300, 200);
@@ -36,7 +36,7 @@ public class AlertWindow {
 		TextField textField = new TextField();
 		Button btn = new Button("Submit");
 		btn.setOnAction(e -> {
-			AlertWindow.value = textField.getText();
+			InputWindow.value = textField.getText();
 			stage.close();
 		});
 		

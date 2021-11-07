@@ -11,16 +11,16 @@ public class Token {
 		this.position = position;
 	}
 
-	public TokenKind getKind() {
-		return this.tokenKind;
+	public TokenKind getTokenKind() {
+		return tokenKind;
 	}
 
 	public String getValue() {
-		return this.value;
+		return value;
 	}
 	
 	public int getPosition() {
-		return this.position;
+		return position;
 	}
 
 	public void viewToken() {

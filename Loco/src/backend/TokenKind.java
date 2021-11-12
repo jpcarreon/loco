@@ -1,84 +1,96 @@
 package backend;
 
 public enum TokenKind {
-	haiToken("HAI", 1), byeToken("KTHXBYE", 1),
+	haiToken("HAI", "progStart",1), byeToken("KTHXBYE", "progEnd", 1),
 
-	numbrToken("-?[0-9]+", 1), numbarToken("-?[0-9]+\\.[0-9]+", 1), yarnToken("(\".+?|\"[^\"]+\")", -1), troofToken("WIN|FAIL", 1), typeToken("(TROOF|NUMBR|NUMBAR|YARN)", 1),
+	numbrToken("-?[0-9]+", "literal", 1), 
+	numbarToken("-?[0-9]+\\.[0-9]+", "literal", 1), 
+	yarnToken("(\".+?|\"[^\"]+\")", "literal", -1), 
+	troofToken("WIN|FAIL", "literal", 1), 
+	typeToken("(TROOF|NUMBR|NUMBAR|YARN)", "literal", 1),
 
-	btwToken("BTW", 1), obtwToken("OBTW", 1), tldrToken("TLDR", 1),
+	btwToken("BTW", "comment", 1), obtwToken("OBTW", "comment",1), tldrToken("TLDR", "comment",1),
 
-	ihasToken("I\sHAS\sA", 3), itzToken("ITZ", 1), rToken("^R$", 1), 
+	ihasToken("I\sHAS\sA", "newvar", 3), 
+	itzToken("ITZ", "", 1), 
+	rToken("^R$", "varassign", 1), 
 
-	sumOpToken("SUM\sOF", 2), 
-	diffOpToken("DIFF\sOF", 2), 
-	divOpToken("QUOSHUNT\sOF", 2), 
-	mulOpToken("PRODUKT\sOF", 2), 
-	modOpToken("MOD\sOF", 2), 
-	minOpToken("SMALLR\sOF", 2), 
-	maxOpToken("BIGGR\sOF", 2),
+	sumOpToken("SUM\sOF", "mathop", 2), 
+	diffOpToken("DIFF\sOF", "mathop", 2), 
+	divOpToken("QUOSHUNT\sOF", "mathop", 2), 
+	mulOpToken("PRODUKT\sOF", "mathop", 2), 
+	modOpToken("MOD\sOF", "mathop", 2), 
+	minOpToken("SMALLR\sOF", "mathop", 2), 
+	maxOpToken("BIGGR\sOF", "mathop", 2),
 	
-	bothOpToken("BOTH\sOF", 2), 
-	eitherOpToken("EITHER\sOF", 2), 
-	wonOpToken("WON\sOF", 2), 
-	notOpToken("NOT", 1), 
-	anyOpToken("ANY\sOF", 2), 
-	allOpToken("ALL\sOF", 2),
+	bothOpToken("BOTH\sOF", "boolop", 2), 
+	eitherOpToken("EITHER\sOF", "boolop", 2), 
+	wonOpToken("WON\sOF", "boolop", 2), 
+	notOpToken("NOT", "boolop", 1), 
+	anyOpToken("ANY\sOF", "infarop", 2), 
+	allOpToken("ALL\sOF", "infarop", 2),
 	
-	bothSameOpToken("BOTH\sSAEM", 2),
-	diffrntOpToken("DIFFRINT", 1),
+	bothSameOpToken("BOTH\sSAEM", "cmpop", 2),
+	diffrntOpToken("DIFFRINT", "cmpop", 1),
 	
-	smooshToken("SMOOSH", 1),
+	smooshToken("SMOOSH", "concat", 1),
 	
-	isNowToken("IS\sNOW\sA", 3),
-	maekToken("MAEK", 1),
-	mkayToken("MKAY", 1),
-	aToken("^A$", 1),
-	anToken("^AN$", 1), 
+	isNowToken("IS\sNOW\sA", "typecast", 3),
+	maekToken("MAEK", "typecast", 1),
+	mkayToken("MKAY", "", 1),
+	aToken("^A$", "", 1),
+	anToken("^AN$", "", 1), 
 	
-	printToken("VISIBLE", 1),
-	scanToken("GIMMEH", 1),
+	printToken("VISIBLE", "print", 1),
+	scanToken("GIMMEH", "scan", 1),
 	
-	ifStartToken("O\sRLY\\?", 2),
+	ifStartToken("O\sRLY\\?", "ifblock", 2),
 	
-	ifBlockToken("YA\sRLY", 2),
-	elifBlockToken("MEBBE", 1),
-	elseBlockToken("NO\sWAI", 2),
+	ifBlockToken("YA\sRLY", "ifblock", 2),
+	elifBlockToken("MEBBE", "ifblock", 1),
+	elseBlockToken("NO\sWAI", "ifblock", 2),
 	
-	switchToken("WTF\\?", 1),
-	caseToken("^OMG$", 1),
-	defaultToken("OMGWTF", 1),
-	breakToken("GTFO", 1),
+	switchToken("WTF\\?", "switch", 1),
+	caseToken("^OMG$", "switch", 1),
+	defaultToken("OMGWTF", "switch", 1),
+	breakToken("GTFO", "switch", 1),
 	
-	ifEndToken("OIC", 1),
+	ifEndToken("OIC", "ifblock", 1),
 	
-	loopStartToken("IM\sIN\sYR", 3),
+	loopStartToken("IM\sIN\sYR", "loop", 3),
 	
-	incToken("UPPIN", 1),
-	decToken("NERFIN", 1),
-	yrToken("^YR$", 1),
-	tilToken("TIL", 1),
-	wileToken("WILE", 1),
+	incToken("UPPIN", "loop", 1),
+	decToken("NERFIN", "loop", 1),
+	yrToken("^YR$", "loop", 1),
+	tilToken("TIL", "loop", 1),
+	wileToken("WILE", "loop", 1),
 	
-	loopEndToken("IM\sOUTTA\sYR", 3),
+	loopEndToken("IM\sOUTTA\sYR", "loop", 3),
 	
-	idToken("[a-zA-Z][a-zA-Z0-9_]*", 1), 
+	idToken("[a-zA-Z][a-zA-Z0-9_]*", "varident", 1), 
 
-	quoteToken("\"", 1), 
+	quoteToken("\"", "", 1), 
 	
-	eolToken("\n", 1), eofToken("\0", 1), 
+	eolToken("\n", "", 1), eofToken("\0", "", 1), 
 	
-	miscToken("[^\"\s]+", 1), badToken("", 1);
+	miscToken("[^\"\s]+", "", 1), badToken("", "", 1);
 
 	private final String regex;
+	private final String type;
 	private final int length;
 
-	TokenKind(String regex, int length) {
+	TokenKind(String regex, String type, int length) {
 		this.regex = regex;
+		this.type = type;
 		this.length = length;
 	}
 
 	public String getRegex() {
 		return regex;
+	}
+	
+	public String getType() {
+		return type;
 	}
 	
 	public int getLength() {

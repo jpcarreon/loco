@@ -15,7 +15,7 @@ public class Token {
 		return tokenKind;
 	}
 
-	public String getValue() {
+	public String getValue() {		
 		return value;
 	}
 	

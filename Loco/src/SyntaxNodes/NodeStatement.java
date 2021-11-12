@@ -14,6 +14,8 @@ public class NodeStatement extends SyntaxNode{
 	}
 	
 	public void printChildren(int tab) {
+		
+		//printTree(tab);
 		operand1.printChildren(tab);
 		operand2.printChildren(tab);
 	}
@@ -24,12 +26,15 @@ public class NodeStatement extends SyntaxNode{
 		System.out.println("{");
 		
 		printTab(tab);
-		System.out.println("Line " + (Math.abs(lineCounter - counter) + 2) + ":");
+		System.out.println("Statement Node:");
+		
+		//printTab(tab);
+		//System.out.println("Line " + (Math.abs(lineCounter - counter) + 2) + ":");
 		operand1.printChildren(tab + 1);
 		
 		
-		printTab(tab);
-		System.out.println("Line " + (Math.abs(lineCounter - counter) + 3) + ":");
+		//printTab(tab);
+		//System.out.println("Line " + (Math.abs(lineCounter - counter) + 3) + ":");
 		operand2.printChildren(tab + 1);
 		
 		printTab(tab);

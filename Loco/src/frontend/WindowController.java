@@ -157,9 +157,9 @@ public class WindowController implements Initializable {
     
     @FXML
     void foldAll(ActionEvent event) {
-    	verticalSplit.setDividerPosition(0, 1.0);
-    	horizontalSplit.setDividerPosition(0, 1.0);
+		verticalSplit.setDividerPosition(0, 1.0);
     	horizontalSplit.setDividerPosition(1, 1.0);
+    	horizontalSplit.setDividerPosition(0, 1.0);
     }
     
     @FXML

@@ -38,6 +38,8 @@ public class Parser {
 	}
 	
 	private Token peek(int offset) {
+		if (position + offset >= tokens.size()) return tokens.get(position);
+		
 		return tokens.get(position + offset);
 	}
 	
@@ -105,7 +107,7 @@ public class Parser {
 		match(TokenKind.eolToken);
 		consumeEOL();
 		
-		while (current().getTokenKind() != TokenKind.byeToken) {
+		while (current().getTokenKind() != TokenKind.byeToken && current().getTokenKind() != TokenKind.eofToken) {
 			expression = new NodeStatement(expression, parseStatement());
 		}
 		
@@ -113,51 +115,57 @@ public class Parser {
 	}
 	
 	private SyntaxNode parseExpression() {
-		if (isMathOp()) {
+		if (current().getTokenKind().getType() == "mathop") {
 			return new NodeExpression(parseMathOp(), lineCounter);
 			
-		} else if (isComment()) {
+		} else if (current().getTokenKind().getType() == "comment") {
 			return new NodeExpression(parseComment(), lineCounter);
 			
-		} else if (isBoolOp()) {
+		} else if (current().getTokenKind().getType() == "boolop") {
 			return new NodeExpression(parseBoolOp(), lineCounter);
 			
-		} else if (isInfArOp()) {
+		} else if (current().getTokenKind().getType() == "infarop") {
 			SyntaxNode infAr = new NodeExpression(parseInfArOp(nextToken()), lineCounter);
 			match(TokenKind.mkayToken);
 			return infAr;
 			
-		} else if (isCmpOp()) {
+		} else if (current().getTokenKind().getType() == "cmpop") {
 			return new NodeExpression(parseCmpOp(), lineCounter);
 			
-		} else if (isConcatenation()) {
+		} else if (current().getTokenKind().getType() == "concat") {
 			return new NodeExpression(parseConcat(nextToken()), lineCounter);
 			
-		} else if (isPrint()) {
+		} else if (current().getTokenKind().getType() == "print") {
 			return new NodeExpression(parsePrint(nextToken()), lineCounter);
 			
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
-		return new NodeLiteral(nextToken());
+		while (current().getTokenKind() != TokenKind.eolToken) {
+			nextToken();
+		}
+		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
 	}
 	
 	private SyntaxNode parseAssignment() {
-		if (isDeclaration()) {
+		if (current().getTokenKind().getType() == "newvar") {
 			return new NodeAssignment(parseDeclaration(), lineCounter);
 			
 		} else if (current().getTokenKind() == TokenKind.idToken) {
 			Token varid = nextToken();
 			
-			if (isVarChange()) {
+			if (current().getTokenKind().getType() == "varassign") {
 				return new NodeAssignment(parseVarChange(varid), lineCounter);
 						
-			} else if (isTypeCast()) {
+			} else if (current().getTokenKind().getType() == "typecast") {
 				
 			}
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
+		while (current().getTokenKind() != TokenKind.eolToken) {
+			nextToken();
+		}
 		return new NodeLiteral(nextToken());
 	}
 	
@@ -192,9 +200,9 @@ public class Parser {
 		if (current().getTokenKind() == TokenKind.itzToken) {
 			nextToken();
 			
-			if (isLiteral()) {
+			if (current().getTokenKind().getType() == "literal") {
 				return new NodeDeclaration(operation, varid, parseLiteral());
-			} else if (isMathOp()) {
+			} else if (current().getTokenKind().getType() == "mathop") {
 				return new NodeDeclaration(operation, varid, parseMathOp());
 			} else if (current().getTokenKind() == TokenKind.idToken) {
 				if (current().getValue() != varid.getValue()) {
@@ -288,15 +296,15 @@ public class Parser {
 	}
 	
 	private SyntaxNode parseLiteral() {
-		if (isMathOp()) {
+		if (current().getTokenKind().getType() == "mathop") {
 			return parseMathOp();
-		} else if (isBoolOp()) {
+		} else if (current().getTokenKind().getType() == "boolop") {
 			return parseBoolOp();
-		} else if (isCmpOp()) {
+		} else if (current().getTokenKind().getType() == "cmpop") {
 			return parseCmpOp();
 		} else if (current().getTokenKind() == TokenKind.quoteToken) {
 			return new NodeLiteral(parseYarn());
-		} else if (isLiteral()) {
+		} else if (current().getTokenKind().getType() == "literal") {
 			return new NodeLiteral(nextToken());
 		} else if (current().getTokenKind() == TokenKind.idToken) {
 			//	TODO variable handler
@@ -325,117 +333,7 @@ public class Parser {
 			nextToken();
 		}
 	}
-	
-	private boolean isMathOp() {
-		if (current().getTokenKind() == TokenKind.sumOpToken ||
-			current().getTokenKind() == TokenKind.diffOpToken||
-			current().getTokenKind() == TokenKind.mulOpToken ||
-			current().getTokenKind() == TokenKind.divOpToken ||
-			current().getTokenKind() == TokenKind.modOpToken ||
-			current().getTokenKind() == TokenKind.minOpToken ||
-			current().getTokenKind() == TokenKind.maxOpToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isBoolOp() {
-		if (current().getTokenKind() == TokenKind.bothOpToken ||
-			current().getTokenKind() == TokenKind.eitherOpToken||
-			current().getTokenKind() == TokenKind.wonOpToken ||
-			current().getTokenKind() == TokenKind.notOpToken) {
-			return true;
-		}
-		
-		return false;
-	}
 
-	private boolean isInfArOp() {
-		if (current().getTokenKind() == TokenKind.anyOpToken ||
-			current().getTokenKind() == TokenKind.allOpToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isCmpOp() {
-		if (current().getTokenKind() == TokenKind.bothSameOpToken ||
-			current().getTokenKind() == TokenKind.diffrntOpToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isComment() {
-		if (current().getTokenKind() == TokenKind.obtwToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isLiteral() {
-		if (current().getTokenKind() == TokenKind.numbrToken ||
-			current().getTokenKind() == TokenKind.numbarToken ||
-			current().getTokenKind() == TokenKind.quoteToken ||
-			current().getTokenKind() == TokenKind.troofToken ) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isDeclaration() {
-		if (current().getTokenKind() == TokenKind.ihasToken) {
-			return true;
-		}
-		return false;
-	}
-	
-	private boolean isConcatenation() {
-		if (current().getTokenKind() == TokenKind.smooshToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isVarChange() {
-		if (current().getTokenKind() == TokenKind.rToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isTypeCast() {
-		if (current().getTokenKind() == TokenKind.maekToken ||
-			current().getTokenKind() == TokenKind.isNowToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isPrint() {
-		if (current().getTokenKind() == TokenKind.printToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	private boolean isScan() {
-		if (current().getTokenKind() == TokenKind.scanToken) {
-			return true;
-		}
-		
-		return false;
-	}
-	
 	private boolean isAssignment() {
 		if (current().getTokenKind() == TokenKind.ihasToken ||
 			current().getTokenKind() == TokenKind.idToken ||

@@ -2,6 +2,7 @@ package frontend;
 
 import java.io.File;
 
+import backend.Evaluator;
 import backend.Lexer;
 import backend.Parser;
 import backend.Token;
@@ -44,6 +45,11 @@ public class Main extends Application {
 		System.exit(0);
 	}
 	
+	static void startEvaluator() {
+		File fp = new File("src/sample.lol");
+		Evaluator evaluator = new Evaluator(fp);
+		
+	}
 	@Override
 	public void start(Stage primaryStage) {
 		try {

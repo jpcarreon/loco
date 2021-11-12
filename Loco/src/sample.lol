@@ -1,9 +1,3 @@
 HAI
-	SUM OF 1 AN 3
-	DIFF OF 2 AN 1
-	OBTW ddd
-	dd
-	TLDR
-	I HAS A var1
-	var1 R 1
+	VISIBLE SUM OF 1 AN DIFF OF 1 AN 3 here
 KTHXBYE

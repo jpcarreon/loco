@@ -73,6 +73,14 @@ public class Parser {
 		for (String i : diagnostics) System.out.println(i);
 	}
 	
+	protected ArrayList<Token> getTokens() {
+		return tokens;
+	}
+	
+	protected ArrayList<String> getDiagnostics() {
+		return diagnostics;
+	}
+	
 	public SyntaxNode parse() {
 		NodeRoot root;
 		

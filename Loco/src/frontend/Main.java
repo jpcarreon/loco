@@ -16,9 +16,9 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public static void main(String[] args) {
-		startParser();
+		//startEvaluator();
 		//startLexer();
-		//launch(args);
+		launch(args);
 	}
 	
 	static void startLexer() {
@@ -48,6 +48,9 @@ public class Main extends Application {
 	static void startEvaluator() {
 		File fp = new File("src/sample.lol");
 		Evaluator evaluator = new Evaluator(fp);
+		
+		evaluator.viewParseTree();
+		evaluator.viewErrors();
 		
 	}
 	@Override

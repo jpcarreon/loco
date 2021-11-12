@@ -7,12 +7,14 @@ import SyntaxNodes.*;
 
 public class Parser {
 	private ArrayList<Token> tokens;
+	private ArrayList<Token> allTokens;
 	private ArrayList<String> diagnostics;
 	private int position;
 	private int lineCounter;
 	
 	public Parser (File file) {
 		this.tokens = new ArrayList<Token>();
+		this.allTokens = new ArrayList<Token>();
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
 		this.lineCounter = 1;
@@ -26,11 +28,42 @@ public class Parser {
 			// ignore single line comment
 			if (curToken.getTokenKind() == TokenKind.btwToken) {
 				while (curToken.getTokenKind() != TokenKind.eolToken) {
+					allTokens.add(curToken);
 					curToken = lexer.nextToken();
 				}
 			}
 			
 			if (curToken.getTokenKind() != TokenKind.badToken) {
+				allTokens.add(curToken);
+				tokens.add(curToken);
+			}
+			
+		} while (curToken.getTokenKind() != TokenKind.eofToken);
+	}
+	
+	public Parser (String strFile) {
+		this.tokens = new ArrayList<Token>();
+		this.allTokens = new ArrayList<Token>();
+		this.diagnostics = new ArrayList<String>();
+		this.position = 0;
+		this.lineCounter = 1;
+		
+		Lexer lexer = new Lexer(strFile);
+		Token curToken;
+		
+		do {
+			curToken = lexer.nextToken();
+			
+			// ignore single line comment
+			if (curToken.getTokenKind() == TokenKind.btwToken) {
+				while (curToken.getTokenKind() != TokenKind.eolToken) {
+					allTokens.add(curToken);
+					curToken = lexer.nextToken();
+				}
+			}
+			
+			if (curToken.getTokenKind() != TokenKind.badToken) {
+				allTokens.add(curToken);
 				tokens.add(curToken);
 			}
 			
@@ -74,7 +107,7 @@ public class Parser {
 	}
 	
 	protected ArrayList<Token> getTokens() {
-		return tokens;
+		return allTokens;
 	}
 	
 	protected ArrayList<String> getDiagnostics() {
@@ -100,7 +133,6 @@ public class Parser {
 		
 		
 		match(TokenKind.eofToken);
-		root.printChildren(0);
 		
 		return root;
 	}

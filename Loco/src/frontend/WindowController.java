@@ -8,7 +8,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
-import backend.Lexer;
+import backend.Evaluator;
+import backend.SymTabEntry;
 import backend.Token;
 import backend.TokenKind;
 import javafx.event.ActionEvent;
@@ -26,6 +27,8 @@ import javafx.stage.FileChooser;
 
 
 public class WindowController implements Initializable {
+	private Evaluator evaluator;
+	
 	public final static int WINDOW_HEIGHT = 675;
 	public final static int WINDOW_WIDTH = 1200;
 	
@@ -40,14 +43,17 @@ public class WindowController implements Initializable {
 	@FXML private TableColumn<Token, String> lexemeColumn;
 	@FXML private TableColumn<Token, TokenKind> tokenKindColumn;
 	
-	@FXML private TableView<Token> symbolTable;
-	@FXML private TableColumn<Token, String> identifierColumn;
-	@FXML private TableColumn<Token, String> valueColumn;
+	@FXML private TableView<SymTabEntry> symbolTable;
+	@FXML private TableColumn<SymTabEntry, String> identifierColumn;
+	@FXML private TableColumn<SymTabEntry, String> valueColumn;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lexemeColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("value"));
 		tokenKindColumn.setCellValueFactory(new PropertyValueFactory<Token, TokenKind>("tokenKind"));
+		
+		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
+		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
 		
 	}
 	
@@ -103,19 +109,25 @@ public class WindowController implements Initializable {
     @FXML
     void runProgram(ActionEvent event) {
     	String fp = codeTextArea.getText();
-    	
     	fp = fp.replaceAll("\t", "");
     	
-    	Lexer lexer = new Lexer(fp);
-    	Token token;
+    	evaluator = new Evaluator(fp);
+
+    	evaluator.viewParseTree();
+    	evaluator.viewErrors();
     	
     	tokenTable.getItems().clear();
-    	
-    	do {
-    		token = lexer.nextToken();
+    	for (Token token : evaluator.getTokens()) {
     		tokenTable.getItems().add(token);
-    		
-    	} while (token.getTokenKind() != TokenKind.eofToken);
+    	}
+    	
+    	consoleTextArea.clear();
+    	for (String string: evaluator.getDiagnostics()) {
+    		consoleTextArea.appendText(string + "\n");
+    	}
+    	
+    	updateSymbolTable();
+    	
     }
     
     @FXML
@@ -167,6 +179,13 @@ public class WindowController implements Initializable {
     	verticalSplit.setDividerPosition(0, 0.8);
     	horizontalSplit.setDividerPosition(0, 0.6);
     	horizontalSplit.setDividerPosition(1, 0.8);
+    }
+    
+    private void updateSymbolTable() {
+    	symbolTable.getItems().clear();
+    	for (SymTabEntry entry : evaluator.getSymbolTable()) {
+    		symbolTable.getItems().add(entry);
+    	}
     }
     
     private String displayInputBox(String title, String prompt) {

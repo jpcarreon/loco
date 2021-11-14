@@ -1,10 +1,12 @@
 package SyntaxNodes;
 
 public class NodeAssignment extends SyntaxNode {
+	SyntaxType type;
 	SyntaxNode node;
 	int lineCounter;
 	
 	public NodeAssignment(SyntaxNode node, int lineCounter) {
+		super(SyntaxType.assignment);
 		this.node = node;
 		this.lineCounter = lineCounter;
 		

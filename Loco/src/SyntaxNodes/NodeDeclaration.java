@@ -7,11 +7,13 @@ public class NodeDeclaration extends SyntaxNode {
 	SyntaxNode value;
 	
 	public NodeDeclaration(Token operation, Token varid) {
+		super(SyntaxType.newvar);
 		this.operation = operation;
 		this.varid = varid;
 	}
 	
 	public NodeDeclaration(Token operation, Token varid, SyntaxNode value) {
+		super(SyntaxType.newvar);
 		this.operation = operation;
 		this.varid = varid;
 		this.value = value;

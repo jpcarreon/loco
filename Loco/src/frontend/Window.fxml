@@ -31,6 +31,7 @@
                   <MenuItem mnemonicParsing="false" onAction="#defaultFold" text="Default Layout" />
                   <MenuItem mnemonicParsing="false" onAction="#changeFont" text="Set Font Size" />
                   <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Next Line" />
               <MenuItem mnemonicParsing="false" onAction="#runProgram" text="Run" />
             </items>
           </Menu>

@@ -1,11 +1,13 @@
 package SyntaxNodes;
 
 public class NodeStatement extends SyntaxNode{
+	SyntaxType type;
 	SyntaxNode operand1, operand2;
 	int lineCounter;
 	static int counter = 0;
 	
 	public NodeStatement(SyntaxNode op1, SyntaxNode op2) {
+		super(SyntaxType.statement);
 		this.operand1 = op1;
 		this.operand2 = op2;
 		
@@ -20,7 +22,7 @@ public class NodeStatement extends SyntaxNode{
 		operand2.printChildren(tab);
 	}
 	
-	private void printTree(int tab) {
+	public void printTree(int tab) {
 		
 		printTab(tab);
 		System.out.println("{");
@@ -40,5 +42,13 @@ public class NodeStatement extends SyntaxNode{
 		printTab(tab);
 		System.out.println("}");
 		
+	}
+	
+	public SyntaxNode getOp1() {
+		return operand1;
+	}
+	
+	public SyntaxNode getOp2() {
+		return operand2;
 	}
 }

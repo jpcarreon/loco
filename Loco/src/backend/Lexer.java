@@ -135,7 +135,7 @@ public class Lexer {
 		    return new Token(TokenKind.eofToken, "\0", position);
 		}
 		
-		//	Peek at the next 2 lexemes and check if it matches a 3 word keyword
+		/*
 		lexeme = currentLexeme() + " " + peek(1) + " " + peek(2);
 		for (TokenKind kind : TokenKind.values()) {
 			if (kind.getLength() == 3 && lexeme.matches(kind.getRegex())) {
@@ -144,7 +144,6 @@ public class Lexer {
 			}
 		}
 		
-		//	Peek at the next lexeme and check if it matches a 2 word keyword
 		lexeme = currentLexeme() + " " + peek(1);
 		for (TokenKind kind : TokenKind.values()) {
 			if (kind.getLength() == 2 && lexeme.matches(kind.getRegex())) {
@@ -152,11 +151,28 @@ public class Lexer {
 				return new Token(kind, lexeme, position - 2);
 			}
 		}
+		*/
 
-		//	Check if current lexeme matches a 1 word keyword
+		
 		for (TokenKind kind : TokenKind.values()) {
-			if (kind.getLength() == 1 && currentLexeme().matches(kind.getRegex())) {
-				return new Token(kind, currentLexeme(), position++);
+			//	Peek at the next 2 lexemes and check if it matches a 3 word keyword
+			lexeme = currentLexeme() + " " + peek(1) + " " + peek(2);
+			if (kind.getLength() == 3 && lexeme.matches(kind.getRegex())) {
+				position = position + 3;
+				return new Token(kind, lexeme, position - 3);
+			}
+			
+			//	Peek at the next lexeme and check if it matches a 2 word keyword
+			lexeme = currentLexeme() + " " + peek(1);
+			if (kind.getLength() == 2 && lexeme.matches(kind.getRegex())) {
+				position = position + 2;
+				return new Token(kind, lexeme, position - 2);
+			}
+			
+			//	Check if current lexeme matches a 1 word keyword
+			lexeme = currentLexeme();
+			if (kind.getLength() == 1 && lexeme.matches(kind.getRegex())) {
+				return new Token(kind, lexeme, position++);
 			} 
 		}
 		

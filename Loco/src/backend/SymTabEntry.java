@@ -1,7 +1,5 @@
 package backend;
 
-import SyntaxNodes.SyntaxNode;
-
 public class SymTabEntry {
 	private String identifier;
 	private TokenKind kind;
@@ -23,5 +21,18 @@ public class SymTabEntry {
 	
 	public String getValue() {
 		return value;
+	}
+	
+	public void setKind (TokenKind kind) {
+		this.kind = kind;
+	}
+	
+	public void setValue(String value) {
+		this.value = value;
+	}
+	
+	public void setKindValue(Token token) {
+		this.kind = token.getTokenKind();
+		this.value = token.getValue();
 	}
 }

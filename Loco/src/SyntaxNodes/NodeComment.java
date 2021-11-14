@@ -9,6 +9,7 @@ public class NodeComment extends SyntaxNode{
 	ArrayList<Token> inner;
 	
 	public NodeComment(Token start, ArrayList<Token> inner, Token end) {
+		super(SyntaxType.comment);
 		this.start = start;
 		this.inner = inner;
 		this.end = end;

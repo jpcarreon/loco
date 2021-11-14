@@ -1,10 +1,12 @@
 package SyntaxNodes;
 
 public class NodeFlowControl extends SyntaxNode {
+	SyntaxType type;
 	SyntaxNode node;
 	int lineCounter;
 	
 	public NodeFlowControl (SyntaxNode node, int lineCounter) {
+		super(SyntaxType.flowcontrol);
 		this.node = node;
 		this.lineCounter = lineCounter;
 	}

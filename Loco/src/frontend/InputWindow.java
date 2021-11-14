@@ -1,10 +1,13 @@
 package frontend;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -35,9 +38,18 @@ public class InputWindow {
 		Text text = new Text(message);
 		TextField textField = new TextField();
 		Button btn = new Button("Submit");
+		
 		btn.setOnAction(e -> {
 			InputWindow.value = textField.getText();
 			stage.close();
+		});
+		
+		textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.ENTER) btn.fire();
+			}
+
 		});
 		
 		text.setFont(Font.font("Segoe UI", FontWeight.BOLD, 15));

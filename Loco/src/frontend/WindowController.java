@@ -114,7 +114,7 @@ public class WindowController implements Initializable {
     	evaluator = new Evaluator(fp);
 
     	evaluator.viewParseTree();
-    	evaluator.viewErrors();
+    	evaluator.viewParserErrors();
     	
     	tokenTable.getItems().clear();
     	for (Token token : evaluator.getTokens()) {
@@ -122,11 +122,17 @@ public class WindowController implements Initializable {
     	}
     	
     	consoleTextArea.clear();
-    	for (String string: evaluator.getDiagnostics()) {
+    	for (String string: evaluator.getParserDiagnostics()) {
+    		defaultFold(null);
     		consoleTextArea.appendText(string + "\n");
     	}
     	
     	updateSymbolTable();
+    	
+    }
+    
+    @FXML
+    void runNextLine(ActionEvent event) {
     	
     }
     

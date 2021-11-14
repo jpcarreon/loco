@@ -114,7 +114,7 @@ public class Parser {
 		return diagnostics;
 	}
 	
-	public SyntaxNode parse() {
+	public NodeRoot parse() {
 		NodeRoot root;
 		
 		Token start = match(TokenKind.haiToken);
@@ -216,7 +216,7 @@ public class Parser {
 		match(TokenKind.anToken);
 		SyntaxNode operand2 = parseLiteral();
 		
-		return new NodeOperation(operation, operand1, operand2);
+		return new NodeOperation(SyntaxType.mathop, operation, operand1, operand2);
 		
 	}
 	
@@ -267,11 +267,11 @@ public class Parser {
 			match(TokenKind.anToken);
 			SyntaxNode operand2 = parseLiteral();
 			
-			return new NodeOperation(operation, operand1, operand2);
+			return new NodeOperation(SyntaxType.boolop, operation, operand1, operand2);
 		} else {
 			SyntaxNode operand1 = parseLiteral();
 			
-			return new NodeOperation(operation, operand1);
+			return new NodeOperation(SyntaxType.boolop, operation, operand1);
 		}
 	}
 	
@@ -280,7 +280,7 @@ public class Parser {
 		
 		while (current().getTokenKind() != TokenKind.mkayToken && current().getTokenKind() != TokenKind.eolToken) {
 			match(TokenKind.anToken);
-			operand1 = new NodeOperation(operation, operand1, parseInfArOp(operation));
+			operand1 = new NodeOperation(SyntaxType.infarop , operation, operand1, parseInfArOp(operation));
 		}
 		
 		return operand1;
@@ -293,7 +293,7 @@ public class Parser {
 		match(TokenKind.anToken);
 		SyntaxNode operand2 = parseLiteral();
 		
-		return new NodeOperation(operation, operand1, operand2);
+		return new NodeOperation(SyntaxType.cmpop, operation, operand1, operand2);
 	}
 	
 	private SyntaxNode parseConcat(Token operation) {
@@ -302,12 +302,12 @@ public class Parser {
 		if (current().getTokenKind() != TokenKind.eolToken) {
 			while (current().getTokenKind() != TokenKind.eolToken) {
 				match(TokenKind.anToken);
-				operand1 = new NodeOperation(operation, operand1, parseConcat(operation));
+				operand1 = new NodeOperation(SyntaxType.concat, operation, operand1, parseConcat(operation));
 			}
 			
 			return operand1;
 		} else {
-			return new NodeOperation(operation, operand1);
+			return new NodeOperation(SyntaxType.concat, operation, operand1);
 		}
 		
 
@@ -326,12 +326,12 @@ public class Parser {
 		
 		if (current().getTokenKind() != TokenKind.eolToken) {
 			while (current().getTokenKind() != TokenKind.eolToken) {
-				operand1 = new NodeOperation(operation, operand1, parsePrint(operation));
+				operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
 			}
 			
 			return operand1;
 		} else {
-			return new NodeOperation(operation, operand1);
+			return new NodeOperation(SyntaxType.print, operation, operand1);
 		}
 	}
 	

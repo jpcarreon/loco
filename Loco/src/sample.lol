@@ -1,4 +1,5 @@
 HAI
-	I HAS A var1
-	SUM OF 1 AN 2
+
+	SUM OF 1 AN "sad21#dd"
+	ALL OF 1 AN 2 AN 3 MKAY
 KTHXBYE

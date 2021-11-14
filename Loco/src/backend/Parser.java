@@ -95,7 +95,13 @@ public class Parser {
 		
 		diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
 						+ "> expected <"+ kind + ">");
-		return new Token(kind, null, current().getPosition());
+		
+		if (current().getTokenKind() == TokenKind.miscToken ||
+			current().getTokenKind() == TokenKind.badToken ) {
+			nextToken();
+		}
+		
+		return new Token(kind, null, current().getPosition() - 1);
 	}
 	
 	public void viewTokens() {
@@ -212,9 +218,9 @@ public class Parser {
 	private SyntaxNode parseMathOp() {
 		Token operation = nextToken();
 		
-		SyntaxNode operand1 = parseLiteral();
+		SyntaxNode operand1 = parseTerminal();
 		match(TokenKind.anToken);
-		SyntaxNode operand2 = parseLiteral();
+		SyntaxNode operand2 = parseTerminal();
 		
 		return new NodeOperation(SyntaxType.mathop, operation, operand1, operand2);
 		
@@ -240,6 +246,7 @@ public class Parser {
 		if (current().getTokenKind() == TokenKind.itzToken) {
 			nextToken();
 			
+			/*
 			if (current().getTokenKind().getType() == "literal") {
 				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseLiteral());
 			} else if (current().getTokenKind().getType() == "mathop") {
@@ -250,8 +257,11 @@ public class Parser {
 					return new NodeDeclaration(SyntaxType.newvar, operation, varid);
 				}
 			}
+			*/
 			
-			diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected valid Literal/VarId/Expression");
+			return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseTerminal());
+			
+			//diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected valid Literal/VarId/Expression");
 			
 		}
 		
@@ -263,20 +273,20 @@ public class Parser {
 		Token operation = nextToken();
 		
 		if (operation.getTokenKind() != TokenKind.notOpToken) {
-			SyntaxNode operand1 = parseLiteral();
+			SyntaxNode operand1 = parseTerminal();
 			match(TokenKind.anToken);
-			SyntaxNode operand2 = parseLiteral();
+			SyntaxNode operand2 = parseTerminal();
 			
 			return new NodeOperation(SyntaxType.boolop, operation, operand1, operand2);
 		} else {
-			SyntaxNode operand1 = parseLiteral();
+			SyntaxNode operand1 = parseTerminal();
 			
 			return new NodeOperation(SyntaxType.boolop, operation, operand1);
 		}
 	}
 	
 	private SyntaxNode parseInfArOp(Token operation) {
-		SyntaxNode operand1 = parseLiteral();
+		SyntaxNode operand1 = parseTerminal();
 		
 		while (current().getTokenKind() != TokenKind.mkayToken && current().getTokenKind() != TokenKind.eolToken) {
 			match(TokenKind.anToken);
@@ -289,15 +299,15 @@ public class Parser {
 	private SyntaxNode parseCmpOp() {
 		Token operation = nextToken();
 		
-		SyntaxNode operand1 = parseLiteral();
+		SyntaxNode operand1 = parseTerminal();
 		match(TokenKind.anToken);
-		SyntaxNode operand2 = parseLiteral();
+		SyntaxNode operand2 = parseTerminal();
 		
 		return new NodeOperation(SyntaxType.cmpop, operation, operand1, operand2);
 	}
 	
 	private SyntaxNode parseConcat(Token operation) {
-		SyntaxNode operand1 = parseLiteral();
+		SyntaxNode operand1 = parseTerminal();
 		
 		if (current().getTokenKind() != TokenKind.eolToken) {
 			while (current().getTokenKind() != TokenKind.eolToken) {
@@ -316,13 +326,13 @@ public class Parser {
 	private SyntaxNode parseVarChange(Token varid) {
 		Token operation = nextToken();
 		
-		SyntaxNode terminal = parseLiteral();
+		SyntaxNode terminal = parseTerminal();
 		
 		return new NodeDeclaration(SyntaxType.varchange, operation, varid, terminal);
 	}
 	
 	private SyntaxNode parsePrint(Token operation) {
-		SyntaxNode operand1 = parseLiteral();
+		SyntaxNode operand1 = parseTerminal();
 		
 		if (current().getTokenKind() != TokenKind.eolToken) {
 			while (current().getTokenKind() != TokenKind.eolToken) {
@@ -335,7 +345,7 @@ public class Parser {
 		}
 	}
 	
-	private SyntaxNode parseLiteral() {
+	private SyntaxNode parseTerminal() {
 		if (current().getTokenKind().getType() == "mathop") {
 			return parseMathOp();
 		} else if (current().getTokenKind().getType() == "boolop") {
@@ -351,7 +361,8 @@ public class Parser {
 			return new NodeLiteral(nextToken());
 		}
 		
-		return new NodeLiteral(match(TokenKind.numbrToken));
+		diagnostics.add("Line "+ lineCounter + ": Invalid operator; expected valid Literal/VarId/Expression");
+		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
 	}
 	
 	private Token parseYarn() {

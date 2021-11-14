@@ -119,6 +119,8 @@ public class WindowController implements Initializable {
     	//evaluator.viewParseTree();
     	evaluator.viewParserErrors();
     	
+    	verticalSplit.setDividerPosition(0, 1.0);
+    	
     	tokenTable.getItems().clear();
     	for (Token token : evaluator.getTokens()) {
     		tokenTable.getItems().add(token);
@@ -150,6 +152,8 @@ public class WindowController implements Initializable {
 
     	//evaluator.viewParseTree();
     	evaluator.viewParserErrors();
+    	
+    	verticalSplit.setDividerPosition(0, 1.0);
     	
     	tokenTable.getItems().clear();
     	for (Token token : evaluator.getTokens()) {

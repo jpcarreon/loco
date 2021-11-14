@@ -6,19 +6,18 @@ public class NodeDeclaration extends SyntaxNode {
 	Token operation, varid;
 	SyntaxNode value;
 	
-	public NodeDeclaration(Token operation, Token varid) {
-		super(SyntaxType.newvar);
+	public NodeDeclaration(SyntaxType type, Token operation, Token varid) {
+		super(type);
 		this.operation = operation;
 		this.varid = varid;
 	}
 	
-	public NodeDeclaration(Token operation, Token varid, SyntaxNode value) {
-		super(SyntaxType.newvar);
+	public NodeDeclaration(SyntaxType type, Token operation, Token varid, SyntaxNode value) {
+		super(type);
 		this.operation = operation;
 		this.varid = varid;
 		this.value = value;
 	}
-	
 	
 	public void printChildren(int tab) {
 		printTab(tab);
@@ -42,6 +41,18 @@ public class NodeDeclaration extends SyntaxNode {
 		printTab(tab);
 		System.out.println("}");
 		
+	}
+	
+	public Token getOperation() {
+		return operation;
+	}
+	
+	public Token getVarID() {
+		return varid;
+	}
+	
+	public SyntaxNode getValue() {
+		return value;
 	}
 
 }

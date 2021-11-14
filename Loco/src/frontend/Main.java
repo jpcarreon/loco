@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {		
 		startEvaluator();
 		launch(args);
 	}
@@ -54,6 +54,7 @@ public class Main extends Application {
 		while (!evaluator.isPCEmpty()) {
 			evaluator.nextInstruction();
 		}
+		
 		
 		System.out.println(evaluator.getEvalDiagnostics());
 		

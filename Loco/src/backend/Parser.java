@@ -241,13 +241,13 @@ public class Parser {
 			nextToken();
 			
 			if (current().getTokenKind().getType() == "literal") {
-				return new NodeDeclaration(operation, varid, parseLiteral());
+				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseLiteral());
 			} else if (current().getTokenKind().getType() == "mathop") {
-				return new NodeDeclaration(operation, varid, parseMathOp());
+				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseMathOp());
 			} else if (current().getTokenKind() == TokenKind.idToken) {
 				if (current().getValue() != varid.getValue()) {
 					//	TODO symbol table for variables
-					return new NodeDeclaration(operation, varid);
+					return new NodeDeclaration(SyntaxType.newvar, operation, varid);
 				}
 			}
 			
@@ -255,7 +255,7 @@ public class Parser {
 			
 		}
 		
-		return new NodeDeclaration(operation, varid);
+		return new NodeDeclaration(SyntaxType.newvar, operation, varid);
 
 	}
 	
@@ -318,7 +318,7 @@ public class Parser {
 		
 		SyntaxNode terminal = parseLiteral();
 		
-		return new NodeDeclaration(operation, varid, terminal);
+		return new NodeDeclaration(SyntaxType.varchange, operation, varid, terminal);
 	}
 	
 	private SyntaxNode parsePrint(Token operation) {

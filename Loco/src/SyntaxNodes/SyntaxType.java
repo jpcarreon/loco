@@ -8,9 +8,11 @@ public enum SyntaxType {
 	flowcontrol,
 	
 	comment,
-	newvar,
 	literal,
 	varid,
+	
+	newvar,
+	varchange,
 	
 	mathop,
 	boolop,

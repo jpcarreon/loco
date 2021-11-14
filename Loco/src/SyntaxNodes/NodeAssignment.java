@@ -11,6 +11,7 @@ public class NodeAssignment extends SyntaxNode {
 		this.lineCounter = lineCounter;
 		
 	}
+	
 	public void printChildren(int tab) {
 		printTab(tab);
 		System.out.println("{");
@@ -21,5 +22,9 @@ public class NodeAssignment extends SyntaxNode {
 		
 		printTab(tab);
 		System.out.println("}");
+	}
+	
+	public SyntaxNode getNode() {
+		return node;
 	}
 }

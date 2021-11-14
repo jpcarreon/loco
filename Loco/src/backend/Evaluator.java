@@ -3,16 +3,13 @@ package backend;
 import java.io.File;
 import java.util.ArrayList;
 
-import SyntaxNodes.NodeExpression;
-import SyntaxNodes.NodeLiteral;
-import SyntaxNodes.NodeOperation;
-import SyntaxNodes.NodeRoot;
-import SyntaxNodes.NodeStatement;
-import SyntaxNodes.SyntaxNode;
-import SyntaxNodes.SyntaxType;
+import SyntaxNodes.*;
+
+import frontend.WindowController;
 
 public class Evaluator {
 	private Parser parser;
+	private WindowController window;
 	
 	private ArrayList<Token> tokens;
 	private ArrayList<SymTabEntry> SymbolTable;
@@ -37,8 +34,9 @@ public class Evaluator {
 		this.programCounter = root.getStatements();
 	}
 	
-	public Evaluator(String strFile) {
+	public Evaluator(String strFile, WindowController window) {
 		this.errorMsg = new String();
+		this.window = window;
 		this.SymbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
 		
@@ -53,6 +51,11 @@ public class Evaluator {
 	
 	public void nextInstruction() {
 		
+		if (parser.getDiagnostics().size() > 0) {
+			programCounter = null;
+			return;
+		}
+		
 		++lineCounter;
 		
 		// check if PC holds only 1 line of code 
@@ -65,6 +68,8 @@ public class Evaluator {
 			
 			if (currentInstruction.getType() == SyntaxType.expression) {
 				evalExpression();
+			} else if (currentInstruction.getType() == SyntaxType.assignment) {
+				evalAssignment();
 			}
 			
 			return;
@@ -78,6 +83,8 @@ public class Evaluator {
 		
 		if (currentInstruction.getType() == SyntaxType.expression) {
 			evalExpression();
+		} else if (currentInstruction.getType() == SyntaxType.assignment) {
+			evalAssignment();
 		}
 		
 		if (!errorMsg.isBlank()) programCounter = null;
@@ -90,8 +97,32 @@ public class Evaluator {
 			return;
 		} else if (node.getType() == SyntaxType.mathop) {
 			Token token = evalMathOp((NodeOperation) node);
+			token.viewToken();
 			SymbolTable.get(0).setKindValue(token);
 		}	
+	}
+	
+	private void evalAssignment() {
+		SyntaxNode node = ((NodeAssignment) currentInstruction).getNode();
+		
+		if (node.getType() == SyntaxType.newvar) {
+			evalNewVar((NodeDeclaration) node);
+		}
+	}
+	
+	private void evalNewVar(NodeDeclaration node) {		
+		SymTabEntry newVar;
+		
+		String varid = node.getVarID().getValue();
+		
+		if (node.getValue() != null) {
+			Token value = evalTerminal(node.getValue());
+			newVar = new SymTabEntry(varid, value.getTokenKind(), value.getValue());
+		} else {
+			newVar = new SymTabEntry(varid, TokenKind.badToken, "");
+		}
+		
+		SymbolTable.add(newVar);
 	}
 	
 	private Token evalMathOp(NodeOperation node) {
@@ -113,15 +144,23 @@ public class Evaluator {
 		if (operand1.getTokenKind() == TokenKind.troofToken) {
 			if (operand1.getValue().matches("WIN")) op1 = (float) 1.0;
 			else op1 = (float) 0;
-		} else {
+		} else if (operand1.getTokenKind() == TokenKind.numbrToken ||
+				   operand1.getTokenKind() == TokenKind.numbarToken) {
 			op1 = Float.parseFloat(operand1.getValue());
+		} else {
+			errorMsg = "Line "+ lineCounter + ": Unexpected <"+operand2.getTokenKind()+"> as operand";
+			return new Token(TokenKind.badToken, null, -1);
 		}
 		
 		if (operand2.getTokenKind() == TokenKind.troofToken) {
 			if (operand2.getValue().matches("WIN")) op2 = (float) 1.0;
 			else op2 = (float) 0;
-		} else {
+		} else if (operand2.getTokenKind() == TokenKind.numbrToken ||
+				   operand2.getTokenKind() == TokenKind.numbarToken) {
 			op2 = Float.parseFloat(operand2.getValue());
+		} else {
+			errorMsg = "Line "+ lineCounter + ": Unexpected <"+operand2.getTokenKind()+"> as operand";
+			return new Token(TokenKind.badToken, null, -1);
 		}
 		
 		if (operation.getTokenKind() == TokenKind.sumOpToken) {
@@ -140,7 +179,7 @@ public class Evaluator {
 			result = op1 % op2;
 		}
 		
-		if (op1 == (int)op1 && op2 == (int)op2) {
+		if (op1 == (int) op1 && op2 == (int) op2) {
 			return new Token(TokenKind.numbrToken, Integer.toString((int)result), -1);
 		}
 		
@@ -149,8 +188,10 @@ public class Evaluator {
 	}
 	
 	private Token evalTerminal(SyntaxNode operand) {
-		if (operand.getType() != SyntaxType.literal) {
+		if (operand.getType() == SyntaxType.varid) {
 			
+		} else if (operand.getType() == SyntaxType.mathop) {
+			return evalMathOp((NodeOperation) operand);
 		}
 		
 		return ((NodeLiteral) operand).getToken();

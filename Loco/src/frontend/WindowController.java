@@ -17,6 +17,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -46,6 +47,8 @@ public class WindowController implements Initializable {
 	@FXML private TableView<SymTabEntry> symbolTable;
 	@FXML private TableColumn<SymTabEntry, String> identifierColumn;
 	@FXML private TableColumn<SymTabEntry, String> valueColumn;
+	
+	@FXML private MenuItem nextLineBtn;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -111,9 +114,9 @@ public class WindowController implements Initializable {
     	String fp = codeTextArea.getText();
     	fp = fp.replaceAll("\t", "");
     	
-    	evaluator = new Evaluator(fp);
+    	evaluator = new Evaluator(fp, this);
 
-    	evaluator.viewParseTree();
+    	//evaluator.viewParseTree();
     	evaluator.viewParserErrors();
     	
     	tokenTable.getItems().clear();
@@ -127,13 +130,54 @@ public class WindowController implements Initializable {
     		consoleTextArea.appendText(string + "\n");
     	}
     	
-    	updateSymbolTable();
+    	while (!evaluator.isPCEmpty()) {
+			evaluator.nextInstruction();
+			updateSymbolTable();
+		}
     	
+    	if (!evaluator.getEvalDiagnostics().isBlank()) {
+    		defaultFold(null);
+    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
+    	}
+    }
+    
+    @FXML
+    void runDebug(ActionEvent event) {
+    	String fp = codeTextArea.getText();
+    	fp = fp.replaceAll("\t", "");
+    	
+    	evaluator = new Evaluator(fp, this);
+
+    	//evaluator.viewParseTree();
+    	evaluator.viewParserErrors();
+    	
+    	tokenTable.getItems().clear();
+    	for (Token token : evaluator.getTokens()) {
+    		tokenTable.getItems().add(token);
+    	}
+    	
+    	consoleTextArea.clear();
+    	for (String string: evaluator.getParserDiagnostics()) {
+    		defaultFold(null);
+    		consoleTextArea.appendText(string + "\n");
+    	}
+    	
+    	nextLineBtn.setDisable(false);
     }
     
     @FXML
     void runNextLine(ActionEvent event) {
-    	
+    	evaluator.nextInstruction();
+		updateSymbolTable();
+		
+    	if (evaluator.isPCEmpty()) {
+			if (!evaluator.getEvalDiagnostics().isBlank()) {
+	    		defaultFold(null);
+	    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
+	    	}
+			
+			nextLineBtn.setDisable(true);
+    	}
     }
     
     @FXML

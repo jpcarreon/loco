@@ -357,8 +357,7 @@ public class Parser {
 		} else if (current().getTokenKind().getType() == "literal") {
 			return new NodeLiteral(nextToken());
 		} else if (current().getTokenKind() == TokenKind.idToken) {
-			//	TODO variable handler
-			return new NodeLiteral(nextToken());
+			return new NodeLiteral(SyntaxType.varid, nextToken());
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid operator; expected valid Literal/VarId/Expression");

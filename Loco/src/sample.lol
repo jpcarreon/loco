@@ -1,5 +1,4 @@
 HAI
-
-	SUM OF 1 AN "sad21#dd"
-	ALL OF 1 AN 2 AN 3 MKAY
+	I HAS A var1 ITZ "1d5"
+	DIFF OF var1 AN 6
 KTHXBYE

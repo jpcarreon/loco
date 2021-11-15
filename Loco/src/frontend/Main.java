@@ -48,7 +48,7 @@ public class Main extends Application {
 		File fp = new File("src/sample.lol");
 		Evaluator evaluator = new Evaluator(fp);
 		
-		evaluator.viewParseTree();
+		//evaluator.viewParseTree();
 		evaluator.viewParserErrors();
 		
 		while (!evaluator.isPCEmpty()) {
@@ -68,8 +68,13 @@ public class Main extends Application {
 			
 			scene.getStylesheets().add(getClass().getResource("Window.css").toExternalForm());
 			
+			
 			primaryStage.setScene(scene);
 			primaryStage.setTitle("Loco - Lolcode Interpreter");
+			
+			primaryStage.setMinHeight(WindowController.WINDOW_HEIGHT);
+			primaryStage.setMinWidth(WindowController.WINDOW_WIDTH);
+			
 			primaryStage.show();
 		} catch (Exception e) {
 			e.printStackTrace();

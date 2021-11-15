@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="675.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.WindowController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#runHotKey" prefHeight="675.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="frontend.WindowController">
    <top>
       <MenuBar BorderPane.alignment="CENTER">
         <menus>
@@ -31,15 +31,15 @@
                   <MenuItem mnemonicParsing="false" onAction="#defaultFold" text="Default Layout" />
                   <MenuItem mnemonicParsing="false" onAction="#changeFont" text="Set Font Size" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem mnemonicParsing="false" onAction="#runDebug" text="Debug" />
-                  <MenuItem fx:id="nextLineBtn" disable="true" mnemonicParsing="false" onAction="#runNextLine" text="Next Line" />
+                  <MenuItem mnemonicParsing="false" onAction="#runDebug" text="Debug (F7)" />
+                  <MenuItem fx:id="nextLineBtn" disable="true" mnemonicParsing="false" onAction="#runNextLine" text="Next Line (F8)" />
                   <SeparatorMenuItem mnemonicParsing="false" />
-              <MenuItem mnemonicParsing="false" onAction="#runProgram" text="Run" />
+              <MenuItem mnemonicParsing="false" onAction="#runProgram" text="Run (F6)" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
-              <MenuItem mnemonicParsing="false" onAction="#displayAbout" text="About" />
+              <MenuItem mnemonicParsing="false" onAction="#displayAbout" text="About (F12)" />
             </items>
           </Menu>
         </menus>

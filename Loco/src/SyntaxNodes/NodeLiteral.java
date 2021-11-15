@@ -12,6 +12,12 @@ public class NodeLiteral extends SyntaxNode {
 		
 	}
 	
+	public NodeLiteral(SyntaxType type, Token token) {
+		super(type);
+		this.literalToken = token;
+		
+	}
+	
 	public void printChildren(int tab) {
 		printTab(tab);
 		System.out.println(literalToken.getValue() + 

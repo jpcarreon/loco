@@ -9,7 +9,6 @@ import frontend.WindowController;
 
 public class Evaluator {
 	private Parser parser;
-	private WindowController window;
 	
 	private ArrayList<Token> tokens;
 	private ArrayList<SymTabEntry> SymbolTable;
@@ -29,14 +28,13 @@ public class Evaluator {
 		this.root = parser.parse();
 		
 		this.tokens = parser.getTokens();
-		this.SymbolTable.add(new SymTabEntry("IT", TokenKind.badToken, ""));
+		this.SymbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
 		this.programCounter = root.getStatements();
 	}
 	
-	public Evaluator(String strFile, WindowController window) {
+	public Evaluator(String strFile) {
 		this.errorMsg = new String();
-		this.window = window;
 		this.SymbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
 		
@@ -44,7 +42,7 @@ public class Evaluator {
 		this.root = parser.parse();
 		
 		this.tokens = parser.getTokens();
-		this.SymbolTable.add(new SymTabEntry("IT", TokenKind.badToken, ""));
+		this.SymbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
 		this.programCounter = root.getStatements();
 	}
@@ -55,7 +53,7 @@ public class Evaluator {
 			programCounter = null;
 			return;
 		}
-		
+
 		++lineCounter;
 		
 		// check if PC holds only 1 line of code 
@@ -97,7 +95,7 @@ public class Evaluator {
 			return;
 		} else if (node.getType() == SyntaxType.mathop) {
 			Token token = evalMathOp((NodeOperation) node);
-			token.viewToken();
+			//token.viewToken();
 			SymbolTable.get(0).setKindValue(token);
 		}	
 	}
@@ -119,7 +117,7 @@ public class Evaluator {
 			Token value = evalTerminal(node.getValue());
 			newVar = new SymTabEntry(varid, value.getTokenKind(), value.getValue());
 		} else {
-			newVar = new SymTabEntry(varid, TokenKind.badToken, "");
+			newVar = new SymTabEntry(varid, TokenKind.noobToken, "");
 		}
 		
 		SymbolTable.add(newVar);
@@ -128,20 +126,23 @@ public class Evaluator {
 	private Token evalMathOp(NodeOperation node) {
 		float op1, op2, result;
 		
+		op1 = op2 = (float) 0;
+		
 		Token operation = node.getOperation();
 		Token operand1 = evalTerminal(node.getOp1());
 		Token operand2 = evalTerminal(node.getOp2());
 		
-		if (operand1.getTokenKind() == TokenKind.yarnToken ||
-			operand2.getTokenKind() == TokenKind.yarnToken) {
-			
-			errorMsg = "Line "+ lineCounter + ": Unexpected <yarnToken> as operand";
-			
-			return new Token(TokenKind.badToken, null, -1);
-		}
 		
-		
-		if (operand1.getTokenKind() == TokenKind.troofToken) {
+		if (operand1.getTokenKind() == TokenKind.yarnToken) {
+			
+			try {
+				op1 = Float.parseFloat(operand1.getValue());
+			} catch (Exception e) {
+				errorMsg = "Line "+ lineCounter + ": Type mismatch <yarnToken> cannot be typecast for this operation";
+				return new Token(TokenKind.badToken, null, -1);
+			} 
+			
+		} else if (operand1.getTokenKind() == TokenKind.troofToken) {
 			if (operand1.getValue().matches("WIN")) op1 = (float) 1.0;
 			else op1 = (float) 0;
 		} else if (operand1.getTokenKind() == TokenKind.numbrToken ||
@@ -152,7 +153,16 @@ public class Evaluator {
 			return new Token(TokenKind.badToken, null, -1);
 		}
 		
-		if (operand2.getTokenKind() == TokenKind.troofToken) {
+		if (operand2.getTokenKind() == TokenKind.yarnToken) {
+			
+			try {
+				op2 = Float.parseFloat(operand2.getValue());
+			} catch (Exception e) {
+				errorMsg = "Line "+ lineCounter + ": Type mismatch <yarnToken> cannot be typecast for this operation";
+				return new Token(TokenKind.badToken, null, -1);
+			} 
+			
+		} else if (operand2.getTokenKind() == TokenKind.troofToken) {
 			if (operand2.getValue().matches("WIN")) op2 = (float) 1.0;
 			else op2 = (float) 0;
 		} else if (operand2.getTokenKind() == TokenKind.numbrToken ||
@@ -179,7 +189,7 @@ public class Evaluator {
 			result = op1 % op2;
 		}
 		
-		if (op1 == (int) op1 && op2 == (int) op2) {
+		if (operand1.getTokenKind() == TokenKind.numbrToken && operand2.getTokenKind() == TokenKind.numbrToken) {
 			return new Token(TokenKind.numbrToken, Integer.toString((int)result), -1);
 		}
 		
@@ -187,8 +197,21 @@ public class Evaluator {
 		
 	}
 	
-	private Token evalTerminal(SyntaxNode operand) {
+	private Token evalTerminal(SyntaxNode operand) {		
 		if (operand.getType() == SyntaxType.varid) {
+			Token token = ((NodeLiteral) operand).getToken();
+			int idx = findVarValue(token.getValue());
+			
+			if (idx == SymbolTable.size()) {
+				this.errorMsg = "Line "+ lineCounter + ": Unbound variable <"+token.getValue()+">";
+				return new Token(TokenKind.numbrToken, "0", -1);
+			} else if (SymbolTable.get(idx).getValue().isEmpty()) {
+				this.errorMsg = "Line "+ lineCounter + ": Uninitialized variable <"+token.getValue()+">";
+				return new Token(TokenKind.numbrToken, "0", -1);
+			} else {
+				SymTabEntry entry = SymbolTable.get(idx);
+				return new Token(entry.getKind(), entry.getValue(), token.getPosition());
+			}
 			
 		} else if (operand.getType() == SyntaxType.mathop) {
 			return evalMathOp((NodeOperation) operand);
@@ -197,6 +220,16 @@ public class Evaluator {
 		return ((NodeLiteral) operand).getToken();
 	}
 	
+	
+	private int findVarValue(String varid) {
+		int counter = 0;
+		for (SymTabEntry entry : SymbolTable) {
+			if (entry.getIdentifier().equals(varid)) break;
+			counter++;
+		}
+		
+		return counter;
+	}
 	
 	public void viewParserErrors() {
 		for (String i : parser.getDiagnostics()) System.out.println(i);

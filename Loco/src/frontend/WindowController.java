@@ -23,6 +23,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 
@@ -30,8 +32,8 @@ import javafx.stage.FileChooser;
 public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
-	public final static int WINDOW_HEIGHT = 675;
-	public final static int WINDOW_WIDTH = 1200;
+	public final static int WINDOW_HEIGHT = 707;
+	public final static int WINDOW_WIDTH = 1202;
 	
 	@FXML private SplitPane verticalSplit;
 	@FXML private SplitPane horizontalSplit;
@@ -114,7 +116,7 @@ public class WindowController implements Initializable {
     	String fp = codeTextArea.getText();
     	fp = fp.replaceAll("\t", "");
     	
-    	evaluator = new Evaluator(fp, this);
+    	evaluator = new Evaluator(fp);
 
     	//evaluator.viewParseTree();
     	evaluator.viewParserErrors();
@@ -148,13 +150,14 @@ public class WindowController implements Initializable {
     	String fp = codeTextArea.getText();
     	fp = fp.replaceAll("\t", "");
     	
-    	evaluator = new Evaluator(fp, this);
+    	evaluator = new Evaluator(fp);
 
     	//evaluator.viewParseTree();
     	evaluator.viewParserErrors();
     	
     	verticalSplit.setDividerPosition(0, 1.0);
     	
+    	symbolTable.getItems().clear();
     	tokenTable.getItems().clear();
     	for (Token token : evaluator.getTokens()) {
     		tokenTable.getItems().add(token);
@@ -233,6 +236,15 @@ public class WindowController implements Initializable {
     	verticalSplit.setDividerPosition(0, 0.8);
     	horizontalSplit.setDividerPosition(0, 0.6);
     	horizontalSplit.setDividerPosition(1, 0.8);
+    }
+    
+    @FXML
+    void runHotKey(KeyEvent event) {
+    	if (event.getCode() == KeyCode.F6) runProgram(null);
+    	else if (event.getCode() == KeyCode.F7) runDebug(null);
+    	else if (event.getCode() == KeyCode.F8) {
+    		if (!evaluator.isPCEmpty()) runNextLine(null);
+    	} else if (event.getCode() == KeyCode.F12) displayAbout(null);
     }
     
     private void updateSymbolTable() {

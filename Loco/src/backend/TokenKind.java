@@ -3,6 +3,7 @@ package backend;
 public enum TokenKind {
 	haiToken("HAI", "progStart",1), byeToken("KTHXBYE", "progEnd", 1),
 
+	noobToken("", "", 1),
 	numbrToken("-?[0-9]+", "literal", 1), 
 	numbarToken("-?[0-9]+\\.[0-9]+", "literal", 1), 
 	yarnToken("(\".+?|\"[^\"]+\")", "literal", -1), 

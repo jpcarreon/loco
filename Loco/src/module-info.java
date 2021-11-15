@@ -1,5 +1,4 @@
 module Loco {
-	exports SyntaxNodes;
 	exports backend;
 	exports frontend;
 

@@ -8,10 +8,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
-import backend.Evaluator;
-import backend.SymTabEntry;
-import backend.Token;
-import backend.TokenKind;
+import backend.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -28,8 +25,6 @@ import javafx.stage.FileChooser;
 
 
 public class WindowController implements Initializable {
-	private Evaluator evaluator;
-	
 	public final static int WINDOW_HEIGHT = 675;
 	public final static int WINDOW_WIDTH = 1200;
 	
@@ -44,20 +39,13 @@ public class WindowController implements Initializable {
 	@FXML private TableColumn<Token, String> lexemeColumn;
 	@FXML private TableColumn<Token, TokenKind> tokenKindColumn;
 	
-	@FXML private TableView<SymTabEntry> symbolTable;
-	@FXML private TableColumn<SymTabEntry, String> identifierColumn;
-	@FXML private TableColumn<SymTabEntry, String> valueColumn;
-	
 	@FXML private MenuItem nextLineBtn;
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lexemeColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("value"));
 		tokenKindColumn.setCellValueFactory(new PropertyValueFactory<Token, TokenKind>("tokenKind"));
-		
-		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
-		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
-		
+
 	}
 	
 	@FXML
@@ -113,75 +101,19 @@ public class WindowController implements Initializable {
     void runProgram(ActionEvent event) {
     	String fp = codeTextArea.getText();
     	fp = fp.replaceAll("\t", "");
-    	
-    	evaluator = new Evaluator(fp, this);
 
-    	//evaluator.viewParseTree();
-    	evaluator.viewParserErrors();
-    	
-    	verticalSplit.setDividerPosition(0, 1.0);
-    	
-    	tokenTable.getItems().clear();
-    	for (Token token : evaluator.getTokens()) {
-    		tokenTable.getItems().add(token);
-    	}
-    	
-    	consoleTextArea.clear();
-    	for (String string: evaluator.getParserDiagnostics()) {
-    		defaultFold(null);
-    		consoleTextArea.appendText(string + "\n");
-    	}
-    	
-    	while (!evaluator.isPCEmpty()) {
-			evaluator.nextInstruction();
-			updateSymbolTable();
-		}
-    	
-    	if (!evaluator.getEvalDiagnostics().isBlank()) {
-    		defaultFold(null);
-    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
-    	}
-    }
-    
-    @FXML
-    void runDebug(ActionEvent event) {
-    	String fp = codeTextArea.getText();
-    	fp = fp.replaceAll("\t", "");
-    	
-    	evaluator = new Evaluator(fp, this);
+		Lexer lexer = new Lexer(fp);
 
-    	//evaluator.viewParseTree();
-    	evaluator.viewParserErrors();
-    	
-    	verticalSplit.setDividerPosition(0, 1.0);
-    	
-    	tokenTable.getItems().clear();
-    	for (Token token : evaluator.getTokens()) {
-    		tokenTable.getItems().add(token);
-    	}
-    	
-    	consoleTextArea.clear();
-    	for (String string: evaluator.getParserDiagnostics()) {
-    		defaultFold(null);
-    		consoleTextArea.appendText(string + "\n");
-    	}
-    	
-    	nextLineBtn.setDisable(false);
-    }
-    
-    @FXML
-    void runNextLine(ActionEvent event) {
-    	evaluator.nextInstruction();
-		updateSymbolTable();
-		
-    	if (evaluator.isPCEmpty()) {
-			if (!evaluator.getEvalDiagnostics().isBlank()) {
-	    		defaultFold(null);
-	    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
-	    	}
-			
-			nextLineBtn.setDisable(true);
-    	}
+		//lexer.viewLexemes();
+		tokenTable.getItems().clear();
+
+		Token token;
+		do {
+			token = lexer.nextToken();
+			tokenTable.getItems().add(token);
+
+			//if (token.getTokenKind() != TokenKind.badToken) token.viewToken();
+		} while (token.getTokenKind() != TokenKind.eofToken);
     }
     
     @FXML
@@ -233,13 +165,6 @@ public class WindowController implements Initializable {
     	verticalSplit.setDividerPosition(0, 0.8);
     	horizontalSplit.setDividerPosition(0, 0.6);
     	horizontalSplit.setDividerPosition(1, 0.8);
-    }
-    
-    private void updateSymbolTable() {
-    	symbolTable.getItems().clear();
-    	for (SymTabEntry entry : evaluator.getSymbolTable()) {
-    		symbolTable.getItems().add(entry);
-    	}
     }
     
     private String displayInputBox(String title, String prompt) {

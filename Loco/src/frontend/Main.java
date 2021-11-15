@@ -2,9 +2,7 @@ package frontend;
 
 import java.io.File;
 
-import backend.Evaluator;
 import backend.Lexer;
-import backend.Parser;
 import backend.Token;
 import backend.TokenKind;
 import javafx.application.Application;
@@ -16,7 +14,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public static void main(String[] args) {		
-		//startEvaluator();
+		//startLexer();
 		launch(args);
 	}
 	
@@ -34,32 +32,7 @@ public class Main extends Application {
 		
 		System.exit(0);
 	}
-	
-	static void startParser() {
-		File fp = new File("src/sample.lol");
-		Parser parser = new Parser(fp);
-		parser.parse();
-		parser.viewErrors();
-		
-		System.exit(0);
-	}
-	
-	static void startEvaluator() {
-		File fp = new File("src/sample.lol");
-		Evaluator evaluator = new Evaluator(fp);
-		
-		evaluator.viewParseTree();
-		evaluator.viewParserErrors();
-		
-		while (!evaluator.isPCEmpty()) {
-			evaluator.nextInstruction();
-		}
-		
-		
-		System.out.println(evaluator.getEvalDiagnostics());
-		
-		System.exit(0);
-	}
+
 	@Override
 	public void start(Stage primaryStage) {
 		try {

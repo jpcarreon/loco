@@ -23,7 +23,8 @@ expression:
 assignment:
 	| vardec
 	| varassign
-	| typecast
+	| scan
+	| asntypecast
 	;
 
 flowcontrol:
@@ -95,6 +96,10 @@ mulliteral: literal
 	
 print:
 	| printToken terminal
+	;
+
+scan:
+	| scanToken idToken
 	;
 	
 multerminal: terminal

@@ -86,6 +86,15 @@ public class Parser {
 		return curToken;
 	}
 	
+	private Token lazyMatch(TokenKind kind) {
+		if (current().getTokenKind() == kind) {
+			if (kind == TokenKind.eolToken) lineCounter++;
+			return nextToken();
+		}
+		
+		return new Token(kind, null, current().getPosition() - 1);
+	}
+	
 	private Token match(TokenKind kind) {
 		
 		if (current().getTokenKind() == kind) {
@@ -97,29 +106,14 @@ public class Parser {
 						+ "> expected <"+ kind + ">");
 		
 		if (current().getTokenKind() == TokenKind.miscToken ||
-			current().getTokenKind() == TokenKind.badToken ) {
+			current().getTokenKind() == TokenKind.badToken  ||
+			kind == TokenKind.eolToken) {
 			nextToken();
 		}
 		
 		return new Token(kind, null, current().getPosition() - 1);
 	}
-	
-	public void viewTokens() {
-		for (Token i : tokens) i.viewToken();
-	}
-	
-	public void viewErrors() {
-		for (String i : diagnostics) System.out.println(i);
-	}
-	
-	protected ArrayList<Token> getTokens() {
-		return allTokens;
-	}
-	
-	protected ArrayList<String> getDiagnostics() {
-		return diagnostics;
-	}
-	
+
 	public NodeRoot parse() {
 		NodeRoot root;
 		
@@ -160,6 +154,7 @@ public class Parser {
 		return expression;
 	}
 	
+	
 	private SyntaxNode parseExpression() {
 		if (current().getTokenKind().getType() == "mathop") {
 			return new NodeExpression(parseMathOp(), lineCounter);
@@ -178,10 +173,15 @@ public class Parser {
 		} else if (current().getTokenKind().getType() == "cmpop") {
 			return new NodeExpression(parseCmpOp(), lineCounter);
 			
-		} else if (current().getTokenKind().getType() == "concat") {
-			return new NodeExpression(parseConcat(nextToken()), lineCounter);
+		}	else if (current().getTokenKind() == TokenKind.maekToken) {
+			return new NodeExpression(parseExpTypecast(), lineCounter);
+				
+		} else if (current().getTokenKind() == TokenKind.smooshToken) {
+			SyntaxNode concat = new NodeExpression(parseConcat(nextToken()), lineCounter);
+			lazyMatch(TokenKind.mkayToken);
+			return concat;
 			
-		} else if (current().getTokenKind().getType() == "print") {
+		} else if (current().getTokenKind() == TokenKind.printToken) {
 			return new NodeExpression(parsePrint(nextToken()), lineCounter);
 			
 		}
@@ -190,6 +190,7 @@ public class Parser {
 		while (current().getTokenKind() != TokenKind.eolToken) {
 			nextToken();
 		}
+		
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
 	}
 	
@@ -200,12 +201,14 @@ public class Parser {
 		} else if (current().getTokenKind() == TokenKind.idToken) {
 			Token varid = nextToken();
 			
-			if (current().getTokenKind().getType() == "varassign") {
+			if (current().getTokenKind() == TokenKind.rToken) {
 				return new NodeAssignment(parseVarChange(varid), lineCounter);
 						
-			} else if (current().getTokenKind().getType() == "typecast") {
-				
+			} else if (current().getTokenKind() == TokenKind.isNowToken) {
+				return new NodeAssignment(parseAsnTypecast(varid), lineCounter);
 			}
+		} else if (current().getTokenKind().getType() == "scan") {
+			return new NodeAssignment(parseScan(), lineCounter);
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
@@ -214,6 +217,8 @@ public class Parser {
 		}
 		return new NodeLiteral(nextToken());
 	}
+	
+	
 	
 	private SyntaxNode parseMathOp() {
 		Token operation = nextToken();
@@ -253,7 +258,6 @@ public class Parser {
 				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseMathOp());
 			} else if (current().getTokenKind() == TokenKind.idToken) {
 				if (current().getValue() != varid.getValue()) {
-					//	TODO symbol table for variables
 					return new NodeDeclaration(SyntaxType.newvar, operation, varid);
 				}
 			}
@@ -309,18 +313,16 @@ public class Parser {
 	private SyntaxNode parseConcat(Token operation) {
 		SyntaxNode operand1 = parseTerminal();
 		
-		if (current().getTokenKind() != TokenKind.eolToken) {
-			while (current().getTokenKind() != TokenKind.eolToken) {
-				match(TokenKind.anToken);
-				operand1 = new NodeOperation(SyntaxType.concat, operation, operand1, parseConcat(operation));
-			}
+		if (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.mkayToken) {
+			match(TokenKind.anToken);
+			operand1 = new NodeOperation(SyntaxType.concat, operation, operand1, parseConcat(operation));
 			
 			return operand1;
 		} else {
 			return new NodeOperation(SyntaxType.concat, operation, operand1);
 		}
 		
-
+		
 	}
 	
 	private SyntaxNode parseVarChange(Token varid) {
@@ -331,18 +333,43 @@ public class Parser {
 		return new NodeDeclaration(SyntaxType.varchange, operation, varid, terminal);
 	}
 	
+	private SyntaxNode parseAsnTypecast(Token varid) {
+		Token operation = nextToken();
+		SyntaxNode vartype = new NodeLiteral(SyntaxType.vartype, match(TokenKind.typeToken));
+		
+		return new NodeDeclaration(SyntaxType.vartypechange, operation, varid, vartype);
+	}
+	
+	private SyntaxNode parseExpTypecast() {
+		Token operation = nextToken();
+		return new NodeLiteral(operation);
+	}
+
 	private SyntaxNode parsePrint(Token operation) {
 		SyntaxNode operand1 = parseTerminal();
 		
-		if (current().getTokenKind() != TokenKind.eolToken) {
-			while (current().getTokenKind() != TokenKind.eolToken) {
-				operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
-			}
+		if (current().getTokenKind() != TokenKind.eolToken && operand1.getType() != SyntaxType.invalid) {
+			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
+
+			return operand1;
+		} else if (operand1.getType() == SyntaxType.invalid) {
+			nextToken();
+			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
 			
 			return operand1;
 		} else {
+			
 			return new NodeOperation(SyntaxType.print, operation, operand1);
 		}
+		
+		
+	}
+	
+	private SyntaxNode parseScan() {
+		Token operation = nextToken();
+		SyntaxNode varid = new NodeLiteral(SyntaxType.varid, match(TokenKind.idToken));
+		
+		return new NodeOperation(SyntaxType.scan, operation, varid);
 	}
 	
 	private SyntaxNode parseTerminal() {
@@ -361,7 +388,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid operator; expected valid Literal/VarId/Expression");
-		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
+		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
 	
 	private Token parseYarn() {
@@ -377,6 +404,8 @@ public class Parser {
 		return new Token(TokenKind.yarnToken, value, current().getPosition());
 	}
 	
+	
+	
 	private void consumeEOL() {
 		while (current().getTokenKind() == TokenKind.eolToken) {
 			lineCounter++;
@@ -387,7 +416,7 @@ public class Parser {
 	private boolean isAssignment() {
 		if (current().getTokenKind() == TokenKind.ihasToken ||
 			current().getTokenKind() == TokenKind.idToken ||
-			current().getTokenKind() == TokenKind.maekToken) {
+			current().getTokenKind() == TokenKind.scanToken) {
 			return true;
 		}
 		
@@ -403,4 +432,19 @@ public class Parser {
 		return false;
 	}
 	
+	protected ArrayList<Token> getTokens() {
+		return allTokens;
+	}
+	
+	protected ArrayList<String> getDiagnostics() {
+		return diagnostics;
+	}
+	
+	public void viewTokens() {
+		for (Token i : tokens) i.viewToken();
+	}
+	
+	public void viewErrors() {
+		for (String i : diagnostics) System.out.println(i);
+	}
 }

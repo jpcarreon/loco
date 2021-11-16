@@ -10,9 +10,11 @@ public enum SyntaxType {
 	comment,
 	literal,
 	varid,
+	vartype,
 	
 	newvar,
 	varchange,
+	vartypechange,
 	
 	mathop,
 	boolop,
@@ -20,5 +22,8 @@ public enum SyntaxType {
 	infarop,
 	
 	concat,
-	print
+	print,
+	scan,
+	
+	invalid
 }

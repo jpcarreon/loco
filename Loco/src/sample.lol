@@ -1,4 +1,3 @@
 HAI
-	I HAS A var1 ITZ "1d5"
-	DIFF OF var1 AN 6
+	VISIBLE 21 "aa" AN "Helo"
 KTHXBYE

@@ -36,8 +36,8 @@ public enum TokenKind {
 	
 	smooshToken("SMOOSH", "concat", 1),
 	
-	isNowToken("IS\sNOW\sA", "typecast", 3),
-	maekToken("MAEK", "typecast", 1),
+	isNowToken("IS\sNOW\sA", "asntypecast", 3),
+	maekToken("MAEK", "exptypecast", 1),
 	mkayToken("MKAY", "", 1),
 	aToken("^A$", "", 1),
 	anToken("^AN$", "", 1), 

@@ -27,4 +27,8 @@ public class NodeExpression extends SyntaxNode {
 	public SyntaxNode getNode() {
 		return node;
 	}
+	
+	public int getLineCounter() {
+		return lineCounter;
+	}
 }

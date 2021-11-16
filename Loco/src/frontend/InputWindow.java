@@ -44,7 +44,7 @@ public class InputWindow {
 			stage.close();
 		});
 		
-		textField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		vbox.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
 				if (event.getCode() == KeyCode.ENTER) btn.fire();

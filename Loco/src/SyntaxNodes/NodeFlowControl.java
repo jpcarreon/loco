@@ -23,4 +23,11 @@ public class NodeFlowControl extends SyntaxNode {
 		System.out.println("}");
 	}
 	
+	public SyntaxNode getNode() {
+		return node;
+	}
+	
+	public int getLineCounter() {
+		return lineCounter;
+	}
 }

@@ -32,8 +32,8 @@ import javafx.stage.FileChooser;
 public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
-	public final static int WINDOW_HEIGHT = 707;
-	public final static int WINDOW_WIDTH = 1202;
+	public final static int WINDOW_HEIGHT = 675;
+	public final static int WINDOW_WIDTH = 1200;
 	
 	@FXML private SplitPane verticalSplit;
 	@FXML private SplitPane horizontalSplit;

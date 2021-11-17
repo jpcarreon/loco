@@ -141,7 +141,7 @@ public class Parser {
 		SyntaxNode expression;
 		
 		if (isAssignment()) expression = parseAssignment();
-		else if (isFlowControl()) expression = parseExpression();
+		else if (isFlowControl()) expression = parseFlowControl();
 		else expression = parseExpression();
 		
 		match(TokenKind.eolToken);
@@ -156,11 +156,12 @@ public class Parser {
 	
 	
 	private SyntaxNode parseExpression() {
-		if (current().getTokenKind().getType() == "mathop") {
-			return new NodeExpression(parseMathOp(), lineCounter);
-			
-		} else if (current().getTokenKind().getType() == "comment") {
+		
+		if (current().getTokenKind() == TokenKind.obtwToken) {
 			return new NodeExpression(parseComment(), lineCounter);
+			
+		} else if (current().getTokenKind().getType() == "mathop") {
+			return new NodeExpression(parseMathOp(), lineCounter);
 			
 		} else if (current().getTokenKind().getType() == "boolop") {
 			return new NodeExpression(parseBoolOp(), lineCounter);
@@ -190,12 +191,11 @@ public class Parser {
 		while (current().getTokenKind() != TokenKind.eolToken) {
 			nextToken();
 		}
-		
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
 	}
 	
 	private SyntaxNode parseAssignment() {
-		if (current().getTokenKind().getType() == "newvar") {
+		if (current().getTokenKind() == TokenKind.ihasToken) {
 			return new NodeAssignment(parseDeclaration(), lineCounter);
 			
 		} else if (current().getTokenKind() == TokenKind.idToken) {
@@ -207,7 +207,7 @@ public class Parser {
 			} else if (current().getTokenKind() == TokenKind.isNowToken) {
 				return new NodeAssignment(parseAsnTypecast(varid), lineCounter);
 			}
-		} else if (current().getTokenKind().getType() == "scan") {
+		} else if (current().getTokenKind() == TokenKind.scanToken) {
 			return new NodeAssignment(parseScan(), lineCounter);
 		}
 		
@@ -215,20 +215,26 @@ public class Parser {
 		while (current().getTokenKind() != TokenKind.eolToken) {
 			nextToken();
 		}
-		return new NodeLiteral(nextToken());
+		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
 	}
 	
-	
-	
-	private SyntaxNode parseMathOp() {
-		Token operation = nextToken();
+	private SyntaxNode parseFlowControl() {
+		if (current().getTokenKind() == TokenKind.ifStartToken) {
+			return new NodeFlowControl(parseIfBlock(), lineCounter);
+			
+		} else if (current().getTokenKind() == TokenKind.switchToken) {
+			return new NodeFlowControl(parseSwitchCase(), lineCounter);
+			
+		} else if (current().getTokenKind() == TokenKind.loopStartToken) {
+			return new NodeFlowControl(parseLoop(), lineCounter);
+			
+		}
 		
-		SyntaxNode operand1 = parseTerminal();
-		match(TokenKind.anToken);
-		SyntaxNode operand2 = parseTerminal();
-		
-		return new NodeOperation(SyntaxType.mathop, operation, operand1, operand2);
-		
+		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
+		while (current().getTokenKind() != TokenKind.eolToken) {
+			nextToken();
+		}
+		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
 	}
 	
 	private SyntaxNode parseComment() {
@@ -244,33 +250,23 @@ public class Parser {
 		return new NodeComment(start, inner, end);
 	}
 	
-	private SyntaxNode parseDeclaration() {
+	/*
+	 ========================
+	 
+	 	EXPRESSION
+	 
+	 ========================
+	*/
+	
+	private SyntaxNode parseMathOp() {
 		Token operation = nextToken();
-		Token varid = match(TokenKind.idToken);
 		
-		if (current().getTokenKind() == TokenKind.itzToken) {
-			nextToken();
-			
-			/*
-			if (current().getTokenKind().getType() == "literal") {
-				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseLiteral());
-			} else if (current().getTokenKind().getType() == "mathop") {
-				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseMathOp());
-			} else if (current().getTokenKind() == TokenKind.idToken) {
-				if (current().getValue() != varid.getValue()) {
-					return new NodeDeclaration(SyntaxType.newvar, operation, varid);
-				}
-			}
-			*/
-			
-			return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseTerminal());
-			
-			//diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected valid Literal/VarId/Expression");
-			
-		}
+		SyntaxNode operand1 = parseTerminal();
+		match(TokenKind.anToken);
+		SyntaxNode operand2 = parseTerminal();
 		
-		return new NodeDeclaration(SyntaxType.newvar, operation, varid);
-
+		return new NodeOperation(SyntaxType.mathop, operation, operand1, operand2);
+		
 	}
 	
 	private SyntaxNode parseBoolOp() {
@@ -321,30 +317,8 @@ public class Parser {
 		} else {
 			return new NodeOperation(SyntaxType.concat, operation, operand1);
 		}
-		
-		
 	}
 	
-	private SyntaxNode parseVarChange(Token varid) {
-		Token operation = nextToken();
-		
-		SyntaxNode terminal = parseTerminal();
-		
-		return new NodeDeclaration(SyntaxType.varchange, operation, varid, terminal);
-	}
-	
-	private SyntaxNode parseAsnTypecast(Token varid) {
-		Token operation = nextToken();
-		SyntaxNode vartype = new NodeLiteral(SyntaxType.vartype, match(TokenKind.typeToken));
-		
-		return new NodeDeclaration(SyntaxType.vartypechange, operation, varid, vartype);
-	}
-	
-	private SyntaxNode parseExpTypecast() {
-		Token operation = nextToken();
-		return new NodeLiteral(operation);
-	}
-
 	private SyntaxNode parsePrint(Token operation) {
 		SyntaxNode operand1 = parseTerminal();
 		
@@ -361,8 +335,70 @@ public class Parser {
 			
 			return new NodeOperation(SyntaxType.print, operation, operand1);
 		}
+	}
+	
+	private SyntaxNode parseExpTypecast() {
+		Token operation = nextToken();
 		
+		Token varid = nextToken();
 		
+		lazyMatch(TokenKind.aToken);
+		
+		SyntaxNode vartype = new NodeLiteral(SyntaxType.vartype, match(TokenKind.typeToken));
+		
+		return new NodeDeclaration(SyntaxType.vartypechange, operation, varid, vartype);
+	}
+	
+	/*
+	 ========================
+	 
+	 	ASSIGNMENT
+	 
+	 ========================
+	*/
+	
+	private SyntaxNode parseDeclaration() {
+		Token operation = nextToken();
+		Token varid = match(TokenKind.idToken);
+		
+		if (current().getTokenKind() == TokenKind.itzToken) {
+			nextToken();
+			
+			/*
+			if (current().getTokenKind().getType() == "literal") {
+				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseLiteral());
+			} else if (current().getTokenKind().getType() == "mathop") {
+				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseMathOp());
+			} else if (current().getTokenKind() == TokenKind.idToken) {
+				if (current().getValue() != varid.getValue()) {
+					return new NodeDeclaration(SyntaxType.newvar, operation, varid);
+				}
+			}
+			*/
+			
+			return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseTerminal());
+			
+			//diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected valid Literal/VarId/Expression");
+			
+		}
+		
+		return new NodeDeclaration(SyntaxType.newvar, operation, varid);
+
+	}
+
+	private SyntaxNode parseVarChange(Token varid) {
+		Token operation = nextToken();
+		
+		SyntaxNode terminal = parseTerminal();
+		
+		return new NodeDeclaration(SyntaxType.varchange, operation, varid, terminal);
+	}
+	
+	private SyntaxNode parseAsnTypecast(Token varid) {
+		Token operation = nextToken();
+		SyntaxNode vartype = new NodeLiteral(SyntaxType.vartype, match(TokenKind.typeToken));
+		
+		return new NodeDeclaration(SyntaxType.vartypechange, operation, varid, vartype);
 	}
 	
 	private SyntaxNode parseScan() {
@@ -371,6 +407,33 @@ public class Parser {
 		
 		return new NodeOperation(SyntaxType.scan, operation, varid);
 	}
+	
+	/*
+	 ========================
+	 
+	 	FLOW CONTROL
+	 
+	 ========================
+	*/
+	
+	private SyntaxNode parseIfBlock() {
+		Token operation = nextToken();
+		
+		return new NodeLiteral(operation);
+	}
+	
+	private SyntaxNode parseSwitchCase() {
+		Token operation = nextToken();
+		
+		return new NodeLiteral(operation);
+	}
+	
+	private SyntaxNode parseLoop() {
+		Token operation = nextToken();
+		
+		return new NodeLiteral(operation);
+	}
+	
 	
 	private SyntaxNode parseTerminal() {
 		if (current().getTokenKind().getType() == "mathop") {
@@ -425,6 +488,7 @@ public class Parser {
 	
 	private boolean isFlowControl() {
 		if (current().getTokenKind() == TokenKind.ifStartToken ||
+			current().getTokenKind() == TokenKind.switchToken ||
 			current().getTokenKind() == TokenKind.loopStartToken) {
 			return true;
 		}

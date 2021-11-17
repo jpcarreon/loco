@@ -25,5 +25,9 @@ public enum SyntaxType {
 	print,
 	scan,
 	
+	ifblock,
+	switchcase,
+	loop,
+	
 	invalid
 }

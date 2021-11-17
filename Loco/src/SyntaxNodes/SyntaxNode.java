@@ -7,13 +7,25 @@ public abstract class SyntaxNode {
 		this.type = type;
 	}
 	
+	
+	public abstract void printChildren(int tab);
+	
+	public abstract String getStrChildren(int tab);
+	
 	public void printTab (int x) {
 		while (x-- > 0) {
 			System.out.print("\t");
 		}
 	}
 	
-	public abstract void printChildren(int tab);
+	public String getStrTab(int x) {
+		String str = new String();
+		while (x-- > 0) {
+			str += "\t";
+		}
+		
+		return str;
+	}
 	
 	public SyntaxType getType() {
 		return type;

@@ -24,6 +24,22 @@ public class NodeAssignment extends SyntaxNode {
 		System.out.println("}");
 	}
 	
+	public String getStrChildren(int tab) {
+		String str = new String();
+		
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		str += getStrTab(tab);
+		str += "Line " + lineCounter + ": (Assignment)\n";
+		str += node.getStrChildren(tab+1);
+		
+		str += getStrTab(tab);
+		str += "}\n";
+		
+		return str;
+	}
+	
 	public SyntaxNode getNode() {
 		return node;
 	}

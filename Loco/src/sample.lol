@@ -1,3 +1,4 @@
 HAI
-	VISIBLE 21 "aa" AN "Helo"
+	SMOOSH aaa AN 1122 MKAY
+	VISIBLE asdas da AN sadasd
 KTHXBYE

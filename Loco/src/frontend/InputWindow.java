@@ -21,7 +21,7 @@ public class InputWindow {
 	private Group root;
 	private VBox vbox;
 	
-	static private String value = "1";
+	static private String value = "";
 	
 	public InputWindow (String title, String message) {
 		this.stage = new Stage();

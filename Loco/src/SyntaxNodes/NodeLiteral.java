@@ -24,6 +24,16 @@ public class NodeLiteral extends SyntaxNode {
 						  " ("+literalToken.getTokenKind()+")");
 	}
 	
+	public String getStrChildren(int tab) {
+		String str = new String();
+		
+		str += getStrTab(tab);
+		str += literalToken.getValue();
+		str += " (" + literalToken.getTokenKind() + ")\n";
+		
+		return str;
+	}
+	
 	public Token getToken() {
 		return literalToken;
 	}

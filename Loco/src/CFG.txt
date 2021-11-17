@@ -18,6 +18,7 @@ expression:
     | cmpOp
     | concat
     | print
+    | exptypecast
     ;
     
 assignment:
@@ -34,8 +35,13 @@ varassign:
 	| idToken rToken terminal
 	;
 	
-typecast:
+asntypecast:
 	| idToken isNowToken typeToken
+	;
+	
+exptypecast:
+	| maekToken idToken aToken typeToken
+	| maekToken idToken typeToken
 	;
 	
 mathOp: 

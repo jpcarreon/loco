@@ -43,6 +43,32 @@ public class NodeDeclaration extends SyntaxNode {
 		
 	}
 	
+	public String getStrChildren(int tab) {
+		String str = new String();
+		
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		str += getStrTab(tab);
+		str += operation.getValue() + ": \n";
+		str += getStrTab(tab);
+		str += "varID: ";
+		str += varid.getValue() + "\n";
+		str += getStrTab(tab);
+		str += "value: \n";
+		
+		if (value != null) str += value.getStrChildren(tab + 1);
+		else {
+			str += getStrTab(tab + 1);
+			str += "<Empty>\n";
+		}
+		
+		str += getStrTab(tab);
+		str += "}\n";
+		
+		return str;
+	}
+	
 	public Token getOperation() {
 		return operation;
 	}

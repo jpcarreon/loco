@@ -40,6 +40,30 @@ public class NodeOperation extends SyntaxNode{
 		System.out.println("}");	
 	}
 	
+	public String getStrChildren(int tab) {
+		String str = new String();
+		
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		str += getStrTab(tab);
+		str += operation.getValue() + ": \n";
+		str += getStrTab(tab);
+		str += "0: \n";
+		str += operand1.getStrChildren(tab + 1);
+		
+		if (operand2 != null) {
+			str += getStrTab(tab);
+			str += "1: \n";
+			str += operand2.getStrChildren(tab + 1);
+		}
+		
+		str += getStrTab(tab);
+		str += "}\n";
+		
+		return str;
+	}
+	
 	public Token getOperation() {
 		return operation;
 	}

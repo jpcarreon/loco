@@ -21,7 +21,6 @@ public class NodeRoot extends SyntaxNode {
 		
 	}
 	
-	
 	public void printChildren(int tab) {
 		printTab(tab);
 		System.out.println("{");
@@ -43,7 +42,34 @@ public class NodeRoot extends SyntaxNode {
 		
 		printTab(tab);
 		System.out.println("}");
-	};
+	}
+	
+	public String getStrChildren(int tab) {
+		String str = new String();
+		
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		str += getStrTab(tab);
+		str += "PARSE TREE\n";
+		str += "0: ";
+		str += getStrTab(tab);
+		str += start.getValue() + "\n";
+		
+		str += "1: \n";
+		str += getStrTab(tab);
+		if (statement == null) str += "<Not Statements>\n";
+		else str += statement.getStrChildren(tab + 1);
+		
+		str += "2: ";
+		str += getStrTab(tab);
+		str += end.getValue() + "\n";
+		
+		str += getStrTab(tab);
+		str += "}\n";
+		
+		return str;
+	}
 	
 	public SyntaxNode getStatements() {
 		return statement;

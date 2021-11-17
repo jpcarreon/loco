@@ -113,6 +113,11 @@ public class Evaluator {
 		
 		String varid = node.getVarID().getValue();
 		
+		if (findVarValue(varid) < SymbolTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Duplicate instantiation of new variable";
+			return;
+		}
+		
 		if (node.getValue() != null) {
 			Token value = evalTerminal(node.getValue());
 			newVar = new SymTabEntry(varid, value.getTokenKind(), value.getValue());
@@ -237,6 +242,10 @@ public class Evaluator {
 	
 	public void viewParseTree() {
 		root.printChildren(0);
+	}
+	
+	public String getStrParseTree() {
+		return root.getStrChildren(0);
 	}
 	
 	public boolean isPCEmpty() {

@@ -48,7 +48,8 @@ public class Main extends Application {
 		File fp = new File("src/sample.lol");
 		Evaluator evaluator = new Evaluator(fp);
 		
-		evaluator.viewParseTree();
+		//evaluator.viewParseTree();
+		System.out.println(evaluator.getStrParseTree());
 		evaluator.viewParserErrors();
 		
 		while (!evaluator.isPCEmpty()) {

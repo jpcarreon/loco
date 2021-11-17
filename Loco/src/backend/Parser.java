@@ -354,7 +354,7 @@ public class Parser {
 			return operand1;
 		} else if (operand1.getType() == SyntaxType.invalid) {
 			nextToken();
-			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
+			operand1 = new NodeOperation(SyntaxType.print, operation, operand1);
 			
 			return operand1;
 		} else {

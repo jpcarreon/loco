@@ -26,11 +26,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 
 public class WindowController implements Initializable {
 	private Evaluator evaluator;
+	
+	private boolean isPTreeShow;
 	
 	public final static int WINDOW_HEIGHT = 675;
 	public final static int WINDOW_WIDTH = 1200;
@@ -39,8 +42,8 @@ public class WindowController implements Initializable {
 	@FXML private SplitPane horizontalSplit;
 	
 	@FXML private TextArea codeTextArea;
-	
 	@FXML private TextArea consoleTextArea;
+	@FXML private TextArea parseTreeTextArea;
 	
 	@FXML private TableView<Token> tokenTable;
 	@FXML private TableColumn<Token, String> lexemeColumn;
@@ -49,6 +52,8 @@ public class WindowController implements Initializable {
 	@FXML private TableView<SymTabEntry> symbolTable;
 	@FXML private TableColumn<SymTabEntry, String> identifierColumn;
 	@FXML private TableColumn<SymTabEntry, String> valueColumn;
+	
+	@FXML private Text symbolTableLabel;
 	
 	@FXML private MenuItem nextLineBtn;
 	
@@ -59,6 +64,8 @@ public class WindowController implements Initializable {
 		
 		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
 		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
+		
+		isPTreeShow = false;
 		
 	}
 	
@@ -81,6 +88,8 @@ public class WindowController implements Initializable {
 				}
 				
 				sc.close();
+				
+				codeTextArea.positionCaret(0);
 				
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -117,9 +126,6 @@ public class WindowController implements Initializable {
     	fp = fp.replaceAll("\t", "");
     	
     	evaluator = new Evaluator(fp);
-
-    	//evaluator.viewParseTree();
-    	evaluator.viewParserErrors();
     	
     	verticalSplit.setDividerPosition(0, 1.0);
     	
@@ -128,10 +134,13 @@ public class WindowController implements Initializable {
     		tokenTable.getItems().add(token);
     	}
     	
+    	parseTreeTextArea.clear();
+    	parseTreeTextArea.appendText(evaluator.getStrParseTree());
+    	
     	consoleTextArea.clear();
     	for (String string: evaluator.getParserDiagnostics()) {
-    		defaultFold(null);
     		consoleTextArea.appendText(string + "\n");
+    		verticalSplit.setDividerPosition(0, 0.6);
     	}
     	
     	while (!evaluator.isPCEmpty()) {
@@ -143,6 +152,9 @@ public class WindowController implements Initializable {
     		defaultFold(null);
     		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
     	}
+    	
+    	consoleTextArea.positionCaret(0);
+    	parseTreeTextArea.positionCaret(0);
     }
     
     @FXML
@@ -198,7 +210,7 @@ public class WindowController implements Initializable {
     		alert.show();
     		
     		return;
-    	};
+    	}
     	
     	try {
     		fontSize = Double.parseDouble(input);
@@ -209,6 +221,11 @@ public class WindowController implements Initializable {
     	
     	codeTextArea.setFont(Font.font("Consolas", fontSize));
     	consoleTextArea.setFont(Font.font("Consolas", fontSize));
+    	parseTreeTextArea.setFont(Font.font("Consolas", fontSize));
+    	
+    	codeTextArea.positionCaret(0);
+    	consoleTextArea.positionCaret(0);
+    	parseTreeTextArea.positionCaret(0);
     }
     
     @FXML
@@ -239,7 +256,25 @@ public class WindowController implements Initializable {
     }
     
     @FXML
-    void runHotKey(KeyEvent event) {
+    void showParseTree(ActionEvent event) {
+    	if (isPTreeShow) {
+    		symbolTableLabel.setText("Symbol Table");
+    		symbolTable.toFront();
+    		parseTreeTextArea.toBack();
+    		symbolTable.setVisible(true);
+    		
+    	} else {
+    		symbolTableLabel.setText("Parse Tree");
+    		symbolTable.toBack();
+    		parseTreeTextArea.toFront();
+    		symbolTable.setVisible(false);
+    	}
+    	
+    	isPTreeShow = !isPTreeShow;
+    }
+    
+    @FXML
+    void setHotKey(KeyEvent event) {
     	if (event.getCode() == KeyCode.F6) runProgram(null);
     	else if (event.getCode() == KeyCode.F7) runDebug(null);
     	else if (event.getCode() == KeyCode.F8) {

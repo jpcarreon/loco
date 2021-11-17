@@ -32,4 +32,24 @@ public class NodeComment extends SyntaxNode{
 		System.out.println("}");
 	}
 	
+	public String getStrChildren(int tab) {
+		String str = new String();
+		
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		str += getStrTab(tab);
+		str += "Comment: \n";
+		
+		for (Token i : inner) {
+			str += getStrTab(tab + 1);
+			str += i.getValue();
+		}
+		
+		str += getStrTab(tab);
+		str += "}\n";
+		
+		return str;
+	}
+	
 }

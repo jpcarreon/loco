@@ -98,8 +98,8 @@
                                     </TextArea>
                                     <TableView fx:id="symbolTable" prefHeight="608.0" prefWidth="204.0">
                                        <columns>
-                                          <TableColumn fx:id="identifierColumn" prefWidth="117.0" text="Identifier" />
-                                          <TableColumn fx:id="valueColumn" prefWidth="117.0" text="Value" />
+                                          <TableColumn prefWidth="117.0" text="Identifier" />
+                                          <TableColumn prefWidth="117.0" text="Value" />
                                        </columns>
                                     </TableView>
                                  </children>

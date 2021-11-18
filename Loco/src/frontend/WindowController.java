@@ -48,9 +48,7 @@ public class WindowController implements Initializable {
 	@FXML private TableColumn<Token, String> lexemeColumn;
 	@FXML private TableColumn<Token, TokenKind> tokenKindColumn;
 	
-	@FXML private TableView<SymTabEntry> symbolTable;
-	@FXML private TableColumn<SymTabEntry, String> identifierColumn;
-	@FXML private TableColumn<SymTabEntry, String> valueColumn;
+	@FXML private TableView<String> symbolTable;
 	
 	@FXML private Text symbolTableLabel;
 
@@ -60,9 +58,6 @@ public class WindowController implements Initializable {
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		lexemeColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("value"));
 		tokenKindColumn.setCellValueFactory(new PropertyValueFactory<Token, TokenKind>("tokenKind"));
-		
-		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
-		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
 		
 		isPTreeShow = false;
 		

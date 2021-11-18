@@ -2,11 +2,7 @@ package frontend;
 
 import java.io.File;
 
-import backend.Evaluator;
-import backend.Lexer;
 import backend.Parser;
-import backend.Token;
-import backend.TokenKind;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,7 +12,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public static void main(String[] args) {		
-		startParser();
+		//startParser();
 		launch(args);
 	}
 	

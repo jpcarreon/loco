@@ -96,9 +96,9 @@ public class Parser {
 	}
 	
 	private Token match(TokenKind kind) {
-		
 		if (current().getTokenKind() == kind) {
 			if (kind == TokenKind.eolToken) lineCounter++;
+			
 			return nextToken();
 		}
 		
@@ -432,13 +432,16 @@ public class Parser {
 		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
 		Token operation = nextToken();
 		
+		match(TokenKind.eolToken);
 		consumeEOL();
 		match(TokenKind.ifBlockToken);
+		match(TokenKind.eolToken);
 		consumeEOL();
 		
 		statements.add(parseStatement());
 	
 		match(TokenKind.elseBlockToken);
+		match(TokenKind.eolToken);
 		consumeEOL();
 		
 		statements.add(parseStatement());
@@ -452,11 +455,14 @@ public class Parser {
 		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
 		ArrayList<NodeLiteral> switchLiterals = new ArrayList<NodeLiteral>();
 		Token operation = nextToken();
+		match(TokenKind.eolToken);
+		consumeEOL();
 		
 		do {
-			consumeEOL();
+			
 			match(TokenKind.caseToken);
 			switchLiterals.add(parseLiteral());
+			match(TokenKind.eolToken);
 			consumeEOL();
 			
 			statements.add(parseStatement());
@@ -476,11 +482,48 @@ public class Parser {
 	}
 	
 	private SyntaxNode parseLoop() {
+		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
 		Token operation = nextToken();
-
+		Token loopid = match(TokenKind.idToken);
+		Token optype;
+		SyntaxNode condition;
 		
+		if (current().getTokenKind() == TokenKind.incToken || current().getTokenKind() == TokenKind.decToken) {
+			optype = nextToken();
+		} else {
+			diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
+					+ "> expected <incToken>/<decToken>");
+			optype = new Token(TokenKind.incToken, "UPPIN", -1);
+		}
 		
-		return new NodeLiteral(operation);
+		match(TokenKind.yrToken);
+		
+		Token varid = match(TokenKind.idToken);
+		if (current().getTokenKind() == TokenKind.tilToken || current().getTokenKind() == TokenKind.wileToken) {
+			condition = new NodeDeclaration(SyntaxType.loopcond, nextToken(), varid, parseCmpOp());
+		} else {
+			diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
+					+ "> expected <tilToken>/<wileToken>");
+			Token tempToken = new Token(TokenKind.tilToken, "TIL", -1);
+			condition = new NodeDeclaration(SyntaxType.loopcond, tempToken, varid, parseCmpOp());
+		}
+		
+		match(TokenKind.eolToken);
+		consumeEOL();
+		
+		statements.add(parseStatement());
+		
+		match(TokenKind.loopEndToken);
+		
+		if (!loopid.getValue().equals(current().getValue())) {
+			System.out.println(current().getValue() + " " + loopid.getValue());
+			diagnostics.add("Line "+ lineCounter + ": Loop id mismatch");
+			
+		} 
+		
+		nextToken();
+		
+		return new NodeMultiLine(operation, loopid, optype, condition, statements);
 	}
 	
 	

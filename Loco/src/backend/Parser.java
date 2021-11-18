@@ -71,7 +71,7 @@ public class Parser {
 	}
 	
 	private Token peek(int offset) {
-		if (position + offset >= tokens.size()) return tokens.get(position);
+		if (position + offset >= tokens.size()) return tokens.get(tokens.size() - 1);
 		
 		return tokens.get(position + offset);
 	}
@@ -135,7 +135,7 @@ public class Parser {
 		
 		match(TokenKind.eolToken);
 		
-		if (current().getTokenKind() != TokenKind.byeToken) {
+		if (current().getTokenKind() != TokenKind.byeToken && current().getTokenKind() != TokenKind.eofToken) {
 			SyntaxNode statement = parseStatement();
 			Token end = match(TokenKind.byeToken);
 			
@@ -548,6 +548,8 @@ public class Parser {
 			return new NodeLiteral(nextToken());
 		} else if (current().getTokenKind() == TokenKind.idToken) {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
+		} else if (current().getTokenKind() == TokenKind.maekToken) {
+			return parseExpTypecast();
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");

@@ -25,9 +25,9 @@ public class NodeStatement extends SyntaxNode{
 	public String getStrChildren(int tab) {
 		String str = new String();
 		
-		//str += getStrTree(tab);
-		str += operand1.getStrChildren(tab);
-		str += operand2.getStrChildren(tab);
+		str += getStrTree(tab);
+		//str += operand1.getStrChildren(tab);
+		//str += operand2.getStrChildren(tab);
 		
 		return str;
 	}

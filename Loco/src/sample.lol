@@ -1,9 +1,10 @@
 HAI
-	I HAS A var1 ITZ 12
-	var1 R 15
-	OBTW
-	sdfasdfas
-	dsad
-	TLDR
-	SUM OF 1 AN 2
+	I HAS A temp ITZ 2
+
+    BTW prints 2 to 9 using TIL
+    IM IN YR print10 UPPIN YR temp TIL BOTH SAEM temp AN 10
+        VISIBLE temp
+    IM OUTTA YR print10
 KTHXBYE
+
+

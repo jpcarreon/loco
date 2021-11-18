@@ -27,7 +27,9 @@ public enum SyntaxType {
 	
 	ifblock,
 	switchcase,
+	gtfo,
 	loop,
+	loopcond,
 	
 	invalid
 }

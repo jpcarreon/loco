@@ -45,16 +45,16 @@ public enum TokenKind {
 	printToken("VISIBLE", "print", 1),
 	scanToken("GIMMEH", "scan", 1),
 	
-	ifStartToken("O\sRLY\\?", "ifblock", 2),
+	ifStartToken("O\sRLY\\?", "ifstartblock", 2),
 	
 	ifBlockToken("YA\sRLY", "ifblock", 2),
 	elifBlockToken("MEBBE", "ifblock", 1),
 	elseBlockToken("NO\sWAI", "ifblock", 2),
 	
-	switchToken("WTF\\?", "switch", 1),
+	switchToken("WTF\\?", "switchstart", 1),
 	caseToken("^OMG$", "switch", 1),
 	defaultToken("OMGWTF", "switch", 1),
-	breakToken("GTFO", "switch", 1),
+	breakToken("GTFO", "", 1),
 	
 	ifEndToken("OIC", "ifblock", 1),
 	

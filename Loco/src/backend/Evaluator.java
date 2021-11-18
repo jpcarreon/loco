@@ -53,8 +53,6 @@ public class Evaluator {
 			programCounter = null;
 			return;
 		}
-
-		++lineCounter;
 		
 		// check if PC holds only 1 line of code 
 		if (programCounter.getType() == SyntaxType.expression ||
@@ -64,24 +62,22 @@ public class Evaluator {
 			currentInstruction = programCounter;
 			programCounter = null;
 			
-			if (currentInstruction.getType() == SyntaxType.expression) {
-				evalExpression();
-			} else if (currentInstruction.getType() == SyntaxType.assignment) {
-				evalAssignment();
-			}
+		} else {
+			//	Type cast from generic SyntaxNode to NodeStatement
 			
-			return;
+			NodeStatement ns = (NodeStatement) programCounter;
+			
+			currentInstruction = ns.getOp1();
+			programCounter = ns.getOp2();
 		}
 		
-		//	Type cast from generic SyntaxNode to NodeStatement
-		NodeStatement ns = (NodeStatement) programCounter;
-		
-		currentInstruction = ns.getOp1();
-		programCounter = ns.getOp2();
 		
 		if (currentInstruction.getType() == SyntaxType.expression) {
+			lineCounter = ((NodeExpression) currentInstruction).getLineCounter();
 			evalExpression();
+			
 		} else if (currentInstruction.getType() == SyntaxType.assignment) {
+			lineCounter = ((NodeAssignment) currentInstruction).getLineCounter();
 			evalAssignment();
 		}
 		
@@ -270,5 +266,8 @@ public class Evaluator {
 		return errorMsg;
 	}
 
+	public int getCurrentLine() {
+		return lineCounter;
+	}
 	
 }

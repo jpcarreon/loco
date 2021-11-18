@@ -25,6 +25,7 @@ public class NodeStatement extends SyntaxNode{
 	public String getStrChildren(int tab) {
 		String str = new String();
 		
+		//str += getStrTree(tab);
 		str += operand1.getStrChildren(tab);
 		str += operand2.getStrChildren(tab);
 		
@@ -51,6 +52,26 @@ public class NodeStatement extends SyntaxNode{
 		printTab(tab);
 		System.out.println("}");
 		
+	}
+	
+	public String getStrTree(int tab) {
+		String str = new String();
+		
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		str += getStrTab(tab);
+		str += "Statement Node:\n";
+		
+
+		str += operand1.getStrChildren(tab + 1);
+		str += operand2.getStrChildren(tab + 1);
+
+		
+		str += getStrTab(tab);
+		str += "}\n";
+		
+		return str;
 	}
 	
 	public SyntaxNode getOp1() {

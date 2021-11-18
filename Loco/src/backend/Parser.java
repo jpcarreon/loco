@@ -103,13 +103,14 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
-						+ "> expected <"+ kind + ">");
-		
+				+ "> expected <"+ kind + ">");
+			
 		if (current().getTokenKind() == TokenKind.miscToken ||
-			current().getTokenKind() == TokenKind.badToken  ||
-			kind == TokenKind.eolToken) {
+			current().getTokenKind() == TokenKind.badToken ||
+			kind == TokenKind.eolToken ) {
 			nextToken();
 		}
+		
 		
 		return new Token(kind, null, current().getPosition() - 1);
 	}
@@ -118,6 +119,11 @@ public class Parser {
 		NodeRoot root;
 		
 		Token start = match(TokenKind.haiToken);
+		
+		//	Version number
+		lazyMatch(TokenKind.numbarToken);
+		lazyMatch(TokenKind.numbrToken);
+		
 		match(TokenKind.eolToken);
 		consumeEOL();
 		
@@ -131,7 +137,7 @@ public class Parser {
 			root = new NodeRoot (start, end);
 		}
 		
-		
+		consumeEOL();
 		match(TokenKind.eofToken);
 		
 		return root;
@@ -147,7 +153,11 @@ public class Parser {
 		match(TokenKind.eolToken);
 		consumeEOL();
 		
-		while (current().getTokenKind() != TokenKind.byeToken && current().getTokenKind() != TokenKind.eofToken) {
+		while (current().getTokenKind() != TokenKind.byeToken && 
+			   current().getTokenKind() != TokenKind.eofToken &&
+			   current().getTokenKind() != TokenKind.loopEndToken &&
+			   current().getTokenKind().getType() != "switch" &&
+			   current().getTokenKind().getType() != "ifblock") {
 			expression = new NodeStatement(expression, parseStatement());
 		}
 		
@@ -185,9 +195,11 @@ public class Parser {
 		} else if (current().getTokenKind() == TokenKind.printToken) {
 			return new NodeExpression(parsePrint(nextToken()), lineCounter);
 			
+		} else if  (current().getTokenKind() == TokenKind.breakToken) {
+			return new NodeLiteral(SyntaxType.gtfo, nextToken());
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
+		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword " + current().getValue());
 		while (current().getTokenKind() != TokenKind.eolToken) {
 			nextToken();
 		}
@@ -417,22 +429,62 @@ public class Parser {
 	*/
 	
 	private SyntaxNode parseIfBlock() {
+		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
 		Token operation = nextToken();
 		
-		return new NodeLiteral(operation);
+		consumeEOL();
+		match(TokenKind.ifBlockToken);
+		consumeEOL();
+		
+		statements.add(parseStatement());
+	
+		match(TokenKind.elseBlockToken);
+		consumeEOL();
+		
+		statements.add(parseStatement());
+		
+		match(TokenKind.ifEndToken);
+		
+		return new NodeMultiLine(operation, statements);
 	}
 	
 	private SyntaxNode parseSwitchCase() {
+		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
+		ArrayList<NodeLiteral> switchLiterals = new ArrayList<NodeLiteral>();
 		Token operation = nextToken();
 		
-		return new NodeLiteral(operation);
+		do {
+			consumeEOL();
+			match(TokenKind.caseToken);
+			switchLiterals.add(parseLiteral());
+			consumeEOL();
+			
+			statements.add(parseStatement());
+			
+		} while (current().getTokenKind() != TokenKind.ifEndToken && current().getTokenKind() != TokenKind.defaultToken);
+		
+		if (current().getTokenKind() == TokenKind.defaultToken) {
+			switchLiterals.add(new NodeLiteral(nextToken()));
+			consumeEOL();
+			
+			statements.add(parseStatement());
+		}
+		
+		match(TokenKind.ifEndToken);
+		
+		return new NodeMultiLine(operation, switchLiterals, statements);
 	}
 	
 	private SyntaxNode parseLoop() {
 		Token operation = nextToken();
+
+		
 		
 		return new NodeLiteral(operation);
 	}
+	
+	
+	
 	
 	
 	private SyntaxNode parseTerminal() {
@@ -450,7 +502,18 @@ public class Parser {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid operator; expected valid Literal/VarId/Expression");
+		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
+		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
+	}
+	
+	private NodeLiteral parseLiteral() {
+		if (current().getTokenKind() == TokenKind.quoteToken) {
+			return new NodeLiteral(parseYarn());
+		} else if (current().getTokenKind().getType() == "literal") {
+			return new NodeLiteral(nextToken());
+		}
+		
+		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid NUMBR/NUMBAR/YARN/TROOF");
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
 	

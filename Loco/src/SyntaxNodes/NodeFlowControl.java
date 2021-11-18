@@ -1,7 +1,6 @@
 package SyntaxNodes;
 
 public class NodeFlowControl extends SyntaxNode {
-	SyntaxType type;
 	SyntaxNode node;
 	int lineCounter;
 	
@@ -14,7 +13,7 @@ public class NodeFlowControl extends SyntaxNode {
 	public void printChildren(int tab) {
 		printTab(tab);
 		System.out.println("{");
-		
+
 		printTab(tab);
 		System.out.println("Line "+lineCounter+": (Flow Control)");
 		node.printChildren(tab + 1);

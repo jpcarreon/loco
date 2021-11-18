@@ -34,6 +34,7 @@ public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
 	private boolean isPTreeShow;
+	private String codeBackup;
 	
 	public final static int WINDOW_HEIGHT = 675;
 	public final static int WINDOW_WIDTH = 1200;
@@ -71,6 +72,8 @@ public class WindowController implements Initializable {
 	
 	@FXML
 	void openFile(ActionEvent event) {
+		if (!codeTextArea.isEditable()) return;
+		
 		FileChooser filechooser = new FileChooser();
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Lolcode File", "*.lol");
 		
@@ -102,6 +105,8 @@ public class WindowController implements Initializable {
 	
 	@FXML
 	void saveFile(ActionEvent event) {
+		if (!codeTextArea.isEditable()) return;
+		
 		FileChooser filechooser = new FileChooser();
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Lolcode File", "*.lol");
 		
@@ -122,13 +127,20 @@ public class WindowController implements Initializable {
 
     @FXML
     void runProgram(ActionEvent event) {
-    	String fp = codeTextArea.getText();
-    	fp = fp.replaceAll("\t", "");
+    	if (!codeTextArea.isEditable()) return;
     	
-    	evaluator = new Evaluator(fp);
+    	try {
+    		String fp = codeTextArea.getText();
+        	fp = fp.replaceAll("\t", "");
+        	
+        	evaluator = new Evaluator(fp);
+    	} catch (Exception e) {
+    		return;
+    	}
     	
     	verticalSplit.setDividerPosition(0, 1.0);
     	
+    	symbolTable.getItems().clear();
     	tokenTable.getItems().clear();
     	for (Token token : evaluator.getTokens()) {
     		tokenTable.getItems().add(token);
@@ -140,7 +152,7 @@ public class WindowController implements Initializable {
     	consoleTextArea.clear();
     	for (String string: evaluator.getParserDiagnostics()) {
     		consoleTextArea.appendText(string + "\n");
-    		verticalSplit.setDividerPosition(0, 0.6);
+    		verticalSplit.setDividerPosition(0, 0.8);
     	}
     	
     	while (!evaluator.isPCEmpty()) {
@@ -159,13 +171,16 @@ public class WindowController implements Initializable {
     
     @FXML
     void runDebug(ActionEvent event) {
-    	String fp = codeTextArea.getText();
-    	fp = fp.replaceAll("\t", "");
+    	if (!codeTextArea.isEditable()) return;
     	
-    	evaluator = new Evaluator(fp);
-
-    	//evaluator.viewParseTree();
-    	evaluator.viewParserErrors();
+    	try {
+    		String fp = codeTextArea.getText();
+        	fp = fp.replaceAll("\t", "");
+        	
+        	evaluator = new Evaluator(fp);
+    	} catch (Exception e) {
+    		return;
+    	}
     	
     	verticalSplit.setDividerPosition(0, 1.0);
     	
@@ -175,27 +190,44 @@ public class WindowController implements Initializable {
     		tokenTable.getItems().add(token);
     	}
     	
+    	parseTreeTextArea.clear();
+    	parseTreeTextArea.appendText(evaluator.getStrParseTree());
+    	
     	consoleTextArea.clear();
     	for (String string: evaluator.getParserDiagnostics()) {
-    		defaultFold(null);
     		consoleTextArea.appendText(string + "\n");
+    		verticalSplit.setDividerPosition(0, 0.8);
     	}
+    	
+    	codeBackup = codeTextArea.getText();
+    	codeTextArea.clear();
+    	codeTextArea.setEditable(false);
+    	setDebugText();
     	
     	nextLineBtn.setDisable(false);
     }
     
     @FXML
     void runNextLine(ActionEvent event) {
-    	evaluator.nextInstruction();
-		updateSymbolTable();
-		
     	if (evaluator.isPCEmpty()) {
 			if (!evaluator.getEvalDiagnostics().isBlank()) {
 	    		defaultFold(null);
 	    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
 	    	}
 			
+			if (!codeTextArea.isEditable()) {
+				codeTextArea.clear();
+				codeTextArea.setText(codeBackup);
+		    	codeTextArea.setEditable(true);
+			}
+			
 			nextLineBtn.setDisable(true);
+    	} else {
+    		evaluator.nextInstruction();
+    		updateSymbolTable();
+    		
+    		codeTextArea.clear();
+    		setDebugText();
     	}
     }
     
@@ -277,9 +309,26 @@ public class WindowController implements Initializable {
     void setHotKey(KeyEvent event) {
     	if (event.getCode() == KeyCode.F6) runProgram(null);
     	else if (event.getCode() == KeyCode.F7) runDebug(null);
-    	else if (event.getCode() == KeyCode.F8) {
-    		if (!evaluator.isPCEmpty()) runNextLine(null);
-    	} else if (event.getCode() == KeyCode.F12) displayAbout(null);
+    	else if (event.getCode() == KeyCode.F8) runNextLine(null);
+    	else if (event.getCode() == KeyCode.F12) displayAbout(null);
+    }
+    
+    private void setDebugText() {
+    	int counter = 0, currentLine = evaluator.getCurrentLine();
+    	
+    	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");	
+    	for (String i : codeBackup.split("\n")) {
+    		System.out.println(currentLine + " : " + counter);
+    		if (!i.isBlank()) {
+    			if (counter++ == currentLine) {
+        			codeTextArea.appendText("=>\t" + i + "\n");
+        		} else {
+        			codeTextArea.appendText("\t" + i + "\n");
+        		}
+    		} else {
+    			codeTextArea.appendText("\t" + i + "\n");
+    		}
+    	}
     }
     
     private void updateSymbolTable() {

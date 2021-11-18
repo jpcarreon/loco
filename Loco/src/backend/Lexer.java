@@ -47,7 +47,7 @@ public class Lexer {
 				}
 				
 				//	Append a "\n" lexeme to symbolize that the current line has ended
-				if (!curLine.isBlank() && sc.hasNextLine())
+				if (sc.hasNextLine())
 					lexemes.add("\n");
 			}
 			
@@ -66,7 +66,7 @@ public class Lexer {
 		//	Evaluate the string line by line
 		for (String i : strFile.split("\n")) {
 			//	Append \n to the end of the every line except the first and last line and empty lines
-			if (!i.isBlank() && counter++ > 0) {
+			if (counter++ > 0) {
 				lexemes.add("\n");
 			}
 			

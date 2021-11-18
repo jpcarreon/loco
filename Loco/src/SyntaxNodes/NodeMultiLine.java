@@ -3,6 +3,7 @@ package SyntaxNodes;
 import java.util.ArrayList;
 
 import backend.Token;
+import backend.TokenKind;
 
 public class NodeMultiLine extends SyntaxNode {
 	Token operation;
@@ -12,9 +13,9 @@ public class NodeMultiLine extends SyntaxNode {
 	SyntaxNode condition;
 	
 	ArrayList<NodeLiteral> switchLiterals;
-	ArrayList<NodeStatement> statements;
+	ArrayList<SyntaxNode> statements;
 	
-	public NodeMultiLine(Token operation, Token loopid, Token optype, SyntaxNode condition, ArrayList<NodeStatement> statements) {
+	public NodeMultiLine(Token operation, Token loopid, Token optype, SyntaxNode condition, ArrayList<SyntaxNode> statements) {
 		super(SyntaxType.loop);
 		
 		this.operation = operation;
@@ -25,7 +26,7 @@ public class NodeMultiLine extends SyntaxNode {
 		
 	}
 	
-	public NodeMultiLine(Token operation, ArrayList<NodeStatement> statements) {
+	public NodeMultiLine(Token operation, ArrayList<SyntaxNode> statements) {
 		super(SyntaxType.ifblock);
 		
 		this.operation = operation;
@@ -33,7 +34,7 @@ public class NodeMultiLine extends SyntaxNode {
 		
 	}
 	
-	public NodeMultiLine(Token operation, ArrayList<NodeLiteral> switchLiterals, ArrayList<NodeStatement> statements) {
+	public NodeMultiLine(Token operation, ArrayList<NodeLiteral> switchLiterals, ArrayList<SyntaxNode> statements) {
 		super(SyntaxType.switchcase);
 		
 		this.operation = operation;
@@ -66,7 +67,13 @@ public class NodeMultiLine extends SyntaxNode {
 			
 			for (i = 0; i < switchLiterals.size(); i++) {
 				printTab(tab);
-				System.out.println(switchLiterals.get(i).getToken().getValue() + ": ");
+				
+				if (switchLiterals.get(i).getToken().getTokenKind() == TokenKind.yarnToken) {
+					System.out.println("\"" + switchLiterals.get(i).getToken().getValue().trim() + "\": ");
+				} else {
+					System.out.println(switchLiterals.get(i).getToken().getValue() + ": ");
+				}
+				
 				statements.get(i).printChildren(tab + 1);
 			}
 			
@@ -90,6 +97,32 @@ public class NodeMultiLine extends SyntaxNode {
 	
 	public String getStrChildren(int tab) {
 		String str = new String();
+		
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		if (type == SyntaxType.ifblock) {
+			str += getStrTab(tab);
+			str += operation.getValue() + ": \n";
+			str += getStrTab(tab);
+			str += "0: \n";
+			str += statements.get(0).getStrChildren(tab + 1);
+			
+			str += getStrTab(tab);
+			str += "1: \n";
+			str += statements.get(1).getStrChildren(tab + 1);
+			
+		} else if (type == SyntaxType.switchcase) {
+			str += getStrTab(tab);
+
+			
+		} else if (type == SyntaxType.loop) {
+			str += getStrTab(tab);
+
+		}
+		
+		str += getStrTab(tab);
+		str += "}\n";
 		
 		return str;
 	}

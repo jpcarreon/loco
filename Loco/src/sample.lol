@@ -1,8 +1,4 @@
 HAI
-	IM IN YR print10 UPPIN YR temp WILE 
-        VISIBLE temp
-    IM OUTTA YR print10
+	SUM OF 1 AN 2
+	DIFF OF 6 AN 3
 KTHXBYE
-
-
-

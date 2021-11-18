@@ -97,6 +97,7 @@ public class NodeMultiLine extends SyntaxNode {
 	
 	public String getStrChildren(int tab) {
 		String str = new String();
+		int i;
 		
 		str += getStrTab(tab);
 		str += "{\n";
@@ -114,10 +115,34 @@ public class NodeMultiLine extends SyntaxNode {
 			
 		} else if (type == SyntaxType.switchcase) {
 			str += getStrTab(tab);
+			str += operation.getValue() + ": \n";
+			
+			for (i = 0; i < switchLiterals.size(); i++) {
+				str += getStrTab(tab);
+				
+				if (switchLiterals.get(i).getToken().getTokenKind() == TokenKind.yarnToken) {
+					str += "\""+ switchLiterals.get(i).getToken().getValue().trim() + "\": \n";
+				} else {
+					str += switchLiterals.get(i).getToken().getValue() + ": \n";
+				}
+				
+				str += statements.get(i).getStrChildren(tab + 1);
+			}
 
 			
 		} else if (type == SyntaxType.loop) {
 			str += getStrTab(tab);
+			
+			str += operation.getValue() + ": " + loopid.getValue();
+			str += " (" + optype.getValue() + ")\n";
+			
+			str += getStrTab(tab);
+			str += "Condition: \n";
+			str += condition.getStrChildren(tab + 1);
+			
+			str += getStrTab(tab);
+			str += "0: \n";
+			str += statements.get(0).getStrChildren(tab + 1);
 
 		}
 		

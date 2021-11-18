@@ -87,7 +87,12 @@ public class Parser {
 	}
 	
 	private Token lazyMatch(TokenKind kind) {
-		if (current().getTokenKind() == kind) {
+		if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
+			lineCounter++;
+
+			return consumeEOL();
+			
+		} else if (current().getTokenKind() == kind) {
 			if (kind == TokenKind.eolToken) lineCounter++;
 			return nextToken();
 		}
@@ -96,8 +101,12 @@ public class Parser {
 	}
 	
 	private Token match(TokenKind kind) {
-		if (current().getTokenKind() == kind) {
-			if (kind == TokenKind.eolToken) lineCounter++;
+		if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
+			lineCounter++;
+
+			return consumeEOL();
+			
+		} else if (current().getTokenKind() == kind) {
 			
 			return nextToken();
 		}
@@ -125,7 +134,6 @@ public class Parser {
 		lazyMatch(TokenKind.numbrToken);
 		
 		match(TokenKind.eolToken);
-		consumeEOL();
 		
 		if (current().getTokenKind() != TokenKind.byeToken) {
 			SyntaxNode statement = parseStatement();
@@ -137,7 +145,7 @@ public class Parser {
 			root = new NodeRoot (start, end);
 		}
 		
-		consumeEOL();
+		lazyMatch(TokenKind.eolToken);
 		match(TokenKind.eofToken);
 		
 		return root;
@@ -151,7 +159,6 @@ public class Parser {
 		else expression = parseExpression();
 		
 		match(TokenKind.eolToken);
-		consumeEOL();
 		
 		while (current().getTokenKind() != TokenKind.byeToken && 
 			   current().getTokenKind() != TokenKind.eofToken &&
@@ -199,7 +206,7 @@ public class Parser {
 			return new NodeLiteral(SyntaxType.gtfo, nextToken());
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword " + current().getValue());
+		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
 		while (current().getTokenKind() != TokenKind.eolToken) {
 			nextToken();
 		}
@@ -433,16 +440,13 @@ public class Parser {
 		Token operation = nextToken();
 		
 		match(TokenKind.eolToken);
-		consumeEOL();
 		match(TokenKind.ifBlockToken);
 		match(TokenKind.eolToken);
-		consumeEOL();
 		
 		statements.add(parseStatement());
 	
 		match(TokenKind.elseBlockToken);
 		match(TokenKind.eolToken);
-		consumeEOL();
 		
 		statements.add(parseStatement());
 		
@@ -456,14 +460,12 @@ public class Parser {
 		ArrayList<NodeLiteral> switchLiterals = new ArrayList<NodeLiteral>();
 		Token operation = nextToken();
 		match(TokenKind.eolToken);
-		consumeEOL();
 		
 		do {
 			
 			match(TokenKind.caseToken);
 			switchLiterals.add(parseLiteral());
 			match(TokenKind.eolToken);
-			consumeEOL();
 			
 			statements.add(parseStatement());
 			
@@ -471,7 +473,7 @@ public class Parser {
 		
 		if (current().getTokenKind() == TokenKind.defaultToken) {
 			switchLiterals.add(new NodeLiteral(nextToken()));
-			consumeEOL();
+			match(TokenKind.eolToken);
 			
 			statements.add(parseStatement());
 		}
@@ -500,6 +502,10 @@ public class Parser {
 		
 		Token varid = match(TokenKind.idToken);
 		if (current().getTokenKind() == TokenKind.tilToken || current().getTokenKind() == TokenKind.wileToken) {
+			if (peek(1).getTokenKind().getType() != "cmpop") {
+				diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ peek(1).getTokenKind().getType() 
+						+ "> expected comparison operator <cmpop>");
+			}
 			condition = new NodeDeclaration(SyntaxType.loopcond, nextToken(), varid, parseCmpOp());
 		} else {
 			diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
@@ -509,7 +515,6 @@ public class Parser {
 		}
 		
 		match(TokenKind.eolToken);
-		consumeEOL();
 		
 		statements.add(parseStatement());
 		
@@ -575,11 +580,15 @@ public class Parser {
 	
 	
 	
-	private void consumeEOL() {
+	private Token consumeEOL() {
+		Token token = nextToken();
+		
 		while (current().getTokenKind() == TokenKind.eolToken) {
 			lineCounter++;
-			nextToken();
+			token = nextToken();
 		}
+		
+		return token;
 	}
 
 	private boolean isAssignment() {

@@ -548,6 +548,8 @@ public class Parser {
 			return new NodeLiteral(nextToken());
 		} else if (current().getTokenKind() == TokenKind.idToken) {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
+		} else if (current().getTokenKind() == TokenKind.maekToken) {
+			return parseExpTypecast();
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");

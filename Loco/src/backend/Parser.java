@@ -611,11 +611,11 @@ public class Parser {
 		return false;
 	}
 	
-	protected ArrayList<Token> getTokens() {
+	public ArrayList<Token> getTokens() {
 		return allTokens;
 	}
 	
-	protected ArrayList<String> getDiagnostics() {
+	public ArrayList<String> getDiagnostics() {
 		return diagnostics;
 	}
 	

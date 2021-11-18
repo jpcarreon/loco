@@ -16,51 +16,20 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public static void main(String[] args) {		
-		startEvaluator();
+		startParser();
 		launch(args);
-	}
-	
-	static void startLexer() {
-		File fp = new File("src/sample.lol");
-		Lexer lexer = new Lexer(fp);
-		//lexer.viewLexemes();
-		
-		Token token;
-		do {
-			token = lexer.nextToken();
-			
-			if (token.getTokenKind() != TokenKind.badToken) token.viewToken();
-		} while (token.getTokenKind() != TokenKind.eofToken);
-		
-		System.exit(0);
 	}
 	
 	static void startParser() {
 		File fp = new File("src/sample.lol");
 		Parser parser = new Parser(fp);
-		parser.parse();
+
+		System.out.println(parser.parse().getStrChildren(0));
 		parser.viewErrors();
 		
 		System.exit(0);
 	}
-	
-	static void startEvaluator() {
-		File fp = new File("src/sample.lol");
-		Evaluator evaluator = new Evaluator(fp);
-		
-		evaluator.viewParseTree();
-		//System.out.println(evaluator.getStrParseTree());
-		evaluator.viewParserErrors();
-		
-		while (!evaluator.isPCEmpty()) {
-			evaluator.nextInstruction();
-		}
-		
-		
-		System.out.println(evaluator.getEvalDiagnostics());
-		
-		System.exit(0);
-	}
+
 	@Override
 	public void start(Stage primaryStage) {
 		try {

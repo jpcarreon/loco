@@ -8,10 +8,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
 
-import backend.Evaluator;
-import backend.SymTabEntry;
-import backend.Token;
-import backend.TokenKind;
+import SyntaxNodes.NodeRoot;
+import backend.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -31,10 +29,10 @@ import javafx.stage.FileChooser;
 
 
 public class WindowController implements Initializable {
-	private Evaluator evaluator;
-	
+	private Parser parser;
+	private NodeRoot root;
+
 	private boolean isPTreeShow;
-	private String codeBackup;
 	
 	public final static int WINDOW_HEIGHT = 675;
 	public final static int WINDOW_WIDTH = 1200;
@@ -55,7 +53,7 @@ public class WindowController implements Initializable {
 	@FXML private TableColumn<SymTabEntry, String> valueColumn;
 	
 	@FXML private Text symbolTableLabel;
-	
+
 	@FXML private MenuItem nextLineBtn;
 	
 	@Override
@@ -133,104 +131,33 @@ public class WindowController implements Initializable {
     		String fp = codeTextArea.getText();
         	fp = fp.replaceAll("\t", "");
         	
-        	evaluator = new Evaluator(fp);
+        	parser = new Parser(fp);
+			root = parser.parse();
+
     	} catch (Exception e) {
     		return;
     	}
     	
     	verticalSplit.setDividerPosition(0, 1.0);
-    	
-    	symbolTable.getItems().clear();
+
     	tokenTable.getItems().clear();
-    	for (Token token : evaluator.getTokens()) {
+    	for (Token token : parser.getTokens()) {
     		tokenTable.getItems().add(token);
     	}
     	
     	parseTreeTextArea.clear();
-    	parseTreeTextArea.appendText(evaluator.getStrParseTree());
+    	parseTreeTextArea.appendText(root.getStrChildren(0));
     	
     	consoleTextArea.clear();
-    	for (String string: evaluator.getParserDiagnostics()) {
-    		consoleTextArea.appendText(string + "\n");
-    		verticalSplit.setDividerPosition(0, 0.8);
-    	}
-    	
-    	while (!evaluator.isPCEmpty()) {
-			evaluator.nextInstruction();
-			updateSymbolTable();
+    	for (String string: parser.getDiagnostics()) {
+			consoleTextArea.appendText(string + "\n");
+			verticalSplit.setDividerPosition(0, 0.8);
 		}
-    	
-    	if (!evaluator.getEvalDiagnostics().isBlank()) {
-    		defaultFold(null);
-    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
-    	}
     	
     	consoleTextArea.positionCaret(0);
     	parseTreeTextArea.positionCaret(0);
     }
-    
-    @FXML
-    void runDebug(ActionEvent event) {
-    	if (!codeTextArea.isEditable()) return;
-    	
-    	try {
-    		String fp = codeTextArea.getText();
-        	fp = fp.replaceAll("\t", "");
-        	
-        	evaluator = new Evaluator(fp);
-    	} catch (Exception e) {
-    		return;
-    	}
-    	
-    	verticalSplit.setDividerPosition(0, 1.0);
-    	
-    	symbolTable.getItems().clear();
-    	tokenTable.getItems().clear();
-    	for (Token token : evaluator.getTokens()) {
-    		tokenTable.getItems().add(token);
-    	}
-    	
-    	parseTreeTextArea.clear();
-    	parseTreeTextArea.appendText(evaluator.getStrParseTree());
-    	
-    	consoleTextArea.clear();
-    	for (String string: evaluator.getParserDiagnostics()) {
-    		consoleTextArea.appendText(string + "\n");
-    		verticalSplit.setDividerPosition(0, 0.8);
-    	}
-    	
-    	codeBackup = codeTextArea.getText();
-    	codeTextArea.clear();
-    	codeTextArea.setEditable(false);
-    	setDebugText();
-    	
-    	nextLineBtn.setDisable(false);
-    }
-    
-    @FXML
-    void runNextLine(ActionEvent event) {
-    	if (evaluator.isPCEmpty()) {
-			if (!evaluator.getEvalDiagnostics().isBlank()) {
-	    		defaultFold(null);
-	    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
-	    	}
-			
-			if (!codeTextArea.isEditable()) {
-				codeTextArea.clear();
-				codeTextArea.setText(codeBackup);
-		    	codeTextArea.setEditable(true);
-			}
-			
-			nextLineBtn.setDisable(true);
-    	} else {
-    		evaluator.nextInstruction();
-    		updateSymbolTable();
-    		
-    		codeTextArea.clear();
-    		setDebugText();
-    	}
-    }
-    
+
     @FXML
     void changeFont(ActionEvent event) {
     	String input = displayInputBox("Change Font Size", "Font Size: ");
@@ -308,34 +235,7 @@ public class WindowController implements Initializable {
     @FXML
     void setHotKey(KeyEvent event) {
     	if (event.getCode() == KeyCode.F6) runProgram(null);
-    	else if (event.getCode() == KeyCode.F7) runDebug(null);
-    	else if (event.getCode() == KeyCode.F8) runNextLine(null);
     	else if (event.getCode() == KeyCode.F12) displayAbout(null);
-    }
-    
-    private void setDebugText() {
-    	int counter = 0, currentLine = evaluator.getCurrentLine();
-    	
-    	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");	
-    	for (String i : codeBackup.split("\n")) {
-    		System.out.println(currentLine + " : " + counter);
-    		if (!i.isBlank()) {
-    			if (counter++ == currentLine) {
-        			codeTextArea.appendText("=>\t" + i + "\n");
-        		} else {
-        			codeTextArea.appendText("\t" + i + "\n");
-        		}
-    		} else {
-    			codeTextArea.appendText("\t" + i + "\n");
-    		}
-    	}
-    }
-    
-    private void updateSymbolTable() {
-    	symbolTable.getItems().clear();
-    	for (SymTabEntry entry : evaluator.getSymbolTable()) {
-    		symbolTable.getItems().add(entry);
-    	}
     }
     
     private String displayInputBox(String title, String prompt) {

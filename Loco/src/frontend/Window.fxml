@@ -37,8 +37,8 @@
           </Menu>
             <Menu mnemonicParsing="false" text="Run">
                <items>
-                  <MenuItem mnemonicParsing="false" onAction="#runDebug" text="Debug (F7)" />
-                  <MenuItem fx:id="nextLineBtn" disable="true" mnemonicParsing="false" onAction="#runNextLine" text="Next Line (F8)" />
+                  <MenuItem disable="true" mnemonicParsing="false" text="Debug (F7)" />
+                  <MenuItem fx:id="nextLineBtn" disable="true" mnemonicParsing="false" text="Next Line (F8)" />
                   <SeparatorMenuItem mnemonicParsing="false" />
               <MenuItem mnemonicParsing="false" onAction="#runProgram" text="Run (F6)" />
                </items>

@@ -429,9 +429,9 @@ public class Parser {
 	
 	private SyntaxNode parseScan() {
 		Token operation = nextToken();
-		SyntaxNode varid = new NodeLiteral(SyntaxType.varid, match(TokenKind.idToken));
+		Token varid = match(TokenKind.idToken);
 		
-		return new NodeOperation(SyntaxType.scan, operation, varid);
+		return new NodeDeclaration(SyntaxType.scan, operation, varid);
 	}
 	
 	/*

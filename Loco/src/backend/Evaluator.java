@@ -120,12 +120,15 @@ public class Evaluator {
 		
 		if (node.getType() == SyntaxType.newvar) {
 			evalNewVar((NodeDeclaration) node);
+			
+		} else if (node.getType() == SyntaxType.scan) {
+			evalScan((NodeDeclaration) node);
+			
 		}
 	}
 	
 	private void evalNewVar(NodeDeclaration node) {		
 		SymTabEntry newVar;
-		
 		String varid = node.getVarID().getValue();
 		
 		if (findVarValue(varid) < symbolTable.size()) {
@@ -180,8 +183,6 @@ public class Evaluator {
 					   operand1.getType() == SyntaxType.cmpop) {
 				str += evalTerminal(operand1).getValue();
 			}
-			
-			
 			
 			if (currentNode.getOp2() == null) break;
 			else currentNode = (NodeOperation) currentNode.getOp2();
@@ -351,6 +352,25 @@ public class Evaluator {
 		return new Token(TokenKind.yarnToken, str, -1);
 	}
 	
+	private void evalScan(NodeDeclaration node) {
+		Token value;
+		String varid = node.getVarID().getValue();
+		
+		int symbolTableIdx = findVarValue(varid);
+		
+		if (symbolTableIdx >= symbolTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			return;
+		}
+		
+		if (window != null) {
+			value = new Token (TokenKind.yarnToken, window.getYarnInput(), -1);
+		} else {
+			value = new Token (TokenKind.yarnToken, "", -1);
+		}
+		
+		symbolTable.get(symbolTableIdx).setKindValue(value);	
+	}
 	
 	private Token evalTerminal(SyntaxNode operand) {		
 		if (operand.getType() == SyntaxType.varid) {

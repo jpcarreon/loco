@@ -319,6 +319,25 @@ public class WindowController implements Initializable {
     	}
     }
     
+    public String getYarnInput() {
+    	InputWindow popup = new InputWindow("GIMMEH", "Enter Value: ");
+    	Alert alert = new Alert(AlertType.ERROR);
+    	String string = new String();
+    	
+    	popup.display();
+    	
+    	string = popup.getValue();
+    	
+    	if (string.isEmpty() || string.isBlank()) {
+    		alert.setHeaderText("Empty Input!");
+    		alert.show();
+    		
+    		return "";
+    	}
+    	
+    	return string;
+    }
+    
     private void setDebugText() {
     	int counter = 0;
     	int currentLine = evaluator.getCurrentLine();

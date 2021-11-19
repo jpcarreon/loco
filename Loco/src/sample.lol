@@ -1,3 +1,6 @@
 HAI
-	SMOOSH "hello" AN "world" AN BOTH OF 1 AN 2
+	I HAS A var1 ITZ BOTH OF 1 AN 2
+	
+	SMOOSH "hello" AN WIN AN BOTH OF 1 AN 2
+	VISIBLE WIN var1
 KTHXBYE

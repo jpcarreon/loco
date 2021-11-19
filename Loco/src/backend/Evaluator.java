@@ -158,17 +158,12 @@ public class Evaluator {
 				
 				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
 					suppressNL = true;
-				
-				} else if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.troofToken) {
-					errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
-					break;
-					
 				} else {
 					str += ((NodeLiteral) operand1).getToken().getValue();
 				}	
 				
 			} else if (operand1.getType() == SyntaxType.varid) {
-				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue().trim());
+				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue());
 				
 				if (symbolTableIdx >= symbolTable.size() ||
 					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
@@ -177,16 +172,9 @@ public class Evaluator {
 					break;
 					
 				} else if (symbolTableIdx < symbolTable.size()) {
-					
-					if (symbolTable.get(symbolTableIdx).getKind() == TokenKind.troofToken) {
-						errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
-						break;
-					}
-					
 					str += symbolTable.get(symbolTableIdx).getValue();
 				}
 			
-			//	TODO allow only mathop
 			} else if (operand1.getType() == SyntaxType.mathop ||
 					   operand1.getType() == SyntaxType.boolop ||
 					   operand1.getType() == SyntaxType.cmpop) {
@@ -324,27 +312,16 @@ public class Evaluator {
 		SyntaxNode operand1;
 		NodeOperation currentNode = node;
 		int symbolTableIdx;
-		boolean suppressNL = false;
 
 		while (true) {
 			operand1 = currentNode.getOp1();
 			
 			
 			if (operand1.getType() == SyntaxType.literal) {
-				
-				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
-					suppressNL = true;
-				
-				} else if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.troofToken) {
-					errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
-					break;
-					
-				} else {
-					str += ((NodeLiteral) operand1).getToken().getValue();
-				}	
-				
+				str += ((NodeLiteral) operand1).getToken().getValue();
+			
 			} else if (operand1.getType() == SyntaxType.varid) {
-				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue().trim());
+				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue());
 				
 				if (symbolTableIdx >= symbolTable.size() ||
 					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
@@ -353,11 +330,6 @@ public class Evaluator {
 					break;
 					
 				} else if (symbolTableIdx < symbolTable.size()) {
-					
-					if (symbolTable.get(symbolTableIdx).getKind() == TokenKind.troofToken) {
-						errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
-						break;
-					}
 					
 					str += symbolTable.get(symbolTableIdx).getValue();
 				}
@@ -369,15 +341,12 @@ public class Evaluator {
 			}
 			
 			
-			
 			if (currentNode.getOp2() == null) break;
 			else currentNode = (NodeOperation) currentNode.getOp2();
 		}
 		
 		str = str.replaceAll("\\\\n", "\n");
 		str = str.replaceAll("\\\\t", "\t");
-		
-		if (!suppressNL) str += "\n";
 		
 		return new Token(TokenKind.yarnToken, str, -1);
 	}
@@ -416,7 +385,7 @@ public class Evaluator {
 	private Token typecastToken(Token token, TokenKind kind) {
 		float numbar = 0;
 		int numbr = 0;
-		boolean troof = true, isFloat = true, isInt = true, isYarn = true;
+		boolean troof = true, isFloat = true, isInt = true;
 		String yarn = new String();
 		
 		
@@ -459,10 +428,7 @@ public class Evaluator {
 			else troof = true;
 			
 		} else if (token.getTokenKind() == TokenKind.troofToken) {
-			//	troof -> yarn is not allowed
-			//	TODO throw an error if attempted
 			yarn = token.getValue();
-			isYarn = false;
 			
 			if (yarn.equals("WIN")) {
 				numbar = (float) 1;
@@ -488,7 +454,7 @@ public class Evaluator {
 			if (troof) return new Token(TokenKind.troofToken, "WIN", token.getPosition());
 			else return new Token(TokenKind.troofToken, "FAIL", token.getPosition());
 			
-		} else if (kind == TokenKind.yarnToken && isYarn) {
+		} else if (kind == TokenKind.yarnToken) {
 			return new Token(TokenKind.yarnToken, yarn, token.getPosition());
 		
 		}

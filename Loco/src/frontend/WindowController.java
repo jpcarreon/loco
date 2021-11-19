@@ -133,7 +133,7 @@ public class WindowController implements Initializable {
     		String fp = codeTextArea.getText();
         	fp = fp.replaceAll("\t", "");
         	
-        	evaluator = new Evaluator(fp);
+        	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
     		return;
     	}
@@ -161,11 +161,10 @@ public class WindowController implements Initializable {
 		}
     	
     	if (!evaluator.getEvalDiagnostics().isBlank()) {
-    		defaultFold(null);
+    		verticalSplit.setDividerPosition(0, 0.8);
     		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
     	}
     	
-    	consoleTextArea.positionCaret(0);
     	parseTreeTextArea.positionCaret(0);
     }
     
@@ -177,7 +176,7 @@ public class WindowController implements Initializable {
     		String fp = codeTextArea.getText();
         	fp = fp.replaceAll("\t", "");
         	
-        	evaluator = new Evaluator(fp);
+        	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
     		return;
     	}
@@ -211,7 +210,7 @@ public class WindowController implements Initializable {
     void runNextLine(ActionEvent event) {
     	if (evaluator.isPCEmpty()) {
 			if (!evaluator.getEvalDiagnostics().isBlank()) {
-	    		defaultFold(null);
+				verticalSplit.setDividerPosition(0, 0.8);
 	    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
 	    	}
 			
@@ -309,19 +308,31 @@ public class WindowController implements Initializable {
     void setHotKey(KeyEvent event) {
     	if (event.getCode() == KeyCode.F6) runProgram(null);
     	else if (event.getCode() == KeyCode.F7) runDebug(null);
-    	else if (event.getCode() == KeyCode.F8) runNextLine(null);
+    	else if (event.getCode() == KeyCode.F8 && !codeTextArea.isEditable()) runNextLine(null);
     	else if (event.getCode() == KeyCode.F12) displayAbout(null);
     }
     
+    public void updateConsole(String string) {
+    	if (!string.isEmpty()) {
+    		verticalSplit.setDividerPosition(0, 0.8);
+        	consoleTextArea.appendText(string);
+    	}
+    }
+    
     private void setDebugText() {
-    	int counter = 0, currentLine = evaluator.getCurrentLine();
+    	int counter = 0;
+    	int currentLine = evaluator.getCurrentLine();
+    	int caretpos = 0;
+    	
     	
     	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");	
     	for (String i : codeBackup.split("\n")) {
-    		System.out.println(currentLine + " : " + counter);
+    		//System.out.println(currentLine + " : " + counter);
+    		
     		if (!i.isBlank()) {
     			if (counter++ == currentLine) {
         			codeTextArea.appendText("=>\t" + i + "\n");
+        			caretpos = codeTextArea.getLength();
         		} else {
         			codeTextArea.appendText("\t" + i + "\n");
         		}
@@ -329,6 +340,8 @@ public class WindowController implements Initializable {
     			codeTextArea.appendText("\t" + i + "\n");
     		}
     	}
+    	
+    	codeTextArea.positionCaret(caretpos);
     }
     
     private void updateSymbolTable() {

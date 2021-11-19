@@ -9,6 +9,7 @@ public class Token {
 		this.tokenKind = kind;
 		this.value = value;
 		this.position = position;
+		
 	}
 
 	public TokenKind getTokenKind() {

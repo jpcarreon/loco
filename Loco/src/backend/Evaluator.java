@@ -9,9 +9,10 @@ import frontend.WindowController;
 
 public class Evaluator {
 	private Parser parser;
+	private WindowController window;
 	
 	private ArrayList<Token> tokens;
-	private ArrayList<SymTabEntry> SymbolTable;
+	private ArrayList<SymTabEntry> symbolTable;
 	private String errorMsg;
 	
 	private NodeRoot root;
@@ -21,28 +22,30 @@ public class Evaluator {
 	
 	public Evaluator(File file) {
 		this.errorMsg = new String();
-		this.SymbolTable = new ArrayList<SymTabEntry>();
+		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
 		
 		parser = new Parser(file);
 		this.root = parser.parse();
 		
 		this.tokens = parser.getTokens();
-		this.SymbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
+		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
 		this.programCounter = root.getStatements();
 	}
 	
-	public Evaluator(String strFile) {
+	public Evaluator(String strFile, WindowController window) {
+		this.window = window;
+		
 		this.errorMsg = new String();
-		this.SymbolTable = new ArrayList<SymTabEntry>();
+		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
 		
 		parser = new Parser(strFile);
 		this.root = parser.parse();
 		
 		this.tokens = parser.getTokens();
-		this.SymbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
+		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
 		this.programCounter = root.getStatements();
 	}
@@ -86,14 +89,22 @@ public class Evaluator {
 	
 	private void evalExpression() {
 		SyntaxNode node = ((NodeExpression) currentInstruction).getNode();
+		Token token;
 		
 		if (node.getType() == SyntaxType.comment) {
 			return;
 		} else if (node.getType() == SyntaxType.mathop) {
-			Token token = evalMathOp((NodeOperation) node);
-			//token.viewToken();
-			SymbolTable.get(0).setKindValue(token);
-		}	
+			token = evalMathOp((NodeOperation) node);
+
+			symbolTable.get(0).setKindValue(token);
+			
+		} else if (node.getType() == SyntaxType.print) {
+			token = evalPrint((NodeOperation) node);
+
+			symbolTable.get(0).setKindValue(token);
+			
+			if (window != null) window.updateConsole(token.getValue());
+		}
 	}
 	
 	private void evalAssignment() {
@@ -109,7 +120,7 @@ public class Evaluator {
 		
 		String varid = node.getVarID().getValue();
 		
-		if (findVarValue(varid) < SymbolTable.size()) {
+		if (findVarValue(varid) < symbolTable.size()) {
 			errorMsg = "Line " + lineCounter + ": Duplicate instantiation of new variable";
 			return;
 		}
@@ -121,7 +132,46 @@ public class Evaluator {
 			newVar = new SymTabEntry(varid, TokenKind.noobToken, "");
 		}
 		
-		SymbolTable.add(newVar);
+		symbolTable.add(newVar);
+	}
+	
+	private Token evalPrint(NodeOperation node) {
+		String str = new String();
+		SyntaxNode operand1;
+		NodeOperation currentNode = node;
+		int symbolTableIdx;
+
+		while (true) {
+			operand1 = currentNode.getOp1();
+			
+			if (operand1.getType() == SyntaxType.literal) {
+				str += ((NodeLiteral) operand1).getToken().getValue();
+				
+				
+			} else if (operand1.getType() == SyntaxType.varid) {
+				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue().trim());
+				
+				if (symbolTableIdx >= symbolTable.size() ||
+					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
+					
+					errorMsg = "Line " + lineCounter + ": Uninitialized variable "; 
+					
+				} else if (symbolTableIdx < symbolTable.size()) {
+					str += symbolTable.get(symbolTableIdx).getValue();
+				}
+				
+			}
+			
+			
+			
+			if (currentNode.getOp2() == null) break;
+			else currentNode = (NodeOperation) currentNode.getOp2();
+		}
+		
+		str = str.replaceAll("\\\\n", "\n");
+		str = str.replaceAll("\\\\t", "\t");
+		
+		return new Token(TokenKind.yarnToken, str, -1);
 	}
 	
 	private Token evalMathOp(NodeOperation node) {
@@ -203,14 +253,14 @@ public class Evaluator {
 			Token token = ((NodeLiteral) operand).getToken();
 			int idx = findVarValue(token.getValue());
 			
-			if (idx == SymbolTable.size()) {
+			if (idx == symbolTable.size()) {
 				this.errorMsg = "Line "+ lineCounter + ": Unbound variable <"+token.getValue()+">";
 				return new Token(TokenKind.numbrToken, "0", -1);
-			} else if (SymbolTable.get(idx).getValue().isEmpty()) {
+			} else if (symbolTable.get(idx).getValue().isEmpty()) {
 				this.errorMsg = "Line "+ lineCounter + ": Uninitialized variable <"+token.getValue()+">";
 				return new Token(TokenKind.numbrToken, "0", -1);
 			} else {
-				SymTabEntry entry = SymbolTable.get(idx);
+				SymTabEntry entry = symbolTable.get(idx);
 				return new Token(entry.getKind(), entry.getValue(), token.getPosition());
 			}
 			
@@ -224,7 +274,7 @@ public class Evaluator {
 	
 	private int findVarValue(String varid) {
 		int counter = 0;
-		for (SymTabEntry entry : SymbolTable) {
+		for (SymTabEntry entry : symbolTable) {
 			if (entry.getIdentifier().equals(varid)) break;
 			counter++;
 		}
@@ -255,7 +305,7 @@ public class Evaluator {
 	}
 	
 	public ArrayList<SymTabEntry> getSymbolTable() {
-		return SymbolTable;
+		return symbolTable;
 	}
 	
 	public ArrayList<String> getParserDiagnostics() {

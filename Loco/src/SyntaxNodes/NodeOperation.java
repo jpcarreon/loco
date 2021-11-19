@@ -6,17 +6,17 @@ public class NodeOperation extends SyntaxNode{
 	Token operation;
 	SyntaxNode operand1, operand2;
 	
-	public NodeOperation (SyntaxType type, Token mathOp, SyntaxNode op1, SyntaxNode op2) {
+	public NodeOperation (SyntaxType type, Token operation, SyntaxNode op1, SyntaxNode op2) {
 		super(type);
-		this.operation = mathOp;
+		this.operation = operation;
 		this.operand1 = op1;
 		this.operand2 = op2;
 		
 	}
 	
-	public NodeOperation (SyntaxType type, Token mathOp, SyntaxNode op1) {
+	public NodeOperation (SyntaxType type, Token operation, SyntaxNode op1) {
 		super(type);
-		this.operation = mathOp;
+		this.operation = operation;
 		this.operand1 = op1;
 	}
 	

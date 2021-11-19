@@ -82,11 +82,13 @@ public class Lexer {
 	private void fixLexemes() {
 		ArrayList<String> fixedList = new ArrayList<String>();
 		String newLexeme = new String();
+		boolean insideQuote = false;
 		
 		for (String i : lexemes) {
 			//	If current character is not whitespace or a quotation mark; build a complete word until it reaches whitespace
 			if (i.matches("[^\s\"\n]")) {
 				newLexeme = newLexeme + i;
+				
 			} else {
 				//	Reached whitespace; append the word to the new ArrayList 
 				if (!newLexeme.isBlank()) {
@@ -94,12 +96,17 @@ public class Lexer {
 					newLexeme = new String();
 				} 
 				
+				if (i.matches("\"")) insideQuote = !insideQuote;
+				
 				//	Add the newline or quotation mark
-				if (!i.isBlank()) {
+				if (!i.isBlank() || insideQuote) {
 					fixedList.add(i);
 				} else if (i == "\n") {
 					fixedList.add(i);
 				}
+				
+				
+				
 				
 			}
 		}

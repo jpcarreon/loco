@@ -70,7 +70,7 @@ public enum TokenKind {
 	
 	idToken("[a-zA-Z][a-zA-Z0-9_]*", "varident", 1), 
 
-	quoteToken("\"", "", 1), 
+	quoteToken("\"", "", 1), whitespaceToken("\s", "", 1),
 	
 	eolToken("\n", "", 1), eofToken("\0", "", 1), 
 	

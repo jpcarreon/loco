@@ -572,7 +572,8 @@ public class Parser {
 		nextToken();
 		
 		while (current().getTokenKind() != TokenKind.quoteToken && current().getTokenKind() != TokenKind.eolToken) {
-			value = value + nextToken().getValue() + " ";
+			if (peek(1).getTokenKind() != TokenKind.quoteToken) value = value + nextToken().getValue() + " ";
+			else value = value + nextToken().getValue();
 		}
 		
 		match(TokenKind.quoteToken);

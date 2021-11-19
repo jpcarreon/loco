@@ -1,4 +1,5 @@
 HAI
-	SUM OF 1 AN 2
-	DIFF OF 6 AN 3
+	I HAS A var1 ITZ 1512
+	VISIBLE "Hello" "World\n" 
+	VISIBLE "Hello" "World\n" 
 KTHXBYE

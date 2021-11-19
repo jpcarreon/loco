@@ -1,4 +1,5 @@
 HAI
-	VISIBLE "Hello world"
-
+	VISIBLE "hello" " world" !
+	VISIBLE "hello" " world" 
+	VISIBLE "hello" " world" !
 KTHXBYE

@@ -339,7 +339,14 @@ public class Parser {
 	}
 	
 	private SyntaxNode parsePrint(Token operation) {
-		SyntaxNode operand1 = parseTerminal();
+		SyntaxNode operand1 = new NodeLiteral(new Token(TokenKind.badToken, "", -1));
+		
+		if (current().getTokenKind() == TokenKind.exclamationToken) {
+			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(nextToken()));
+		} else {
+			operand1 = parseTerminal();
+		}
+		
 		
 		if (current().getTokenKind() != TokenKind.eolToken && operand1.getType() != SyntaxType.invalid) {
 			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));

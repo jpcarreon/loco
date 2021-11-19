@@ -72,6 +72,8 @@ public enum TokenKind {
 
 	quoteToken("\"", "", 1), whitespaceToken("\s", "", 1), escapeCharToken(":[\\)>o\":]", "", 1),
 	
+	exclamationToken("!", "", 1),
+	
 	eolToken("\n", "", 1), eofToken("\0", "", 1), 
 	
 	miscToken("[^\"\s]+", "", 1), badToken("", "", 1);

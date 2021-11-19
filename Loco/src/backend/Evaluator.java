@@ -152,14 +152,19 @@ public class Evaluator {
 		SyntaxNode operand1;
 		NodeOperation currentNode = node;
 		int symbolTableIdx;
+		boolean suppressNL = false;
 
 		while (true) {
 			operand1 = currentNode.getOp1();
 			
 			
 			if (operand1.getType() == SyntaxType.literal) {
-				str += ((NodeLiteral) operand1).getToken().getValue();
 				
+				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
+					suppressNL = true;
+				} else {
+					str += ((NodeLiteral) operand1).getToken().getValue();
+				}	
 				
 			} else if (operand1.getType() == SyntaxType.varid) {
 				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue().trim());
@@ -188,6 +193,8 @@ public class Evaluator {
 		
 		str = str.replaceAll("\\\\n", "\n");
 		str = str.replaceAll("\\\\t", "\t");
+		
+		if (!suppressNL) str += "\n";
 		
 		return new Token(TokenKind.yarnToken, str, -1);
 	}

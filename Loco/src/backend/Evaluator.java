@@ -95,7 +95,14 @@ public class Evaluator {
 			return;
 		} else if (node.getType() == SyntaxType.mathop) {
 			token = evalMathOp((NodeOperation) node);
+			token.viewToken();
 
+			symbolTable.get(0).setKindValue(token);
+		
+		} else if (node.getType() == SyntaxType.boolop) {
+			token = evalBoolOp((NodeOperation) node);
+			token.viewToken();
+			
 			symbolTable.get(0).setKindValue(token);
 			
 		} else if (node.getType() == SyntaxType.print) {
@@ -103,7 +110,7 @@ public class Evaluator {
 
 			symbolTable.get(0).setKindValue(token);
 			
-			if (window != null) window.updateConsole(token.getValue());
+			if (window != null && errorMsg.isEmpty()) window.updateConsole(token.getValue());
 		}
 	}
 	
@@ -161,6 +168,7 @@ public class Evaluator {
 				}
 				
 			}
+			// TODO evaluating terminals for printing
 			
 			
 			
@@ -176,53 +184,19 @@ public class Evaluator {
 	
 	private Token evalMathOp(NodeOperation node) {
 		float op1, op2, result;
-		
-		op1 = op2 = (float) 0;
+		boolean isFloat = false;
 		
 		Token operation = node.getOperation();
 		Token operand1 = evalTerminal(node.getOp1());
 		Token operand2 = evalTerminal(node.getOp2());
 		
+		if (operand1.getValue().contains(".") || operand2.getValue().contains(".")) isFloat = true;
 		
-		if (operand1.getTokenKind() == TokenKind.yarnToken) {
-			
-			try {
-				op1 = Float.parseFloat(operand1.getValue());
-			} catch (Exception e) {
-				errorMsg = "Line "+ lineCounter + ": Type mismatch <yarnToken> cannot be typecast for this operation";
-				return new Token(TokenKind.badToken, null, -1);
-			} 
-			
-		} else if (operand1.getTokenKind() == TokenKind.troofToken) {
-			if (operand1.getValue().matches("WIN")) op1 = (float) 1.0;
-			else op1 = (float) 0;
-		} else if (operand1.getTokenKind() == TokenKind.numbrToken ||
-				   operand1.getTokenKind() == TokenKind.numbarToken) {
-			op1 = Float.parseFloat(operand1.getValue());
-		} else {
-			errorMsg = "Line "+ lineCounter + ": Unexpected <"+operand2.getTokenKind()+"> as operand";
-			return new Token(TokenKind.badToken, null, -1);
-		}
 		
-		if (operand2.getTokenKind() == TokenKind.yarnToken) {
-			
-			try {
-				op2 = Float.parseFloat(operand2.getValue());
-			} catch (Exception e) {
-				errorMsg = "Line "+ lineCounter + ": Type mismatch <yarnToken> cannot be typecast for this operation";
-				return new Token(TokenKind.badToken, null, -1);
-			} 
-			
-		} else if (operand2.getTokenKind() == TokenKind.troofToken) {
-			if (operand2.getValue().matches("WIN")) op2 = (float) 1.0;
-			else op2 = (float) 0;
-		} else if (operand2.getTokenKind() == TokenKind.numbrToken ||
-				   operand2.getTokenKind() == TokenKind.numbarToken) {
-			op2 = Float.parseFloat(operand2.getValue());
-		} else {
-			errorMsg = "Line "+ lineCounter + ": Unexpected <"+operand2.getTokenKind()+"> as operand";
-			return new Token(TokenKind.badToken, null, -1);
-		}
+		op1 = Float.parseFloat(typecastToken(operand1, TokenKind.numbarToken).getValue());
+		op2 = Float.parseFloat(typecastToken(operand2, TokenKind.numbarToken).getValue());
+		
+		
 		
 		if (operation.getTokenKind() == TokenKind.sumOpToken) {
 			result = op1 + op2;
@@ -240,11 +214,52 @@ public class Evaluator {
 			result = op1 % op2;
 		}
 		
-		if (operand1.getTokenKind() == TokenKind.numbrToken && operand2.getTokenKind() == TokenKind.numbrToken) {
-			return new Token(TokenKind.numbrToken, Integer.toString((int)result), -1);
+		if (operand1.getTokenKind() == TokenKind.numbarToken || operand2.getTokenKind() == TokenKind.numbarToken || isFloat) {
+			return new Token(TokenKind.numbarToken, Float.toString(result), -1);
 		}
 		
-		return new Token(TokenKind.numbarToken, Float.toString(result), -1);
+		return new Token(TokenKind.numbrToken, Integer.toString((int)result), -1);
+	}
+	
+	private Token evalBoolOp(NodeOperation node) {
+		boolean op1, op2, result;
+		
+		op1 = op2 = true;
+		
+		Token operation = node.getOperation();
+		Token operand1 = evalTerminal(node.getOp1());
+		
+		
+		operand1 = typecastToken(operand1, TokenKind.troofToken);
+		if (operand1.getValue().equals("WIN")) op1 = true;
+		else op1 = false;
+		
+		
+		if (operation.getTokenKind() != TokenKind.notOpToken) {
+			Token operand2 = evalTerminal(node.getOp2());
+			
+			operand2 = typecastToken(operand2, TokenKind.troofToken);
+			if (operand2.getValue().equals("WIN")) op2 = true;
+			else op2 = false;
+		}
+		
+		
+		if (operation.getTokenKind() == TokenKind.bothOpToken) {
+			result = op1 && op2;
+		} else if (operation.getTokenKind() == TokenKind.eitherOpToken) {
+			result = op1 || op2;
+		} else if (operation.getTokenKind() == TokenKind.wonOpToken) {
+			result = (op1 || op2) && (!op1 || !op2);
+		} else {
+			result = !op1;
+		} 
+		
+		
+		if (result) {
+			return new Token(TokenKind.troofToken, "WIN", -1);
+		}
+		
+		return new Token(TokenKind.troofToken, "FAIL", -1);
 		
 	}
 	
@@ -266,9 +281,101 @@ public class Evaluator {
 			
 		} else if (operand.getType() == SyntaxType.mathop) {
 			return evalMathOp((NodeOperation) operand);
+			
+		} else if (operand.getType() == SyntaxType.boolop) {
+			return evalBoolOp((NodeOperation) operand);
 		}
 		
 		return ((NodeLiteral) operand).getToken();
+	}
+	
+	private Token typecastToken(Token token, TokenKind kind) {
+		float numbar = 0;
+		int numbr = 0;
+		boolean troof = true, isFloat = true, isInt = true;
+		String yarn = new String();
+		
+		
+		
+		if (token.getTokenKind() == kind) return token;
+		
+		
+		if (token.getTokenKind() == TokenKind.numbrToken) {
+			numbar = Float.parseFloat(token.getValue());
+			numbr = (int) Float.parseFloat(token.getValue());
+			yarn = token.getValue();
+			
+			if (numbr == 0) troof = false;
+			else troof = true;
+			
+		} else if (token.getTokenKind() == TokenKind.numbarToken) {
+			numbar = Float.parseFloat(token.getValue());
+			numbr = (int) Float.parseFloat(token.getValue());
+			yarn = token.getValue();
+			
+			if (numbar == (float) 0) troof = false;
+			else troof = true;
+			
+		} else if (token.getTokenKind() == TokenKind.yarnToken) {
+			try {
+				numbar = Float.parseFloat(token.getValue());
+			} catch (Exception e) {
+				isFloat = false;
+			}
+			
+			try {
+				numbr = Integer.parseInt(token.getValue());
+			} catch (Exception e) {
+				isInt = false;
+			}
+			
+			yarn = token.getValue();
+			
+			if (yarn.isBlank() || yarn.isEmpty()) troof = false;
+			else troof = true;
+			
+		} else if (token.getTokenKind() == TokenKind.troofToken) {
+			yarn = token.getValue();
+			
+			if (yarn.equals("WIN")) {
+				numbar = (float) 1;
+				numbr = 1;
+				troof = true;
+				
+			} else {
+				numbar = (float) 0;
+				numbr = 0;
+				troof = false;
+			}
+		} else if (token.getTokenKind() == TokenKind.noobToken) {
+			isInt = false;
+			isFloat = false;
+			yarn = new String();
+			troof = true;
+		}
+		
+ 		
+		
+		
+		if (kind == TokenKind.troofToken) {
+			if (troof) return new Token(TokenKind.troofToken, "WIN", token.getPosition());
+			else return new Token(TokenKind.troofToken, "FAIL", token.getPosition());
+			
+		} else if (kind == TokenKind.yarnToken) {
+			return new Token(TokenKind.yarnToken, yarn, token.getPosition());
+		
+		}
+		
+		if (kind == TokenKind.numbrToken && isInt) {
+			return new Token(TokenKind.numbrToken, Integer.toString(numbr), token.getPosition());
+			
+		} else if (kind == TokenKind.numbarToken && isFloat) {
+			return new Token(TokenKind.numbarToken, Float.toString(numbar), token.getPosition());
+		}
+		
+		errorMsg = "Line "+ lineCounter + ": Type mismatch <" + token.getTokenKind() + "> cannot be typecasted to "
+				+ "<" + kind + "> ";
+		return new Token(TokenKind.badToken, "0", -1);
 	}
 	
 	

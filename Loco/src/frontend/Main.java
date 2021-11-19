@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public static void main(String[] args) {		
-		//startEvaluator();
+		startEvaluator();
 		launch(args);
 	}
 	
@@ -51,6 +51,7 @@ public class Main extends Application {
 		//evaluator.viewParseTree();
 		//System.out.println(evaluator.getStrParseTree());
 		evaluator.viewParserErrors();
+		
 		
 		while (!evaluator.isPCEmpty()) {
 			evaluator.nextInstruction();

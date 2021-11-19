@@ -1,7 +1,6 @@
 package SyntaxNodes;
 
 public class NodeExpression extends SyntaxNode {
-	SyntaxType type;
 	SyntaxNode node;
 	int lineCounter;
 	

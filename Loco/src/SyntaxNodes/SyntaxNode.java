@@ -29,5 +29,5 @@ public abstract class SyntaxNode {
 	
 	public SyntaxType getType() {
 		return type;
-	};
+	}
 }

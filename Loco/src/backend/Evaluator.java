@@ -102,6 +102,9 @@ public class Evaluator {
 		} else if (node.getType() == SyntaxType.cmpop) {
 			token = evalCmpOp((NodeOperation) node);
 		
+		} else if (node.getType() == SyntaxType.vartypechange) {	
+			token = evalExpTypecast((NodeDeclaration) node);
+		
 		} else if (node.getType() == SyntaxType.concat) {
 			token = evalConcat((NodeOperation) node);
 			
@@ -109,7 +112,7 @@ public class Evaluator {
 			token = evalPrint((NodeOperation) node);
 			
 			if (window != null && errorMsg.isEmpty()) window.updateConsole(token.getValue());
-		}
+		} 
 		
 		symbolTable.get(0).setKindValue(token);
 		if (window == null) token.viewToken();
@@ -316,6 +319,31 @@ public class Evaluator {
 		return new Token(TokenKind.troofToken, "FAIL", -1);
 	}
 	
+	private Token evalExpTypecast(NodeDeclaration node) {
+		String varid = node.getVarID().getValue();
+		Token varType = ((NodeLiteral) node.getValue()).getToken();
+		Token value;
+		int symbolTableIdx = findVarValue(varid);
+		
+		if (symbolTableIdx >= symbolTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			return new Token (TokenKind.badToken, "", -1);
+		}
+		value = symbolTable.get(symbolTableIdx).getToken();
+		
+		if (varType.getValue().matches("YARN")) {
+			value = typecastToken(value, TokenKind.yarnToken);
+		} else if (varType.getValue().matches("NUMBR")) {
+			value = typecastToken(value, TokenKind.numbrToken);
+		} else if (varType.getValue().matches("NUMBAR")) {
+			value = typecastToken(value, TokenKind.numbarToken);
+		} else {
+			value = typecastToken(value, TokenKind.troofToken);
+		}
+		
+		return value;
+	}
+	
 	private Token evalConcat(NodeOperation node) {
 		String str = new String();
 		SyntaxNode operand1;
@@ -385,7 +413,8 @@ public class Evaluator {
 			return;
 		}
 		
-		value = new Token(symbolTable.get(symbolTableIdx).getKind(), symbolTable.get(symbolTableIdx).getValue(), -1);
+		//value = new Token(symbolTable.get(symbolTableIdx).getKind(), symbolTable.get(symbolTableIdx).getValue(), -1);
+		value = symbolTable.get(symbolTableIdx).getToken();
 		
 		if (varType.getValue().matches("YARN")) {
 			value = typecastToken(value, TokenKind.yarnToken);
@@ -399,9 +428,6 @@ public class Evaluator {
 		
 		
 		symbolTable.get(symbolTableIdx).setKindValue(value);
-		
-		System.out.println(symbolTable.get(symbolTableIdx).getKind());
-		System.out.println(symbolTable.get(symbolTableIdx).getValue());
 	}
 	
 	private void evalScan(NodeDeclaration node) {
@@ -458,6 +484,9 @@ public class Evaluator {
 		} else if (operand.getType() == SyntaxType.cmpop) {
 			return evalCmpOp((NodeOperation) operand);
 					
+		} else if (operand.getType() == SyntaxType.vartypechange) {
+			return evalExpTypecast((NodeDeclaration) operand);
+			
 		}
 		
 		return ((NodeLiteral) operand).getToken();

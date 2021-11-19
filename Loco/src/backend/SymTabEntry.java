@@ -23,6 +23,10 @@ public class SymTabEntry {
 		return value;
 	}
 	
+	public Token getToken() {
+		return new Token(kind, value, -1);
+	}
+	
 	public void setKind (TokenKind kind) {
 		this.kind = kind;
 	}

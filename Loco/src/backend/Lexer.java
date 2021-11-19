@@ -114,8 +114,6 @@ public class Lexer {
 		for (int i = 0; i < lexemes.size(); i++) {
 			currentString = lexemes.get(i);
 			
-			
-				
 			if (currentString.matches("[^\s\"\n:]")) {
 				newLexeme += currentString;
 				
@@ -124,6 +122,7 @@ public class Lexer {
 					fixedList.add(newLexeme);
 					newLexeme = new String();
 				}
+				
 				
 				fixedList.add(currentString + lexemes.get(i + 1));
 				i++;
@@ -136,6 +135,7 @@ public class Lexer {
 				} 
 				
 				if (currentString.matches("\"")) insideQuote = !insideQuote;
+				if (currentString == "\n" && insideQuote) insideQuote = false;
 				
 				//	Add the newline or quotation mark
 				if (!currentString.isBlank() || insideQuote) {

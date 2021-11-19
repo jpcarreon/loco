@@ -3,7 +3,7 @@ package backend;
 public enum TokenKind {
 	haiToken("HAI", "progStart",1), byeToken("KTHXBYE", "progEnd", 1),
 
-	noobToken("", "", 1),
+	noobToken("(?!x)x", "", 1),
 	numbrToken("-?[0-9]+", "literal", 1), 
 	numbarToken("-?[0-9]+\\.[0-9]+", "literal", 1), 
 	yarnToken("(\".+?|\"[^\"]+\")", "literal", -1), 
@@ -72,11 +72,11 @@ public enum TokenKind {
 
 	quoteToken("\"", "", 1), whitespaceToken("\s", "", 1), escapeCharToken(":[\\)>o\":]", "", 1),
 	
-	exclamationToken("!", "", 1),
+	exclamationToken("^!$", "", 1),
 	
 	eolToken("\n", "", 1), eofToken("\0", "", 1), 
 	
-	miscToken("[^\"\s]+", "", 1), badToken("", "", 1);
+	miscToken("[^\"\s]+", "", 1), badToken("(?!x)x", "", 1);
 
 	private final String regex;
 	private final String type;

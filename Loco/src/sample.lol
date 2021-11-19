@@ -1,4 +1,7 @@
 HAI
-	I HAS A var1 ITZ BOTH OF 1 AN 2
-	VISIBLE "hello :) :>World" "Sphinx :: :" of :""
+	I HAS A var1 ITZ 545.5
+	var1 IS NOW A NUMBAR
+	var1 IS NOW A TROOF
+	
+	
 KTHXBYE

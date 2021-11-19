@@ -120,6 +120,12 @@ public class Evaluator {
 		
 		if (node.getType() == SyntaxType.newvar) {
 			evalNewVar((NodeDeclaration) node);
+		
+		} else if (node.getType() == SyntaxType.varchange) {
+			evalVarChange((NodeDeclaration) node);
+		
+		} else if (node.getType() == SyntaxType.vartypechange) {
+			evalAsnTypecast((NodeDeclaration) node);
 			
 		} else if (node.getType() == SyntaxType.scan) {
 			evalScan((NodeDeclaration) node);
@@ -354,6 +360,50 @@ public class Evaluator {
 		return new Token(TokenKind.yarnToken, str, -1);
 	}
 	
+	private void evalVarChange(NodeDeclaration node) {
+		String varid = node.getVarID().getValue();
+		Token value = evalTerminal(node.getValue());
+		int symbolTableIdx = findVarValue(varid);
+		
+		if (symbolTableIdx >= symbolTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			return;
+		}
+		
+		symbolTable.get(symbolTableIdx).setKindValue(value);
+		
+	}
+	
+	private void evalAsnTypecast(NodeDeclaration node) {
+		String varid = node.getVarID().getValue();
+		Token varType = ((NodeLiteral) node.getValue()).getToken();
+		Token value;
+		int symbolTableIdx = findVarValue(varid);
+		
+		if (symbolTableIdx >= symbolTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			return;
+		}
+		
+		value = new Token(symbolTable.get(symbolTableIdx).getKind(), symbolTable.get(symbolTableIdx).getValue(), -1);
+		
+		if (varType.getValue().matches("YARN")) {
+			value = typecastToken(value, TokenKind.yarnToken);
+		} else if (varType.getValue().matches("NUMBR")) {
+			value = typecastToken(value, TokenKind.numbrToken);
+		} else if (varType.getValue().matches("NUMBAR")) {
+			value = typecastToken(value, TokenKind.numbarToken);
+		} else {
+			value = typecastToken(value, TokenKind.troofToken);
+		}
+		
+		
+		symbolTable.get(symbolTableIdx).setKindValue(value);
+		
+		System.out.println(symbolTable.get(symbolTableIdx).getKind());
+		System.out.println(symbolTable.get(symbolTableIdx).getValue());
+	}
+	
 	private void evalScan(NodeDeclaration node) {
 		Token token;
 		String value;
@@ -418,8 +468,6 @@ public class Evaluator {
 		int numbr = 0;
 		boolean troof = true, isFloat = true, isInt = true;
 		String yarn = new String();
-		
-		
 		
 		if (token.getTokenKind() == kind) return token;
 		

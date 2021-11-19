@@ -15,8 +15,8 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-	public static void main(String[] args) {		
-		//startEvaluator();
+	public static void main(String[] args) {
+		startEvaluator();
 		//startLexer();
 		launch(args);
 	}
@@ -24,7 +24,7 @@ public class Main extends Application {
 	static void startLexer() {
 		File fp = new File("src/sample.lol");
 		Lexer lexer = new Lexer(fp);
-		lexer.viewLexemes();
+		//lexer.viewLexemes();
 		
 		Token token;
 		do {

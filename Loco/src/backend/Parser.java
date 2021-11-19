@@ -206,7 +206,7 @@ public class Parser {
 			return new NodeLiteral(SyntaxType.gtfo, nextToken());
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
+		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword ");
 		while (current().getTokenKind() != TokenKind.eolToken) {
 			nextToken();
 		}
@@ -599,7 +599,12 @@ public class Parser {
 		}
 		
 		match(TokenKind.quoteToken);
-		
+		/*
+		if (match(TokenKind.quoteToken).getValue() == null) {
+			System.out.println("dd");
+			nextToken();
+		}
+		*/
 		return new Token(TokenKind.yarnToken, value, current().getPosition());
 	}
 	

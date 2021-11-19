@@ -102,6 +102,11 @@ public class Evaluator {
 			token = evalBoolOp((NodeOperation) node);
 
 			symbolTable.get(0).setKindValue(token);
+		
+		} else if (node.getType() == SyntaxType.cmpop) {
+			token = evalCmpOp((NodeOperation) node);
+			
+			symbolTable.get(0).setKindValue(token);
 			
 		} else if (node.getType() == SyntaxType.print) {
 			token = evalPrint((NodeOperation) node);
@@ -168,7 +173,7 @@ public class Evaluator {
 					str += symbolTable.get(symbolTableIdx).getValue();
 				}
 			
-			//	TODO infarop
+			//	TODO infarop (?)
 			} else if (operand1.getType() == SyntaxType.mathop ||
 					   operand1.getType() == SyntaxType.boolop ||
 					   operand1.getType() == SyntaxType.cmpop) {
@@ -268,6 +273,34 @@ public class Evaluator {
 		
 	}
 	
+	private Token evalCmpOp(NodeOperation node) {
+		boolean op1, op2, result;
+		
+		Token operation = node.getOperation();
+		Token operand1 = evalTerminal(node.getOp1());
+		Token operand2 = evalTerminal(node.getOp2());
+		
+		operand1 = typecastToken(operand1, TokenKind.yarnToken);
+		operand2 = typecastToken(operand2, TokenKind.yarnToken);
+		
+		if (operation.getTokenKind() == TokenKind.bothSameOpToken) {
+			
+			if (operand1.getValue().equals(operand2.getValue())) result = true;
+			else result = false;
+			
+		} else {
+			
+			if (operand1.getValue().equals(operand2.getValue())) result = false;
+			else result = true;
+		}
+		
+		if (result) {
+			return new Token(TokenKind.troofToken, "WIN", -1);
+		}
+		
+		return new Token(TokenKind.troofToken, "FAIL", -1);
+	}
+	
 	private Token evalTerminal(SyntaxNode operand) {		
 		if (operand.getType() == SyntaxType.varid) {
 			Token token = ((NodeLiteral) operand).getToken();
@@ -289,6 +322,10 @@ public class Evaluator {
 			
 		} else if (operand.getType() == SyntaxType.boolop) {
 			return evalBoolOp((NodeOperation) operand);
+			
+		} else if (operand.getType() == SyntaxType.cmpop) {
+			return evalCmpOp((NodeOperation) operand);
+					
 		}
 		
 		return ((NodeLiteral) operand).getToken();
@@ -340,6 +377,8 @@ public class Evaluator {
 			else troof = true;
 			
 		} else if (token.getTokenKind() == TokenKind.troofToken) {
+			//	troof -> yarn is not allowed
+			//	TODO throw an error if attempted
 			yarn = token.getValue();
 			
 			if (yarn.equals("WIN")) {

@@ -95,28 +95,24 @@ public class Evaluator {
 			return;
 		} else if (node.getType() == SyntaxType.mathop) {
 			token = evalMathOp((NodeOperation) node);
-
-			symbolTable.get(0).setKindValue(token);
 		
 		} else if (node.getType() == SyntaxType.boolop) {
 			token = evalBoolOp((NodeOperation) node);
-
-			symbolTable.get(0).setKindValue(token);
 		
 		} else if (node.getType() == SyntaxType.cmpop) {
 			token = evalCmpOp((NodeOperation) node);
-			
-			symbolTable.get(0).setKindValue(token);
+		
+		} else if (node.getType() == SyntaxType.concat) {
+			token = evalConcat((NodeOperation) node);
 			
 		} else if (node.getType() == SyntaxType.print) {
 			token = evalPrint((NodeOperation) node);
 			
-			symbolTable.get(0).setKindValue(token);
-			
 			if (window != null && errorMsg.isEmpty()) window.updateConsole(token.getValue());
 		}
 		
-		if (window == null && token != null) token.viewToken();
+		symbolTable.get(0).setKindValue(token);
+		if (window == null) token.viewToken();
 	}
 	
 	private void evalAssignment() {
@@ -162,6 +158,11 @@ public class Evaluator {
 				
 				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
 					suppressNL = true;
+				
+				} else if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.troofToken) {
+					errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
+					break;
+					
 				} else {
 					str += ((NodeLiteral) operand1).getToken().getValue();
 				}	
@@ -172,13 +173,20 @@ public class Evaluator {
 				if (symbolTableIdx >= symbolTable.size() ||
 					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
 					
-					errorMsg = "Line " + lineCounter + ": Uninitialized variable "; 
+					errorMsg = "Line " + lineCounter + ": Uninitialized variable ";
+					break;
 					
 				} else if (symbolTableIdx < symbolTable.size()) {
+					
+					if (symbolTable.get(symbolTableIdx).getKind() == TokenKind.troofToken) {
+						errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
+						break;
+					}
+					
 					str += symbolTable.get(symbolTableIdx).getValue();
 				}
 			
-			//	TODO infarop (?)
+			//	TODO allow only mathop
 			} else if (operand1.getType() == SyntaxType.mathop ||
 					   operand1.getType() == SyntaxType.boolop ||
 					   operand1.getType() == SyntaxType.cmpop) {
@@ -310,6 +318,70 @@ public class Evaluator {
 		
 		return new Token(TokenKind.troofToken, "FAIL", -1);
 	}
+	
+	private Token evalConcat(NodeOperation node) {
+		String str = new String();
+		SyntaxNode operand1;
+		NodeOperation currentNode = node;
+		int symbolTableIdx;
+		boolean suppressNL = false;
+
+		while (true) {
+			operand1 = currentNode.getOp1();
+			
+			
+			if (operand1.getType() == SyntaxType.literal) {
+				
+				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
+					suppressNL = true;
+				
+				} else if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.troofToken) {
+					errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
+					break;
+					
+				} else {
+					str += ((NodeLiteral) operand1).getToken().getValue();
+				}	
+				
+			} else if (operand1.getType() == SyntaxType.varid) {
+				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue().trim());
+				
+				if (symbolTableIdx >= symbolTable.size() ||
+					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
+					
+					errorMsg = "Line " + lineCounter + ": Uninitialized variable ";
+					break;
+					
+				} else if (symbolTableIdx < symbolTable.size()) {
+					
+					if (symbolTable.get(symbolTableIdx).getKind() == TokenKind.troofToken) {
+						errorMsg = "Line " + lineCounter + ": Type mismatch <troofToken> cannot be typecasted to <yarnToken> ";
+						break;
+					}
+					
+					str += symbolTable.get(symbolTableIdx).getValue();
+				}
+			
+			} else if (operand1.getType() == SyntaxType.mathop ||
+					   operand1.getType() == SyntaxType.boolop ||
+					   operand1.getType() == SyntaxType.cmpop) {
+				str += evalTerminal(operand1).getValue();
+			}
+			
+			
+			
+			if (currentNode.getOp2() == null) break;
+			else currentNode = (NodeOperation) currentNode.getOp2();
+		}
+		
+		str = str.replaceAll("\\\\n", "\n");
+		str = str.replaceAll("\\\\t", "\t");
+		
+		if (!suppressNL) str += "\n";
+		
+		return new Token(TokenKind.yarnToken, str, -1);
+	}
+	
 	
 	private Token evalTerminal(SyntaxNode operand) {		
 		if (operand.getType() == SyntaxType.varid) {

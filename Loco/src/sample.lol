@@ -1,5 +1,3 @@
 HAI
-	VISIBLE "hello" " world" !
-	VISIBLE "hello" " world" 
-	VISIBLE "hello" " world" !
+	SMOOSH "hello" AN "world" AN BOTH OF 1 AN 2
 KTHXBYE

@@ -89,29 +89,29 @@ public class Evaluator {
 	
 	private void evalExpression() {
 		SyntaxNode node = ((NodeExpression) currentInstruction).getNode();
-		Token token;
+		Token token = new Token(TokenKind.noobToken, "", -1);
 		
 		if (node.getType() == SyntaxType.comment) {
 			return;
 		} else if (node.getType() == SyntaxType.mathop) {
 			token = evalMathOp((NodeOperation) node);
-			token.viewToken();
 
 			symbolTable.get(0).setKindValue(token);
 		
 		} else if (node.getType() == SyntaxType.boolop) {
 			token = evalBoolOp((NodeOperation) node);
-			token.viewToken();
-			
+
 			symbolTable.get(0).setKindValue(token);
 			
 		} else if (node.getType() == SyntaxType.print) {
 			token = evalPrint((NodeOperation) node);
-
+			
 			symbolTable.get(0).setKindValue(token);
 			
 			if (window != null && errorMsg.isEmpty()) window.updateConsole(token.getValue());
 		}
+		
+		if (window == null && token != null) token.viewToken();
 	}
 	
 	private void evalAssignment() {
@@ -151,6 +151,7 @@ public class Evaluator {
 		while (true) {
 			operand1 = currentNode.getOp1();
 			
+			
 			if (operand1.getType() == SyntaxType.literal) {
 				str += ((NodeLiteral) operand1).getToken().getValue();
 				
@@ -166,9 +167,13 @@ public class Evaluator {
 				} else if (symbolTableIdx < symbolTable.size()) {
 					str += symbolTable.get(symbolTableIdx).getValue();
 				}
-				
+			
+			//	TODO infarop
+			} else if (operand1.getType() == SyntaxType.mathop ||
+					   operand1.getType() == SyntaxType.boolop ||
+					   operand1.getType() == SyntaxType.cmpop) {
+				str += evalTerminal(operand1).getValue();
 			}
-			// TODO evaluating terminals for printing
 			
 			
 			

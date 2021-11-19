@@ -1,6 +1,3 @@
 HAI
-	I HAS A var1 ITZ "dasdas"
-	I HAS A var2 ITZ WIN
-	
-	
+	VISIBLE BOTH OF 1 AN 0
 KTHXBYE

@@ -188,8 +188,10 @@ public class Evaluator {
 			else currentNode = (NodeOperation) currentNode.getOp2();
 		}
 		
-		str = str.replaceAll("\\\\n", "\n");
-		str = str.replaceAll("\\\\t", "\t");
+		str = str.replaceAll(":>", "\t");
+		str = str.replaceAll(":\\)", "\n");
+		str = str.replaceAll(":o", "\\\\g");
+		str = str.replaceAll("::", ":");
 		
 		if (!suppressNL) str += "\n";
 		
@@ -353,7 +355,8 @@ public class Evaluator {
 	}
 	
 	private void evalScan(NodeDeclaration node) {
-		Token value;
+		Token token;
+		String value;
 		String varid = node.getVarID().getValue();
 		
 		int symbolTableIdx = findVarValue(varid);
@@ -364,12 +367,20 @@ public class Evaluator {
 		}
 		
 		if (window != null) {
-			value = new Token (TokenKind.yarnToken, window.getYarnInput(), -1);
+			value = window.getYarnInput(varid);
+			
+			value = value.replaceAll(":>", "\t");
+			value = value.replaceAll(":\\)", "\n");
+			value = value.replaceAll(":o", "\\\\g");
+			value = value.replaceAll("::", ":");
+			value = value.replaceAll(":\"", "\"");
+			
+			token = new Token (TokenKind.yarnToken, value, -1);
 		} else {
-			value = new Token (TokenKind.yarnToken, "", -1);
+			token = new Token (TokenKind.yarnToken, "", -1);
 		}
 		
-		symbolTable.get(symbolTableIdx).setKindValue(value);	
+		symbolTable.get(symbolTableIdx).setKindValue(token);	
 	}
 	
 	private Token evalTerminal(SyntaxNode operand) {		

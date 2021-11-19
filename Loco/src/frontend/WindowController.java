@@ -319,8 +319,8 @@ public class WindowController implements Initializable {
     	}
     }
     
-    public String getYarnInput() {
-    	InputWindow popup = new InputWindow("GIMMEH", "Enter Value: ");
+    public String getYarnInput(String varid) {
+    	InputWindow popup = new InputWindow("GIMMEH", "Set " + varid + ": ");
     	Alert alert = new Alert(AlertType.ERROR);
     	String string = new String();
     	

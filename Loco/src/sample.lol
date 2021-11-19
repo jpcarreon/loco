@@ -1,4 +1,4 @@
 HAI
 	I HAS A var1 ITZ BOTH OF 1 AN 2
-	GIMMEH var1
+	VISIBLE "hello :) :>World" "Sphinx :: :" of :""
 KTHXBYE

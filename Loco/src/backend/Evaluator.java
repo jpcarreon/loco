@@ -337,7 +337,7 @@ public class Evaluator {
 	private Token typecastToken(Token token, TokenKind kind) {
 		float numbar = 0;
 		int numbr = 0;
-		boolean troof = true, isFloat = true, isInt = true;
+		boolean troof = true, isFloat = true, isInt = true, isYarn = true;
 		String yarn = new String();
 		
 		
@@ -383,6 +383,7 @@ public class Evaluator {
 			//	troof -> yarn is not allowed
 			//	TODO throw an error if attempted
 			yarn = token.getValue();
+			isYarn = false;
 			
 			if (yarn.equals("WIN")) {
 				numbar = (float) 1;
@@ -408,7 +409,7 @@ public class Evaluator {
 			if (troof) return new Token(TokenKind.troofToken, "WIN", token.getPosition());
 			else return new Token(TokenKind.troofToken, "FAIL", token.getPosition());
 			
-		} else if (kind == TokenKind.yarnToken) {
+		} else if (kind == TokenKind.yarnToken && isYarn) {
 			return new Token(TokenKind.yarnToken, yarn, token.getPosition());
 		
 		}

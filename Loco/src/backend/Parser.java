@@ -572,11 +572,33 @@ public class Parser {
 		nextToken();
 		
 		while (current().getTokenKind() != TokenKind.quoteToken && current().getTokenKind() != TokenKind.eolToken) {
-			if (peek(1).getTokenKind() != TokenKind.quoteToken) value = value + nextToken().getValue() + " ";
-			else value = value + nextToken().getValue();
+			
+			
+			if (current().getValue().equals(":")) nextToken();
+			else if (current().getValue().equals(":\"")) {
+				value += "\"";
+				nextToken();
+				
+			} 
+			/*
+				else if (peek(1).getTokenKind() != TokenKind.quoteToken && 
+					  !peek(1).getValue().equals(":\"") &&
+					  !peek(1).getValue().equals(":")) {
+
+				value += nextToken().getValue() + " ";
+			
+			}
+			*/
+			else value += nextToken().getValue();
 		}
 		
 		match(TokenKind.quoteToken);
+		
+		value = value.replaceAll("(\s)?:>(\s)?", "\t");
+		value = value.replaceAll("(\s)?:\\)(\s)?", "\n");
+		value = value.replaceAll("(\s)?:o(\s)?", "\\\\g");
+		value = value.replaceAll("(\s)?::(\s)?", ":");
+		
 		
 		return new Token(TokenKind.yarnToken, value, current().getPosition());
 	}

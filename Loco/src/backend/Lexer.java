@@ -82,8 +82,10 @@ public class Lexer {
 	private void fixLexemes() {
 		ArrayList<String> fixedList = new ArrayList<String>();
 		String newLexeme = new String();
+		String currentString;
 		boolean insideQuote = false;
 		
+		/*
 		for (String i : lexemes) {
 			//	If current character is not whitespace or a quotation mark; build a complete word until it reaches whitespace
 			if (i.matches("[^\s\"\n]")) {
@@ -104,17 +106,50 @@ public class Lexer {
 				} else if (i == "\n") {
 					fixedList.add(i);
 				}
-				
-				
-				
-				
 			}
 		}
+		*/
+		
+		
+		for (int i = 0; i < lexemes.size(); i++) {
+			currentString = lexemes.get(i);
+			
+			
+				
+			if (currentString.matches("[^\s\"\n:]")) {
+				newLexeme += currentString;
+				
+			} else if (i + 1 < lexemes.size() && (currentString + lexemes.get(i + 1)).matches(":[\\)>o\":]")) {
+				if (!newLexeme.isBlank()) {
+					fixedList.add(newLexeme);
+					newLexeme = new String();
+				}
+				
+				fixedList.add(currentString + lexemes.get(i + 1));
+				i++;
+				
+			} else {
+				//	Reached whitespace; append the word to the new ArrayList 
+				if (!newLexeme.isBlank()) {
+					fixedList.add(newLexeme);
+					newLexeme = new String();
+				} 
+				
+				if (currentString.matches("\"")) insideQuote = !insideQuote;
+				
+				//	Add the newline or quotation mark
+				if (!currentString.isBlank() || insideQuote) {
+					fixedList.add(currentString);
+				} else if (currentString == "\n") {
+					fixedList.add(currentString);
+				}
+			}
+		}
+		
 		
 		//	Append the last word built 
 		if (!newLexeme.isBlank()) fixedList.add(newLexeme);
 		lexemes = fixedList;
-		
 	}
 
 	private void next() {

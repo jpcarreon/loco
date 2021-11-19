@@ -274,25 +274,28 @@ public class Evaluator {
 	}
 	
 	private Token evalCmpOp(NodeOperation node) {
-		boolean op1, op2, result;
+		boolean result = false;
 		
 		Token operation = node.getOperation();
 		Token operand1 = evalTerminal(node.getOp1());
 		Token operand2 = evalTerminal(node.getOp2());
 		
-		operand1 = typecastToken(operand1, TokenKind.yarnToken);
-		operand2 = typecastToken(operand2, TokenKind.yarnToken);
 		
-		if (operation.getTokenKind() == TokenKind.bothSameOpToken) {
+		if (operand1.getTokenKind() == operand2.getTokenKind()) {
 			
-			if (operand1.getValue().equals(operand2.getValue())) result = true;
-			else result = false;
+			if (operation.getTokenKind() == TokenKind.bothSameOpToken) {
+				
+				if (operand1.getValue().equals(operand2.getValue())) result = true;
+				else result = false;
+				
+			} else {
+				
+				if (operand1.getValue().equals(operand2.getValue())) result = false;
+				else result = true;
+			}
 			
-		} else {
-			
-			if (operand1.getValue().equals(operand2.getValue())) result = false;
-			else result = true;
 		}
+		
 		
 		if (result) {
 			return new Token(TokenKind.troofToken, "WIN", -1);

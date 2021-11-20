@@ -85,32 +85,6 @@ public class Lexer {
 		String currentString;
 		boolean insideQuote = false;
 		
-		/*
-		for (String i : lexemes) {
-			//	If current character is not whitespace or a quotation mark; build a complete word until it reaches whitespace
-			if (i.matches("[^\s\"\n]")) {
-				newLexeme = newLexeme + i;
-				
-			} else {
-				//	Reached whitespace; append the word to the new ArrayList 
-				if (!newLexeme.isBlank()) {
-					fixedList.add(newLexeme);
-					newLexeme = new String();
-				} 
-				
-				if (i.matches("\"")) insideQuote = !insideQuote;
-				
-				//	Add the newline or quotation mark
-				if (!i.isBlank() || insideQuote) {
-					fixedList.add(i);
-				} else if (i == "\n") {
-					fixedList.add(i);
-				}
-			}
-		}
-		*/
-		
-		
 		for (int i = 0; i < lexemes.size(); i++) {
 			currentString = lexemes.get(i);
 			
@@ -176,25 +150,6 @@ public class Lexer {
 		if (position >= lexemes.size()) {
 		    return new Token(TokenKind.eofToken, "\0", position);
 		}
-		
-		/*
-		lexeme = currentLexeme() + " " + peek(1) + " " + peek(2);
-		for (TokenKind kind : TokenKind.values()) {
-			if (kind.getLength() == 3 && lexeme.matches(kind.getRegex())) {
-				position = position + 3;
-				return new Token(kind, lexeme, position - 3);
-			}
-		}
-		
-		lexeme = currentLexeme() + " " + peek(1);
-		for (TokenKind kind : TokenKind.values()) {
-			if (kind.getLength() == 2 && lexeme.matches(kind.getRegex())) {
-				position = position + 2;
-				return new Token(kind, lexeme, position - 2);
-			}
-		}
-		*/
-
 		
 		for (TokenKind kind : TokenKind.values()) {
 			//	Peek at the next 2 lexemes and check if it matches a 3 word keyword

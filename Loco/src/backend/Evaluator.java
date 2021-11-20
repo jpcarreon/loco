@@ -413,7 +413,6 @@ public class Evaluator {
 			return;
 		}
 		
-		//value = new Token(symbolTable.get(symbolTableIdx).getKind(), symbolTable.get(symbolTableIdx).getValue(), -1);
 		value = symbolTable.get(symbolTableIdx).getToken();
 		
 		if (varType.getValue().matches("YARN")) {

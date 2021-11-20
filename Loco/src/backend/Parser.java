@@ -390,22 +390,7 @@ public class Parser {
 		if (current().getTokenKind() == TokenKind.itzToken) {
 			nextToken();
 			
-			/*
-			if (current().getTokenKind().getType() == "literal") {
-				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseLiteral());
-			} else if (current().getTokenKind().getType() == "mathop") {
-				return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseMathOp());
-			} else if (current().getTokenKind() == TokenKind.idToken) {
-				if (current().getValue() != varid.getValue()) {
-					return new NodeDeclaration(SyntaxType.newvar, operation, varid);
-				}
-			}
-			*/
-			
-			return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseTerminal());
-			
-			//diagnostics.add("Line "+ lineCounter + ": Invalid assignment; expected valid Literal/VarId/Expression");
-			
+			return new NodeDeclaration(SyntaxType.newvar, operation, varid, parseTerminal());			
 		}
 		
 		return new NodeDeclaration(SyntaxType.newvar, operation, varid);

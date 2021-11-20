@@ -340,13 +340,14 @@ public class WindowController implements Initializable {
     
     private void setDebugText() {
     	int counter = 0;
-    	int currentLine = evaluator.getCurrentLine();
+    	int currentLine = evaluator.getCurrentLine() - 1;
     	int caretpos = 0;
     	
     	
-    	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");	
+    	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");
+    	System.out.println("============================");
     	for (String i : codeBackup.split("\n")) {
-    		//System.out.println(currentLine + " : " + counter);
+    		System.out.println(currentLine + " : " + counter);
     		
     		if (!i.isBlank()) {
     			if (counter++ == currentLine) {

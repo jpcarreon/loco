@@ -19,17 +19,21 @@ public class Evaluator {
 	private SyntaxNode programCounter;
 	private SyntaxNode currentInstruction;
 	private int lineCounter;
+	private int position;
 	
 	public Evaluator(File file) {
 		this.errorMsg = new String();
 		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
+		this.position = 0;
 		
 		parser = new Parser(file);
 		this.root = parser.parse();
 		
 		this.tokens = parser.getTokens();
 		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
+		
+		updateLineCounter();
 		
 		this.programCounter = root.getStatements();
 	}
@@ -40,12 +44,15 @@ public class Evaluator {
 		this.errorMsg = new String();
 		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
+		this.position = 0;
 		
 		parser = new Parser(strFile);
 		this.root = parser.parse();
 		
 		this.tokens = parser.getTokens();
 		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
+		
+		updateLineCounter();
 		
 		this.programCounter = root.getStatements();
 	}
@@ -76,13 +83,15 @@ public class Evaluator {
 		
 		
 		if (currentInstruction.getType() == SyntaxType.expression) {
-			lineCounter = ((NodeExpression) currentInstruction).getLineCounter();
+			//lineCounter = ((NodeExpression) currentInstruction).getLineCounter();
 			evalExpression();
 			
 		} else if (currentInstruction.getType() == SyntaxType.assignment) {
-			lineCounter = ((NodeAssignment) currentInstruction).getLineCounter();
+			//lineCounter = ((NodeAssignment) currentInstruction).getLineCounter();
 			evalAssignment();
 		}
+		
+		updateLineCounter();
 		
 		if (!errorMsg.isBlank()) programCounter = null;
 	}
@@ -587,6 +596,15 @@ public class Evaluator {
 		}
 		
 		return counter;
+	}
+	
+	private void updateLineCounter() {
+		while (tokens.get(position).getTokenKind() != TokenKind.eolToken) {
+			position++;
+		}
+		position++;
+		lineCounter++;
+		
 	}
 	
 	public void viewParserErrors() {

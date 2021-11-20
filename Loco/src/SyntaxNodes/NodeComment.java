@@ -22,7 +22,7 @@ public class NodeComment extends SyntaxNode{
 		
 		printTab(tab);
 		System.out.println("Comment: ");
-		
+
 		for (Token i : inner) {
 			printTab(tab + 1);
 			System.out.print(i.getValue());
@@ -40,11 +40,16 @@ public class NodeComment extends SyntaxNode{
 		
 		str += getStrTab(tab);
 		str += "Comment: \n";
-		
+
+		/*
 		for (Token i : inner) {
 			str += getStrTab(tab + 1);
 			str += i.getValue();
 		}
+		*/
+
+		str += getStrTab(tab+1);
+		str += "Contents hidden \n";
 		
 		str += getStrTab(tab);
 		str += "}\n";

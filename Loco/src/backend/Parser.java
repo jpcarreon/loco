@@ -444,11 +444,14 @@ public class Parser {
 		match(TokenKind.eolToken);
 		
 		statements.add(parseStatement());
-	
-		match(TokenKind.elseBlockToken);
-		match(TokenKind.eolToken);
-		
-		statements.add(parseStatement());
+
+		if (current().getTokenKind() == TokenKind.elseBlockToken) {
+
+			match(TokenKind.elseBlockToken);
+			match(TokenKind.eolToken);
+
+			statements.add(parseStatement());
+		}
 		
 		match(TokenKind.ifEndToken);
 		

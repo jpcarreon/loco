@@ -438,6 +438,7 @@ public class Parser {
 	
 	private SyntaxNode parseIfBlock() {
 		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
+		ArrayList<SyntaxNode> ifConditions = new ArrayList<SyntaxNode>();
 		Token operation = nextToken();
 		
 		match(TokenKind.eolToken);
@@ -445,10 +446,17 @@ public class Parser {
 		match(TokenKind.eolToken);
 		
 		statements.add(parseStatement());
+		
+		while (current().getTokenKind() == TokenKind.elifBlockToken) {
+			match(TokenKind.elifBlockToken);
+			ifConditions.add(parseTerminal());
+			match(TokenKind.eolToken);
+			statements.add(parseStatement());
+		}
 
 		if (current().getTokenKind() == TokenKind.elseBlockToken) {
 			
-			match(TokenKind.elseBlockToken);
+			ifConditions.add(new NodeLiteral(nextToken()));
 			match(TokenKind.eolToken);
 			
 			statements.add(parseStatement());
@@ -457,12 +465,12 @@ public class Parser {
 		
 		match(TokenKind.ifEndToken);
 		
-		return new NodeMultiLine(operation, statements);
+		return new NodeMultiLine(SyntaxType.ifblock, operation, ifConditions, statements);
 	}
 	
 	private SyntaxNode parseSwitchCase() {
 		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
-		ArrayList<NodeLiteral> switchLiterals = new ArrayList<NodeLiteral>();
+		ArrayList<SyntaxNode> switchLiterals = new ArrayList<SyntaxNode>();
 		Token operation = nextToken();
 		match(TokenKind.eolToken);
 		
@@ -485,7 +493,7 @@ public class Parser {
 		
 		match(TokenKind.ifEndToken);
 		
-		return new NodeMultiLine(operation, switchLiterals, statements);
+		return new NodeMultiLine(SyntaxType.switchcase, operation, switchLiterals, statements);
 	}
 	
 	private SyntaxNode parseLoop() {

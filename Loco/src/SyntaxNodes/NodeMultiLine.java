@@ -12,7 +12,7 @@ public class NodeMultiLine extends SyntaxNode {
 	Token optype;
 	SyntaxNode condition;
 	
-	ArrayList<NodeLiteral> switchLiterals;
+	ArrayList<SyntaxNode> ifConditions;
 	ArrayList<SyntaxNode> statements;
 	
 	public NodeMultiLine(Token operation, Token loopid, Token optype, SyntaxNode condition, ArrayList<SyntaxNode> statements) {
@@ -26,24 +26,17 @@ public class NodeMultiLine extends SyntaxNode {
 		
 	}
 	
-	public NodeMultiLine(Token operation, ArrayList<SyntaxNode> statements) {
-		super(SyntaxType.ifblock);
+	public NodeMultiLine(SyntaxType type, Token operation, ArrayList<SyntaxNode> ifConditions, ArrayList<SyntaxNode> statements) {
+		super(type);
 		
 		this.operation = operation;
-		this.statements = statements;
-		
-	}
-	
-	public NodeMultiLine(Token operation, ArrayList<NodeLiteral> switchLiterals, ArrayList<SyntaxNode> statements) {
-		super(SyntaxType.switchcase);
-		
-		this.operation = operation;
-		this.switchLiterals = switchLiterals;
+		this.ifConditions = ifConditions;
 		this.statements = statements;
 		
 	}
 	
 	public void printChildren(int tab) {
+		NodeLiteral currentLiteral;
 		int i;
 		
 		printTab(tab);
@@ -52,6 +45,9 @@ public class NodeMultiLine extends SyntaxNode {
 		if (type == SyntaxType.ifblock) {
 			printTab(tab);
 			System.out.println(operation.getValue() + ": ");
+			
+			
+			/*
 			printTab(tab);
 			System.out.println("0: ");
 			statements.get(0).printChildren(tab + 1);
@@ -61,6 +57,13 @@ public class NodeMultiLine extends SyntaxNode {
 				System.out.println("1: ");
 				statements.get(1).printChildren(tab + 1);
 			}
+			*/
+			
+			for (i = 0; i < statements.size(); i++) {
+				printTab(tab);
+				System.out.println(i + ": ");
+				statements.get(i).printChildren(tab + 1);
+			}
 			
 			
 			
@@ -68,13 +71,14 @@ public class NodeMultiLine extends SyntaxNode {
 			printTab(tab);
 			System.out.println(operation.getValue() + ": ");
 			
-			for (i = 0; i < switchLiterals.size(); i++) {
-				printTab(tab);
+			for (i = 0; i < ifConditions.size(); i++) {
+				currentLiteral = (NodeLiteral) ifConditions.get(i);
 				
-				if (switchLiterals.get(i).getToken().getTokenKind() == TokenKind.yarnToken) {
-					System.out.println("\"" + switchLiterals.get(i).getToken().getValue() + "\": ");
+				printTab(tab);
+				if (currentLiteral.getToken().getTokenKind() == TokenKind.yarnToken) {
+					System.out.println("\"" + currentLiteral.getToken().getValue() + "\": ");
 				} else {
-					System.out.println(switchLiterals.get(i).getToken().getValue() + ": ");
+					System.out.println(currentLiteral.getToken().getValue() + ": ");
 				}
 				
 				statements.get(i).printChildren(tab + 1);
@@ -100,6 +104,7 @@ public class NodeMultiLine extends SyntaxNode {
 	
 	public String getStrChildren(int tab) {
 		String str = new String();
+		NodeLiteral currentLiteral;
 		int i;
 		
 		str += getStrTab(tab);
@@ -108,6 +113,8 @@ public class NodeMultiLine extends SyntaxNode {
 		if (type == SyntaxType.ifblock) {
 			str += getStrTab(tab);
 			str += operation.getValue() + ": \n";
+			
+			/*
 			str += getStrTab(tab);
 			str += "0: \n";
 			str += statements.get(0).getStrChildren(tab + 1);
@@ -117,18 +124,27 @@ public class NodeMultiLine extends SyntaxNode {
 				str += "1: \n";
 				str += statements.get(1).getStrChildren(tab + 1);
 			}
+			*/
+			
+			for (i = 0; i < statements.size(); i++) {
+				str += getStrTab(tab);
+				str += i + ": ";
+				str += statements.get(i).getStrChildren(tab + 1);
+			}
 			
 		} else if (type == SyntaxType.switchcase) {
 			str += getStrTab(tab);
 			str += operation.getValue() + ": \n";
 			
-			for (i = 0; i < switchLiterals.size(); i++) {
+			for (i = 0; i < ifConditions.size(); i++) {
+				currentLiteral = (NodeLiteral) ifConditions.get(i);
+				
 				str += getStrTab(tab);
 				
-				if (switchLiterals.get(i).getToken().getTokenKind() == TokenKind.yarnToken) {
-					str += "\""+ switchLiterals.get(i).getToken().getValue() + "\": \n";
+				if (currentLiteral.getToken().getTokenKind() == TokenKind.yarnToken) {
+					str += "\""+ currentLiteral.getToken().getValue() + "\": \n";
 				} else {
-					str += switchLiterals.get(i).getToken().getValue() + ": \n";
+					str += currentLiteral.getToken().getValue() + ": \n";
 				}
 				
 				str += statements.get(i).getStrChildren(tab + 1);
@@ -169,8 +185,8 @@ public class NodeMultiLine extends SyntaxNode {
 		return condition;
 	}
 	
-	public ArrayList<NodeLiteral> getSwitchLiterals() {
-		return switchLiterals;
+	public ArrayList<SyntaxNode> getIfConditions() {
+		return ifConditions;
 	}
 	
 	public ArrayList<SyntaxNode> getStatements() {

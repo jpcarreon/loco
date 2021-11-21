@@ -559,28 +559,46 @@ public class Evaluator {
 	
 	private void evalIfBlock(NodeMultiLine node) {
 		ArrayList<SyntaxNode> statements = node.getStatements();
+		ArrayList<SyntaxNode> ifConditions = node.getIfConditions();
 		Token boolCondition = symbolTable.get(0).getToken();
 		boolCondition = typecastToken(boolCondition, TokenKind.troofToken);
+		int counter = 1;
 		
 		if (boolCondition.getValue().equals("WIN")) {
 			evaluate(statements.get(0));
-		} else {
-			evaluate(statements.get(1));
+			
+			return;
+		} else if (ifConditions.size() > 0) {
+			for (SyntaxNode i : ifConditions) {
+				boolCondition = typecastToken(evalTerminal(i), TokenKind.troofToken);
+				
+				if (boolCondition.getValue().equals("WIN")) {
+					evaluate(statements.get(counter));
+					return;
+				}
+				
+				counter++;
+			}
+			
+			if (ifConditions.get(ifConditions.size() - 1) instanceof NodeLiteral) {
+				evaluate(statements.get(statements.size() - 1));
+			}
 		}
+		
 	}
 	
 	private void evalSwitchCase(NodeMultiLine node) {
 		ArrayList<SyntaxNode> statements = node.getStatements();
-		ArrayList<NodeLiteral> switchLiterals = node.getSwitchLiterals();
+		ArrayList<SyntaxNode> switchLiterals = node.getIfConditions();
 		NodeLiteral switchCondition = new NodeLiteral(symbolTable.get(0).getToken());
 		NodeOperation comparison;
 		int counter = 0;
 		
-		for (NodeLiteral i : switchLiterals) {
+		for (SyntaxNode i : switchLiterals) {
 			comparison = new NodeOperation(SyntaxType.cmpop, new Token(TokenKind.bothSameOpToken, "BOTH SAEM", -1), switchCondition, i);
 			
 			if (evalCmpOp(comparison).getValue().equals("WIN") ||
-				i.getToken().getTokenKind() == TokenKind.defaultToken) {
+				((NodeLiteral) i).getToken().getTokenKind() == TokenKind.defaultToken) {
 				
 				do {
 					switchBreak = false;
@@ -592,6 +610,8 @@ public class Evaluator {
 			
 			counter++;
 		}
+		
+		switchBreak = false;
 		
 	}
 	

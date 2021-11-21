@@ -1,6 +1,14 @@
 HAI
-	I HAS A var1 ITZ 545
-	SUM OF 1 AN MAEK SUM OF 2 AN 3 A NUMBAR
-	
-	VISIBLE SUM OF 1 AN MAEK SUM OF 2 AN 3 A NUMBAR
+    I HAS A temp ITZ 1
+	I HAS A temp2 ITZ 0
+
+    IM IN YR print10 UPPIN YR temp TIL BOTH SAEM temp AN "sss"
+        VISIBLE temp ":: " !
+
+		IM IN YR printEven UPPIN YR temp2 TIL BOTH SAEM temp2 AN temp
+			VISIBLE 1 !
+		IM OUTTA YR printEven
+
+		VISIBLE " "
+    IM OUTTA YR print10
 KTHXBYE

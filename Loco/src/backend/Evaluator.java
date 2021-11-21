@@ -19,12 +19,14 @@ public class Evaluator {
 	private SyntaxNode programCounter;
 	private SyntaxNode currentInstruction;
 	private int lineCounter;
+	private int loopLimit;
 	private int position;
 	
 	public Evaluator(File file) {
 		this.errorMsg = new String();
 		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
+		this.loopLimit = 999;
 		this.position = 0;
 		
 		parser = new Parser(file);
@@ -44,6 +46,7 @@ public class Evaluator {
 		this.errorMsg = new String();
 		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
+		this.loopLimit = 999;
 		this.position = 0;
 		
 		parser = new Parser(strFile);
@@ -83,12 +86,13 @@ public class Evaluator {
 		
 		
 		if (currentInstruction.getType() == SyntaxType.expression) {
-			//lineCounter = ((NodeExpression) currentInstruction).getLineCounter();
-			evalExpression();
+			evalExpression((NodeExpression) currentInstruction);
 			
 		} else if (currentInstruction.getType() == SyntaxType.assignment) {
-			//lineCounter = ((NodeAssignment) currentInstruction).getLineCounter();
-			evalAssignment();
+			evalAssignment((NodeAssignment) currentInstruction);
+			
+		} else {
+			evalFlowControl((NodeFlowControl) currentInstruction);
 		}
 		
 		updateLineCounter();
@@ -96,8 +100,44 @@ public class Evaluator {
 		if (!errorMsg.isBlank()) programCounter = null;
 	}
 	
-	private void evalExpression() {
-		SyntaxNode node = ((NodeExpression) currentInstruction).getNode();
+	private void evaluate(SyntaxNode statements) {
+		SyntaxNode currentLine;
+		
+		if (!errorMsg.isBlank()) {
+			programCounter = null;
+			return;
+		}
+		
+		
+		while (statements instanceof NodeStatement) {
+			currentLine = ((NodeStatement) statements).getOp1();
+			statements = ((NodeStatement) statements).getOp2();
+			
+			if (currentLine.getType() == SyntaxType.expression) {
+				evalExpression((NodeExpression) currentLine);
+				
+			} else if (currentLine.getType() == SyntaxType.assignment) {
+				evalAssignment((NodeAssignment) currentLine);
+				
+			} else {
+				evalFlowControl((NodeFlowControl) currentLine);
+			}
+		}
+		
+		if (statements.getType() == SyntaxType.expression) {
+			evalExpression((NodeExpression) statements);
+			
+		} else if (statements.getType() == SyntaxType.assignment) {
+			evalAssignment((NodeAssignment) statements);
+			
+		} else {
+			evalFlowControl((NodeFlowControl) statements);
+		}
+		
+	}
+	
+	private void evalExpression(NodeExpression currentInstruction) {
+		SyntaxNode node = currentInstruction.getNode();
 		Token token = new Token(TokenKind.noobToken, "", -1);
 		
 		if (node.getType() == SyntaxType.comment) {
@@ -127,8 +167,8 @@ public class Evaluator {
 		if (window == null) token.viewToken();
 	}
 	
-	private void evalAssignment() {
-		SyntaxNode node = ((NodeAssignment) currentInstruction).getNode();
+	private void evalAssignment(NodeAssignment currentInstruction) {
+		SyntaxNode node = currentInstruction.getNode();
 		
 		if (node.getType() == SyntaxType.newvar) {
 			evalNewVar((NodeDeclaration) node);
@@ -145,7 +185,21 @@ public class Evaluator {
 		}
 	}
 	
-
+	private void evalFlowControl(NodeFlowControl currentInstruction) {
+		SyntaxNode node = currentInstruction.getNode();
+		
+		if (node.getType() == SyntaxType.ifblock) {
+			
+			
+		} else if (node.getType() == SyntaxType.switchcase) {
+			
+			
+		} else if (node.getType() == SyntaxType.loop) {
+			evalLoop((NodeMultiLine) node);
+			
+		}
+	}
+	
 	
 	
 	
@@ -488,6 +542,84 @@ public class Evaluator {
 	
 	
 	
+	private void evalLoop(NodeMultiLine node) {
+		NodeDeclaration condition = (NodeDeclaration) node.getCondition();
+		Token varid = ((NodeDeclaration) condition).getVarID();
+		Token boolCondition = evalCmpOp((NodeOperation) condition.getValue());
+		Token newValue;
+		
+		int incFactor, counter = 0, symbolTableIdx = findVarValue(varid.getValue());
+		
+		
+		
+		if (symbolTableIdx >= symbolTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			return;
+		} else {
+			varid = symbolTable.get(symbolTableIdx).getToken();
+			
+			if (varid.getTokenKind() != TokenKind.numbarToken &&
+				varid.getTokenKind() != TokenKind.numbrToken) {
+				errorMsg = "Line " + lineCounter + ": Given variable id cannot be incremented/decremented ";
+				return;
+			}
+			
+		}
+		
+		if (node.getOpType().getTokenKind() == TokenKind.incToken) incFactor = 1;
+		else incFactor = -1;
+	
+		if (condition.getOperation().getTokenKind() == TokenKind.tilToken) {
+			while (boolCondition.getValue().equals("FAIL") && counter++ < loopLimit) {
+				varid = symbolTable.get(symbolTableIdx).getToken();
+				
+				evaluate(node.getStatements().get(0));
+				
+				if (varid.getTokenKind() == TokenKind.numbrToken) {
+					newValue = new Token(TokenKind.numbrToken, 
+										 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
+					
+					symbolTable.get(symbolTableIdx).setKindValue(newValue);
+				} else {
+					newValue = new Token(TokenKind.numbarToken, 
+							 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
+		
+					symbolTable.get(symbolTableIdx).setKindValue(newValue);
+					
+				}
+				
+				boolCondition = evalCmpOp((NodeOperation) condition.getValue());
+			}
+			
+		} else {
+			while (boolCondition.getValue().equals("WIN") && counter++ < loopLimit) {
+				varid = symbolTable.get(symbolTableIdx).getToken();
+				
+				evaluate(node.getStatements().get(0));
+				
+				if (varid.getTokenKind() == TokenKind.numbrToken) {
+					newValue = new Token(TokenKind.numbrToken, 
+										 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
+					
+					symbolTable.get(symbolTableIdx).setKindValue(newValue);
+				} else {
+					newValue = new Token(TokenKind.numbarToken, 
+							 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
+		
+					symbolTable.get(symbolTableIdx).setKindValue(newValue);
+					
+				}
+				
+				boolCondition = evalCmpOp((NodeOperation) condition.getValue());
+			}
+		}
+		
+		if (counter >= loopLimit) errorMsg = "Line " + lineCounter + ": InfLoopWarning; Loop has exceeded maximum allowed iterations (" + loopLimit + ")";
+
+	}
+	
+	
+	
 	
 	private Token evalTerminal(SyntaxNode operand) {		
 		if (operand.getType() == SyntaxType.varid) {
@@ -621,6 +753,10 @@ public class Evaluator {
 		return counter;
 	}
 	
+	public void changeLoopLimit(int limit) {
+		loopLimit = limit;
+	}
+	
 	private void updateLineCounter() {
 		//tokens.get(position).viewToken();
 
@@ -672,5 +808,6 @@ public class Evaluator {
 	public int getCurrentLine() {
 		return lineCounter;
 	}
+	
 	
 }

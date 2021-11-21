@@ -36,6 +36,7 @@ public class WindowController implements Initializable {
 	
 	private boolean isPTreeShow;
 	private String codeBackup;
+	private int loopLimit;
 	
 	public final static int WINDOW_HEIGHT = 675;
 	public final static int WINDOW_WIDTH = 1200;
@@ -68,7 +69,7 @@ public class WindowController implements Initializable {
 		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
 		
 		isPTreeShow = false;
-		
+		loopLimit = 999;
 	}
 	
 	@FXML
@@ -139,6 +140,8 @@ public class WindowController implements Initializable {
     		return;
     	}
     	
+    	evaluator.changeLoopLimit(loopLimit);
+    	
     	verticalSplit.setDividerPosition(0, 1.0);
     	
     	symbolTable.getItems().clear();
@@ -181,6 +184,8 @@ public class WindowController implements Initializable {
     	} catch (Exception e) {
     		return;
     	}
+    	
+    	evaluator.changeLoopLimit(loopLimit);
     	
     	verticalSplit.setDividerPosition(0, 1.0);
     	
@@ -258,6 +263,27 @@ public class WindowController implements Initializable {
     	codeTextArea.positionCaret(0);
     	consoleTextArea.positionCaret(0);
     	parseTreeTextArea.positionCaret(0);
+    }
+    
+    @FXML
+    void changeLoopLimit(ActionEvent event) {
+    	String input = displayInputBox("Change loop limit", "Loop Limit: ");
+    	
+    	Alert alert = new Alert(AlertType.ERROR);
+    	
+    	if (input.isEmpty() || input.isBlank()) {
+    		alert.setHeaderText("Empty Input!");
+    		alert.show();
+    		
+    		return;
+    	}
+    	
+    	try {
+    		loopLimit = Integer.parseInt(input);
+    	} catch (Exception e) {
+    		alert.setHeaderText("Invalid Input!");
+    		alert.show();
+    	}
     }
     
     @FXML

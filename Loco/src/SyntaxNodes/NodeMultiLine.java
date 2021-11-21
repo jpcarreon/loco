@@ -157,4 +157,25 @@ public class NodeMultiLine extends SyntaxNode {
 		return str;
 	}
 
+	public Token getOperation() {
+		return operation;
+	}
+
+	public Token getOpType() {
+		return optype;
+	}
+	
+	public SyntaxNode getCondition() {
+		return condition;
+	}
+	
+	public ArrayList<NodeLiteral> getSwitchLiterals() {
+		return switchLiterals;
+	}
+	
+	public ArrayList<SyntaxNode> getStatements() {
+		return statements;
+	}
+	
+	
 }

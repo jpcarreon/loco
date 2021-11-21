@@ -29,6 +29,9 @@ assignment:
 	;
 
 flowcontrol:
+	| ifblock
+	| switchcase
+	| loop
 	;
 
 varassign:
@@ -131,4 +134,22 @@ yarnLiteral:
 	;
 	
 	
-	
+
+	 	root
+	/ 	  |   		\
+HAI     line1           KTHXBYE
+
+
+
+ 		 root
+    / 	  |   	    	\
+HAI    statement       KTHXBYE
+		/ 	  \
+	line 2	statement
+			/	   \
+	   line 3     statement
+                    /     \
+                line  4   line 5
+
+
+

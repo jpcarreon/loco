@@ -28,6 +28,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 
 public class WindowController implements Initializable {
@@ -305,6 +306,12 @@ public class WindowController implements Initializable {
     }
     
     @FXML
+    void closeProgram(ActionEvent event) {
+    	Stage stage = (Stage) tokenTable.getScene().getWindow();
+    	stage.close();
+    }
+    
+    @FXML
     void setHotKey(KeyEvent event) {
     	if (event.getCode() == KeyCode.F6) runProgram(null);
     	else if (event.getCode() == KeyCode.F7) runDebug(null);
@@ -345,9 +352,8 @@ public class WindowController implements Initializable {
     	
     	
     	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");
-    	System.out.println("============================");
+
     	for (String i : codeBackup.split("\n")) {
-    		System.out.println(currentLine + " : " + counter);
     		
     		if (!i.isBlank()) {
     			if (counter++ == currentLine) {

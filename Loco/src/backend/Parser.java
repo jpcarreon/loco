@@ -366,13 +366,22 @@ public class Parser {
 	private SyntaxNode parseExpTypecast() {
 		Token operation = nextToken();
 		
-		Token varid = nextToken();
 		
+		if (current().getTokenKind() == TokenKind.idToken) {
+			Token varid = nextToken();
+			
+			lazyMatch(TokenKind.aToken);
+			
+			SyntaxNode vartype = new NodeLiteral(SyntaxType.vartype, match(TokenKind.typeToken));
+			
+			return new NodeDeclaration(SyntaxType.vartypechange, operation, varid, vartype);
+		}
+		
+		SyntaxNode expression = parseTerminal();
 		lazyMatch(TokenKind.aToken);
-		
 		SyntaxNode vartype = new NodeLiteral(SyntaxType.vartype, match(TokenKind.typeToken));
 		
-		return new NodeDeclaration(SyntaxType.vartypechange, operation, varid, vartype);
+		return new NodeOperation(SyntaxType.vartypechange, operation, expression, vartype);
 	}
 	
 	/*
@@ -436,11 +445,15 @@ public class Parser {
 		match(TokenKind.eolToken);
 		
 		statements.add(parseStatement());
-	
-		match(TokenKind.elseBlockToken);
-		match(TokenKind.eolToken);
+
+		if (current().getTokenKind() == TokenKind.elseBlockToken) {
+			
+			match(TokenKind.elseBlockToken);
+			match(TokenKind.eolToken);
+			
+			statements.add(parseStatement());
+		}
 		
-		statements.add(parseStatement());
 		
 		match(TokenKind.ifEndToken);
 		
@@ -571,25 +584,11 @@ public class Parser {
 				nextToken();
 				
 			} 
-			/*
-				else if (peek(1).getTokenKind() != TokenKind.quoteToken && 
-					  !peek(1).getValue().equals(":\"") &&
-					  !peek(1).getValue().equals(":")) {
-
-				value += nextToken().getValue() + " ";
-			
-			}
-			*/
 			else value += nextToken().getValue();
 		}
 		
 		match(TokenKind.quoteToken);
-		/*
-		if (match(TokenKind.quoteToken).getValue() == null) {
-			System.out.println("dd");
-			nextToken();
-		}
-		*/
+
 		return new Token(TokenKind.yarnToken, value, current().getPosition());
 	}
 	
@@ -628,6 +627,10 @@ public class Parser {
 	
 	protected ArrayList<Token> getTokens() {
 		return allTokens;
+	}
+	
+	protected ArrayList<Token> getParserTokens() {
+		return tokens;
 	}
 	
 	protected ArrayList<String> getDiagnostics() {

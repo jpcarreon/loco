@@ -56,9 +56,12 @@ public class NodeMultiLine extends SyntaxNode {
 			System.out.println("0: ");
 			statements.get(0).printChildren(tab + 1);
 			
-			printTab(tab);
-			System.out.println("1: ");
-			statements.get(1).printChildren(tab + 1);
+			if (statements.size() > 1) {
+				printTab(tab);
+				System.out.println("1: ");
+				statements.get(1).printChildren(tab + 1);
+			}
+			
 			
 			
 		} else if (type == SyntaxType.switchcase) {
@@ -109,9 +112,11 @@ public class NodeMultiLine extends SyntaxNode {
 			str += "0: \n";
 			str += statements.get(0).getStrChildren(tab + 1);
 			
-			str += getStrTab(tab);
-			str += "1: \n";
-			str += statements.get(1).getStrChildren(tab + 1);
+			if (statements.size() > 1) {
+				str += getStrTab(tab);
+				str += "1: \n";
+				str += statements.get(1).getStrChildren(tab + 1);
+			}
 			
 		} else if (type == SyntaxType.switchcase) {
 			str += getStrTab(tab);

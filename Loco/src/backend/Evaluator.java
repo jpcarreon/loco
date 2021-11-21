@@ -112,7 +112,7 @@ public class Evaluator {
 			token = evalCmpOp((NodeOperation) node);
 		
 		} else if (node.getType() == SyntaxType.vartypechange) {	
-			token = evalExpTypecast((NodeDeclaration) node);
+			token = evalExpTypecast(node);
 		
 		} else if (node.getType() == SyntaxType.concat) {
 			token = evalConcat((NodeOperation) node);
@@ -145,76 +145,9 @@ public class Evaluator {
 		}
 	}
 	
-	private void evalNewVar(NodeDeclaration node) {		
-		SymTabEntry newVar;
-		String varid = node.getVarID().getValue();
-		
-		if (findVarValue(varid) < symbolTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Duplicate instantiation of new variable";
-			return;
-		}
-		
-		if (node.getValue() != null) {
-			Token value = evalTerminal(node.getValue());
-			newVar = new SymTabEntry(varid, value.getTokenKind(), value.getValue());
-		} else {
-			newVar = new SymTabEntry(varid, TokenKind.noobToken, "");
-		}
-		
-		symbolTable.add(newVar);
-	}
-	
-	private Token evalPrint(NodeOperation node) {
-		String str = new String();
-		SyntaxNode operand1;
-		NodeOperation currentNode = node;
-		int symbolTableIdx;
-		boolean suppressNL = false;
 
-		while (true) {
-			operand1 = currentNode.getOp1();
-			
-			
-			if (operand1.getType() == SyntaxType.literal) {
-				
-				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
-					suppressNL = true;
-				} else {
-					str += ((NodeLiteral) operand1).getToken().getValue();
-				}	
-				
-			} else if (operand1.getType() == SyntaxType.varid) {
-				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue());
-				
-				if (symbolTableIdx >= symbolTable.size() ||
-					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
-					
-					errorMsg = "Line " + lineCounter + ": Uninitialized variable ";
-					break;
-					
-				} else if (symbolTableIdx < symbolTable.size()) {
-					str += symbolTable.get(symbolTableIdx).getValue();
-				}
-			
-			} else if (operand1.getType() == SyntaxType.mathop ||
-					   operand1.getType() == SyntaxType.boolop ||
-					   operand1.getType() == SyntaxType.cmpop) {
-				str += evalTerminal(operand1).getValue();
-			}
-			
-			if (currentNode.getOp2() == null) break;
-			else currentNode = (NodeOperation) currentNode.getOp2();
-		}
-		
-		str = str.replaceAll(":>", "\t");
-		str = str.replaceAll(":\\)", "\n");
-		str = str.replaceAll(":o", "\\\\g");
-		str = str.replaceAll("::", ":");
-		
-		if (!suppressNL) str += "\n";
-		
-		return new Token(TokenKind.yarnToken, str, -1);
-	}
+	
+	
 	
 	private Token evalMathOp(NodeOperation node) {
 		float op1, op2, result;
@@ -328,17 +261,29 @@ public class Evaluator {
 		return new Token(TokenKind.troofToken, "FAIL", -1);
 	}
 	
-	private Token evalExpTypecast(NodeDeclaration node) {
-		String varid = node.getVarID().getValue();
-		Token varType = ((NodeLiteral) node.getValue()).getToken();
+	private Token evalExpTypecast(SyntaxNode node) {
+		String varid;
+		Token varType;
 		Token value;
-		int symbolTableIdx = findVarValue(varid);
+		int symbolTableIdx;
 		
-		if (symbolTableIdx >= symbolTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
-			return new Token (TokenKind.badToken, "", -1);
+		if (node instanceof NodeDeclaration) {
+			varid = ((NodeDeclaration) node).getVarID().getValue();
+			varType = ((NodeLiteral) ((NodeDeclaration) node).getValue()).getToken();
+			symbolTableIdx = findVarValue(varid);
+			
+			if (symbolTableIdx >= symbolTable.size()) {
+				errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+				return new Token (TokenKind.badToken, "", -1);
+			}
+			
+			value = symbolTable.get(symbolTableIdx).getToken();
+			
+		} else {
+			value = evalTerminal(((NodeOperation) node).getOp1());
+			varType = ((NodeLiteral) ((NodeOperation) node).getOp2()).getToken();
+			
 		}
-		value = symbolTable.get(symbolTableIdx).getToken();
 		
 		if (varType.getValue().matches("YARN")) {
 			value = typecastToken(value, TokenKind.yarnToken);
@@ -351,6 +296,7 @@ public class Evaluator {
 		}
 		
 		return value;
+		
 	}
 	
 	private Token evalConcat(NodeOperation node) {
@@ -395,6 +341,79 @@ public class Evaluator {
 		str = str.replaceAll("\\\\t", "\t");
 		
 		return new Token(TokenKind.yarnToken, str, -1);
+	}
+	
+	private Token evalPrint(NodeOperation node) {
+		String str = new String();
+		SyntaxNode operand1;
+		NodeOperation currentNode = node;
+		int symbolTableIdx;
+		boolean suppressNL = false;
+
+		while (true) {
+			operand1 = currentNode.getOp1();
+			
+			
+			if (operand1.getType() == SyntaxType.literal) {
+				
+				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
+					suppressNL = true;
+				} else {
+					str += ((NodeLiteral) operand1).getToken().getValue();
+				}	
+				
+			} else if (operand1.getType() == SyntaxType.varid) {
+				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue());
+				
+				if (symbolTableIdx >= symbolTable.size() ||
+					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
+					
+					errorMsg = "Line " + lineCounter + ": Uninitialized variable ";
+					break;
+					
+				} else if (symbolTableIdx < symbolTable.size()) {
+					str += symbolTable.get(symbolTableIdx).getValue();
+				}
+			
+			} else if (operand1.getType() == SyntaxType.mathop ||
+					   operand1.getType() == SyntaxType.boolop ||
+					   operand1.getType() == SyntaxType.cmpop) {
+				str += evalTerminal(operand1).getValue();
+			}
+			
+			if (currentNode.getOp2() == null) break;
+			else currentNode = (NodeOperation) currentNode.getOp2();
+		}
+		
+		str = str.replaceAll(":>", "\t");
+		str = str.replaceAll(":\\)", "\n");
+		str = str.replaceAll(":o", "\\\\g");
+		str = str.replaceAll("::", ":");
+		
+		if (!suppressNL) str += "\n";
+		
+		return new Token(TokenKind.yarnToken, str, -1);
+	}
+	
+	
+	
+	private void evalNewVar(NodeDeclaration node) {		
+		SymTabEntry newVar;
+		String varid = node.getVarID().getValue();
+		
+		if (findVarValue(varid) < symbolTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Duplicate instantiation of new variable";
+			return;
+		}
+		
+		if (node.getValue() != null) {
+			Token value = evalTerminal(node.getValue());
+			newVar = new SymTabEntry(varid, value.getTokenKind(), value.getValue());
+		} else {
+			newVar = new SymTabEntry(varid, TokenKind.noobToken, "");
+		}
+		
+		symbolTable.add(newVar);
 	}
 	
 	private void evalVarChange(NodeDeclaration node) {
@@ -467,6 +486,9 @@ public class Evaluator {
 		symbolTable.get(symbolTableIdx).setKindValue(token);	
 	}
 	
+	
+	
+	
 	private Token evalTerminal(SyntaxNode operand) {		
 		if (operand.getType() == SyntaxType.varid) {
 			Token token = ((NodeLiteral) operand).getToken();
@@ -493,7 +515,7 @@ public class Evaluator {
 			return evalCmpOp((NodeOperation) operand);
 					
 		} else if (operand.getType() == SyntaxType.vartypechange) {
-			return evalExpTypecast((NodeDeclaration) operand);
+			return evalExpTypecast(operand);
 			
 		}
 		
@@ -588,6 +610,7 @@ public class Evaluator {
 	}
 	
 	
+	
 	private int findVarValue(String varid) {
 		int counter = 0;
 		for (SymTabEntry entry : symbolTable) {
@@ -599,11 +622,16 @@ public class Evaluator {
 	}
 	
 	private void updateLineCounter() {
+		//tokens.get(position).viewToken();
+
+			
 		while (tokens.get(position).getTokenKind() != TokenKind.eolToken) {
 			position++;
 		}
 		position++;
 		lineCounter++;
+		
+		//tokens.get(position).viewToken();
 		
 	}
 	

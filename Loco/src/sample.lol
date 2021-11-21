@@ -1,17 +1,8 @@
 HAI
-	I HAS A temp ITZ 1
+	SMOOSH "sfsd" AN "FSDFSD" AN "FSDFSDf"
 	
-	MAEK temp A NUMBR
+	SMOOSH ALL OF 1 AN 2 AN 3 MKAY AN "sdfsd"
 	
-	WTF?
-    OMG 1
-        VISIBLE "One NUMBR"
-        GTFO
-    OMG "1"
-        VISIBLE "One YARN"
-        GTFO
-    OMGWTF
-        VISIBLE "NOT One"
-    OIC
+	
 
 KTHXBYE

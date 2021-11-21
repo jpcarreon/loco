@@ -512,8 +512,9 @@ public class Parser {
 		}
 		
 		match(TokenKind.yrToken);
-		
 		Token varid = match(TokenKind.idToken);
+		
+		
 		if (current().getTokenKind() == TokenKind.tilToken || current().getTokenKind() == TokenKind.wileToken) {
 			if (peek(1).getTokenKind().getType() != "cmpop") {
 				diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ peek(1).getTokenKind().getType() 
@@ -521,10 +522,14 @@ public class Parser {
 			}
 			condition = new NodeDeclaration(SyntaxType.loopcond, nextToken(), varid, parseCmpOp());
 		} else {
+			/*
 			diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
 					+ "> expected <tilToken>/<wileToken>");
 			Token tempToken = new Token(TokenKind.tilToken, "TIL", -1);
 			condition = new NodeDeclaration(SyntaxType.loopcond, tempToken, varid, parseCmpOp());
+			*/
+			Token tempToken = new Token(TokenKind.troofToken, "WIN", -1);
+			condition = new NodeDeclaration(SyntaxType.loopcond, tempToken, varid);
 		}
 		
 		match(TokenKind.eolToken);
@@ -534,7 +539,6 @@ public class Parser {
 		match(TokenKind.loopEndToken);
 		
 		if (!loopid.getValue().equals(current().getValue())) {
-			System.out.println(current().getValue() + " " + loopid.getValue());
 			diagnostics.add("Line "+ lineCounter + ": Loop id mismatch");
 			
 		} 

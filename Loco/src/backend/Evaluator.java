@@ -117,7 +117,8 @@ public class Evaluator {
 			statements = ((NodeStatement) statements).getOp2();
 			
 			if (currentLine.getType() == SyntaxType.gtfo) {
-				errorMsg = "Line " + lineCounter + ": Invalid placement of <breakToken>";
+				//errorMsg = "Line " + lineCounter + ": Invalid placement of <breakToken>";
+				switchBreak = true;
 				return;
 				
 			} else if (currentLine.getType() == SyntaxType.expression) {
@@ -618,7 +619,7 @@ public class Evaluator {
 	private void evalLoop(NodeMultiLine node) {
 		NodeDeclaration condition = (NodeDeclaration) node.getCondition();
 		Token varid = ((NodeDeclaration) condition).getVarID();
-		Token boolCondition = evalCmpOp((NodeOperation) condition.getValue());
+		Token boolCondition;
 		Token newValue;
 		
 		int incFactor, counter = 0, symbolTableIdx = findVarValue(varid.getValue());
@@ -641,34 +642,62 @@ public class Evaluator {
 		
 		if (node.getOpType().getTokenKind() == TokenKind.incToken) incFactor = 1;
 		else incFactor = -1;
-	
-		if (condition.getOperation().getTokenKind() == TokenKind.tilToken) {
-			while (boolCondition.getValue().equals("FAIL") && counter++ < loopLimit) {
-				varid = symbolTable.get(symbolTableIdx).getToken();
-				
-				evaluate(node.getStatements().get(0));
-				
-				if (varid.getTokenKind() == TokenKind.numbrToken) {
-					newValue = new Token(TokenKind.numbrToken, 
-										 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
-					
-					symbolTable.get(symbolTableIdx).setKindValue(newValue);
-				} else {
-					newValue = new Token(TokenKind.numbarToken, 
-							 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
 		
-					symbolTable.get(symbolTableIdx).setKindValue(newValue);
-					
-				}
-				
-				boolCondition = evalCmpOp((NodeOperation) condition.getValue());
-			}
+		if (condition.getOperation().getTokenKind() != TokenKind.troofToken) {
+			boolCondition = evalCmpOp((NodeOperation) condition.getValue());
 			
+			if (condition.getOperation().getTokenKind() == TokenKind.tilToken) {
+				while (boolCondition.getValue().equals("FAIL") && counter++ < loopLimit) {
+					varid = symbolTable.get(symbolTableIdx).getToken();
+					
+					evaluate(node.getStatements().get(0));
+					if (switchBreak) break;
+					
+					if (varid.getTokenKind() == TokenKind.numbrToken) {
+						newValue = new Token(TokenKind.numbrToken, 
+											 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
+						
+						symbolTable.get(symbolTableIdx).setKindValue(newValue);
+					} else {
+						newValue = new Token(TokenKind.numbarToken, 
+								 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
+			
+						symbolTable.get(symbolTableIdx).setKindValue(newValue);
+						
+					}
+					
+					boolCondition = evalCmpOp((NodeOperation) condition.getValue());
+				}
+				
+			} else {
+				while (boolCondition.getValue().equals("WIN") && counter++ < loopLimit) {
+					varid = symbolTable.get(symbolTableIdx).getToken();
+					
+					evaluate(node.getStatements().get(0));
+					if (switchBreak) break;
+					
+					if (varid.getTokenKind() == TokenKind.numbrToken) {
+						newValue = new Token(TokenKind.numbrToken, 
+											 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
+						
+						symbolTable.get(symbolTableIdx).setKindValue(newValue);
+					} else {
+						newValue = new Token(TokenKind.numbarToken, 
+								 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
+			
+						symbolTable.get(symbolTableIdx).setKindValue(newValue);
+						
+					}
+					
+					boolCondition = evalCmpOp((NodeOperation) condition.getValue());
+				}
+			}
 		} else {
-			while (boolCondition.getValue().equals("WIN") && counter++ < loopLimit) {
+			while (true && counter++ < loopLimit) {
 				varid = symbolTable.get(symbolTableIdx).getToken();
 				
 				evaluate(node.getStatements().get(0));
+				if (switchBreak) break;
 				
 				if (varid.getTokenKind() == TokenKind.numbrToken) {
 					newValue = new Token(TokenKind.numbrToken, 
@@ -682,10 +711,13 @@ public class Evaluator {
 					symbolTable.get(symbolTableIdx).setKindValue(newValue);
 					
 				}
-				
-				boolCondition = evalCmpOp((NodeOperation) condition.getValue());
 			}
 		}
+
+		
+		
+		
+		switchBreak = false;
 		
 		if (counter >= loopLimit) errorMsg = "Line " + lineCounter + ": InfLoopWarning; Loop has exceeded maximum allowed iterations (" + loopLimit + ")";
 

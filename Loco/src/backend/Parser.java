@@ -259,12 +259,18 @@ public class Parser {
 	private SyntaxNode parseComment() {
 		ArrayList<Token> inner = new ArrayList<Token>();
 		Token start = nextToken();
+		int counter = 0;
 		
 		while (current().getTokenKind() != TokenKind.tldrToken && current().getTokenKind() != TokenKind.byeToken) {
-			if (current().getValue() == "\n") lineCounter++;
+			if (current().getValue() == "\n") {
+				counter++;
+				lineCounter++;
+			}
 			inner.add(nextToken());
 		}
 		Token end = match(TokenKind.tldrToken);
+		
+		if (counter < 2) diagnostics.add("Line "+ lineCounter + ": Invalid comment structure");
 		
 		return new NodeComment(start, inner, end);
 	}

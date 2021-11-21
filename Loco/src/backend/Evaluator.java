@@ -714,9 +714,6 @@ public class Evaluator {
 			}
 		}
 
-		
-		
-		
 		switchBreak = false;
 		
 		if (counter >= loopLimit) errorMsg = "Line " + lineCounter + ": InfLoopWarning; Loop has exceeded maximum allowed iterations (" + loopLimit + ")";

@@ -1,8 +1,6 @@
 HAI
-	SMOOSH "sfsd" AN "FSDFSD" AN "FSDFSDf"
+	I HAS A var1 ITZ 5
 	
-	SMOOSH ALL OF 1 AN 2 AN 3 MKAY AN "sdfsd"
-	
-	
+	VISIBLE "He:)llo" BOTH OF WIN AN FAIL ":: :> :o :" dsdfsd :" " MOD OF 2 AN 0 var1 !
 
 KTHXBYE

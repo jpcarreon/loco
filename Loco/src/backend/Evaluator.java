@@ -164,6 +164,9 @@ public class Evaluator {
 		} else if (node.getType() == SyntaxType.cmpop) {
 			token = evalCmpOp((NodeOperation) node);
 		
+		} else if (node.getType() == SyntaxType.infarop) {
+			token = evalInfArOp((NodeOperation) node);
+			
 		} else if (node.getType() == SyntaxType.vartypechange) {	
 			token = evalExpTypecast(node);
 		
@@ -328,6 +331,43 @@ public class Evaluator {
 		return new Token(TokenKind.troofToken, "FAIL", -1);
 	}
 	
+	private Token evalInfArOp(NodeOperation node) {
+		boolean result = true;
+		Token operation = node.getOperation();
+		Token operand1;
+		NodeOperation currentNode = node;
+		
+		if (operation.getTokenKind() == TokenKind.anyOpToken) result = false;
+		
+		while (true) {
+			operand1 = evalTerminal(currentNode.getOp1());
+			operand1 = typecastToken(operand1, TokenKind.troofToken);
+			
+			if (operation.getTokenKind() == TokenKind.anyOpToken) {
+				
+				if (operand1.getValue().equals("WIN")) result = result || true;
+				else result = result || false;
+				
+				
+			} else {
+				
+				if (operand1.getValue().equals("WIN")) result = result && true;
+				else result = result && false;
+				
+			}			
+			
+			if (currentNode.getOp2() == null) break;
+			else currentNode = (NodeOperation) currentNode.getOp2();
+		}
+		
+		
+		if (result) {
+			return new Token(TokenKind.troofToken, "WIN", -1);
+		}
+		
+		return new Token(TokenKind.troofToken, "FAIL", -1);
+	}
+	
 	private Token evalExpTypecast(SyntaxNode node) {
 		String varid;
 		Token varType;
@@ -370,14 +410,16 @@ public class Evaluator {
 	
 	private Token evalConcat(NodeOperation node) {
 		String str = new String();
-		SyntaxNode operand1;
+		Token operand1;
 		NodeOperation currentNode = node;
-		int symbolTableIdx;
 
 		while (true) {
-			operand1 = currentNode.getOp1();
+			operand1 = evalTerminal(currentNode.getOp1());
+			operand1 = typecastToken(operand1, TokenKind.yarnToken);
 			
+			str += operand1.getValue();
 			
+			/*
 			if (operand1.getType() == SyntaxType.literal) {
 				str += ((NodeLiteral) operand1).getToken().getValue();
 			
@@ -400,6 +442,7 @@ public class Evaluator {
 					   operand1.getType() == SyntaxType.cmpop) {
 				str += evalTerminal(operand1).getValue();
 			}
+			*/
 			
 			
 			if (currentNode.getOp2() == null) break;
@@ -414,15 +457,23 @@ public class Evaluator {
 	
 	private Token evalPrint(NodeOperation node) {
 		String str = new String();
-		SyntaxNode operand1;
+		Token operand1;
 		NodeOperation currentNode = node;
-		int symbolTableIdx;
 		boolean suppressNL = false;
 
 		while (true) {
-			operand1 = currentNode.getOp1();
+			operand1 = evalTerminal(currentNode.getOp1());
+			
+			if (operand1.getTokenKind() != TokenKind.exclamationToken) {
+				operand1 = typecastToken(operand1, TokenKind.yarnToken);
+				
+				str += operand1.getValue();
+				
+			} else suppressNL = true;
 			
 			
+			
+			/*
 			if (operand1.getType() == SyntaxType.literal) {
 				
 				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
@@ -449,6 +500,7 @@ public class Evaluator {
 					   operand1.getType() == SyntaxType.cmpop) {
 				str += evalTerminal(operand1).getValue();
 			}
+			*/
 			
 			if (currentNode.getOp2() == null) break;
 			else currentNode = (NodeOperation) currentNode.getOp2();
@@ -733,9 +785,8 @@ public class Evaluator {
 			} else if (symbolTable.get(idx).getValue().isEmpty()) {
 				this.errorMsg = "Line "+ lineCounter + ": Uninitialized variable <"+token.getValue()+">";
 				return new Token(TokenKind.numbrToken, "0", -1);
-			} else {
-				SymTabEntry entry = symbolTable.get(idx);
-				return new Token(entry.getKind(), entry.getValue(), token.getPosition());
+			} else {				
+				return symbolTable.get(idx).getToken();
 			}
 			
 		} else if (operand.getType() == SyntaxType.mathop) {
@@ -747,6 +798,9 @@ public class Evaluator {
 		} else if (operand.getType() == SyntaxType.cmpop) {
 			return evalCmpOp((NodeOperation) operand);
 					
+		} else if (operand.getType() == SyntaxType.infarop) {
+			return evalInfArOp((NodeOperation) operand);
+			
 		} else if (operand.getType() == SyntaxType.vartypechange) {
 			return evalExpTypecast(operand);
 			

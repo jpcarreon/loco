@@ -18,6 +18,7 @@ public class Evaluator {
 	private NodeRoot root;
 	private SyntaxNode programCounter;
 	private SyntaxNode currentInstruction;
+	private boolean switchBreak;
 	private int lineCounter;
 	private int loopLimit;
 	private int position;
@@ -27,6 +28,7 @@ public class Evaluator {
 		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
 		this.loopLimit = 999;
+		this.switchBreak = false;
 		this.position = 0;
 		
 		parser = new Parser(file);
@@ -47,6 +49,7 @@ public class Evaluator {
 		this.symbolTable = new ArrayList<SymTabEntry>();
 		this.lineCounter = 1;
 		this.loopLimit = 999;
+		this.switchBreak = false;
 		this.position = 0;
 		
 		parser = new Parser(strFile);
@@ -113,7 +116,11 @@ public class Evaluator {
 			currentLine = ((NodeStatement) statements).getOp1();
 			statements = ((NodeStatement) statements).getOp2();
 			
-			if (currentLine.getType() == SyntaxType.expression) {
+			if (currentLine.getType() == SyntaxType.gtfo) {
+				errorMsg = "Line " + lineCounter + ": Invalid placement of <breakToken>";
+				return;
+				
+			} else if (currentLine.getType() == SyntaxType.expression) {
 				evalExpression((NodeExpression) currentLine);
 				
 			} else if (currentLine.getType() == SyntaxType.assignment) {
@@ -124,6 +131,11 @@ public class Evaluator {
 			}
 		}
 		
+		if (statements.getType() == SyntaxType.gtfo) {
+			switchBreak = true;
+			return;
+		}
+	
 		if (statements.getType() == SyntaxType.expression) {
 			evalExpression((NodeExpression) statements);
 			
@@ -189,10 +201,10 @@ public class Evaluator {
 		SyntaxNode node = currentInstruction.getNode();
 		
 		if (node.getType() == SyntaxType.ifblock) {
-			
+			evalIfBlock((NodeMultiLine) node);
 			
 		} else if (node.getType() == SyntaxType.switchcase) {
-			
+			evalSwitchCase((NodeMultiLine) node);
 			
 		} else if (node.getType() == SyntaxType.loop) {
 			evalLoop((NodeMultiLine) node);
@@ -345,8 +357,10 @@ public class Evaluator {
 			value = typecastToken(value, TokenKind.numbrToken);
 		} else if (varType.getValue().matches("NUMBAR")) {
 			value = typecastToken(value, TokenKind.numbarToken);
-		} else {
+		} else if (varType.getValue().matches("TROOF")) {
 			value = typecastToken(value, TokenKind.troofToken);
+		} else {
+			value = typecastToken(value, TokenKind.noobToken);
 		}
 		
 		return value;
@@ -503,8 +517,10 @@ public class Evaluator {
 			value = typecastToken(value, TokenKind.numbrToken);
 		} else if (varType.getValue().matches("NUMBAR")) {
 			value = typecastToken(value, TokenKind.numbarToken);
-		} else {
+		} else if (varType.getValue().matches("TROOF")) {
 			value = typecastToken(value, TokenKind.troofToken);
+		} else {
+			value = typecastToken(value, TokenKind.noobToken);
 		}
 		
 		
@@ -541,6 +557,43 @@ public class Evaluator {
 	}
 	
 	
+	private void evalIfBlock(NodeMultiLine node) {
+		ArrayList<SyntaxNode> statements = node.getStatements();
+		Token boolCondition = symbolTable.get(0).getToken();
+		boolCondition = typecastToken(boolCondition, TokenKind.troofToken);
+		
+		if (boolCondition.getValue().equals("WIN")) {
+			evaluate(statements.get(0));
+		} else {
+			evaluate(statements.get(1));
+		}
+	}
+	
+	private void evalSwitchCase(NodeMultiLine node) {
+		ArrayList<SyntaxNode> statements = node.getStatements();
+		ArrayList<NodeLiteral> switchLiterals = node.getSwitchLiterals();
+		NodeLiteral switchCondition = new NodeLiteral(symbolTable.get(0).getToken());
+		NodeOperation comparison;
+		int counter = 0;
+		
+		for (NodeLiteral i : switchLiterals) {
+			comparison = new NodeOperation(SyntaxType.cmpop, new Token(TokenKind.bothSameOpToken, "BOTH SAEM", -1), switchCondition, i);
+			
+			if (evalCmpOp(comparison).getValue().equals("WIN") ||
+				i.getToken().getTokenKind() == TokenKind.defaultToken) {
+				
+				do {
+					switchBreak = false;
+					evaluate(statements.get(counter++));
+				} while (!switchBreak && counter < statements.size());
+				
+				break;
+			}
+			
+			counter++;
+		}
+		
+	}
 	
 	private void evalLoop(NodeMultiLine node) {
 		NodeDeclaration condition = (NodeDeclaration) node.getCondition();
@@ -620,7 +673,6 @@ public class Evaluator {
 	
 	
 	
-	
 	private Token evalTerminal(SyntaxNode operand) {		
 		if (operand.getType() == SyntaxType.varid) {
 			Token token = ((NodeLiteral) operand).getToken();
@@ -659,6 +711,7 @@ public class Evaluator {
 		int numbr = 0;
 		boolean troof = true, isFloat = true, isInt = true;
 		String yarn = new String();
+		String noob = new String();
 		
 		if (token.getTokenKind() == kind) return token;
 		
@@ -667,6 +720,7 @@ public class Evaluator {
 			numbar = Float.parseFloat(token.getValue());
 			numbr = (int) Float.parseFloat(token.getValue());
 			yarn = token.getValue();
+			noob = "0";
 			
 			if (numbr == 0) troof = false;
 			else troof = true;
@@ -675,6 +729,7 @@ public class Evaluator {
 			numbar = Float.parseFloat(token.getValue());
 			numbr = (int) Float.parseFloat(token.getValue());
 			yarn = token.getValue();
+			noob = "0";
 			
 			if (numbar == (float) 0) troof = false;
 			else troof = true;
@@ -714,11 +769,13 @@ public class Evaluator {
 			isInt = false;
 			isFloat = false;
 			yarn = new String();
-			troof = true;
+			troof = false;
 		}
 		
  		
-		
+		if (kind == TokenKind.noobToken) {
+			return new Token(token.getTokenKind(), noob, token.getPosition());
+		}
 		
 		if (kind == TokenKind.troofToken) {
 			if (troof) return new Token(TokenKind.troofToken, "WIN", token.getPosition());

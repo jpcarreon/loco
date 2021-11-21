@@ -72,7 +72,7 @@ public class NodeMultiLine extends SyntaxNode {
 				printTab(tab);
 				
 				if (switchLiterals.get(i).getToken().getTokenKind() == TokenKind.yarnToken) {
-					System.out.println("\"" + switchLiterals.get(i).getToken().getValue().trim() + "\": ");
+					System.out.println("\"" + switchLiterals.get(i).getToken().getValue() + "\": ");
 				} else {
 					System.out.println(switchLiterals.get(i).getToken().getValue() + ": ");
 				}
@@ -126,7 +126,7 @@ public class NodeMultiLine extends SyntaxNode {
 				str += getStrTab(tab);
 				
 				if (switchLiterals.get(i).getToken().getTokenKind() == TokenKind.yarnToken) {
-					str += "\""+ switchLiterals.get(i).getToken().getValue().trim() + "\": \n";
+					str += "\""+ switchLiterals.get(i).getToken().getValue() + "\": \n";
 				} else {
 					str += switchLiterals.get(i).getToken().getValue() + ": \n";
 				}

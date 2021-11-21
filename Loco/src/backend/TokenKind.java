@@ -8,7 +8,7 @@ public enum TokenKind {
 	numbarToken("-?[0-9]+\\.[0-9]+", "literal", 1), 
 	yarnToken("(\".+?|\"[^\"]+\")", "literal", -1), 
 	troofToken("WIN|FAIL", "literal", 1), 
-	typeToken("(TROOF|NUMBR|NUMBAR|YARN)", "literal", 1),
+	typeToken("(TROOF|NUMBR|NUMBAR|YARN|NOOB)", "literal", 1),
 
 	btwToken("BTW", "comment", 1), obtwToken("OBTW", "comment",1), tldrToken("TLDR", "comment",1),
 

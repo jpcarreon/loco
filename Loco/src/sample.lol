@@ -1,5 +1,4 @@
 HAI
-
 	I HAS A temp ITZ 1
 	
 	MAEK temp A NUMBR
@@ -14,18 +13,5 @@ HAI
     OMGWTF
         VISIBLE "NOT One"
     OIC
-
-
-    IM IN YR print10 UPPIN YR temp 
-        VISIBLE temp !
-        
-        
-        DIFFRINT temp AN SMALLR OF temp AN 5 
-        O RLY?
-        	YA RLY
-        		GTFO
-        OIC
-        
-    IM OUTTA YR print10
 
 KTHXBYE

@@ -126,6 +126,7 @@ public class Parser {
 
 	public NodeRoot parse() {
 		NodeRoot root;
+		lazyMatch(TokenKind.eolToken);
 		
 		Token start = match(TokenKind.haiToken);
 		

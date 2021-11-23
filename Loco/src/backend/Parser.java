@@ -15,6 +15,7 @@ public class Parser {
 	private boolean inInfarop;
 	private boolean inSmoosh;
 	private boolean inFlowControl;
+	private boolean inFunction;
 	
 	public Parser (File file) {
 		this.tokens = new ArrayList<Token>();
@@ -26,6 +27,7 @@ public class Parser {
 		this.inInfarop = false;
 		this.inSmoosh = false;
 		this.inFlowControl = false;
+		this.inFunction = false;
 		
 		Lexer lexer = new Lexer(file);
 		Token curToken;
@@ -59,6 +61,7 @@ public class Parser {
 		this.inInfarop = false;
 		this.inSmoosh = false;
 		this.inFlowControl = false;
+		this.inFunction = false;
 		
 		Lexer lexer = new Lexer(strFile);
 		Token curToken;
@@ -178,6 +181,7 @@ public class Parser {
 		while (current().getTokenKind() != TokenKind.byeToken && 
 			   current().getTokenKind() != TokenKind.eofToken &&
 			   current().getTokenKind() != TokenKind.loopEndToken &&
+			   current().getTokenKind() != TokenKind.functionEndToken &&
 			   current().getTokenKind().getType() != "switch" &&
 			   current().getTokenKind().getType() != "ifblock") {
 			expression = new NodeStatement(expression, parseStatement());
@@ -222,8 +226,15 @@ public class Parser {
 		} else if (current().getTokenKind() == TokenKind.printToken) {
 			return new NodeExpression(parsePrint(nextToken()), lineCounter);
 			
-		} else if  (current().getTokenKind() == TokenKind.breakToken) {
+		} else if (current().getTokenKind() == TokenKind.breakToken) {
 			return new NodeLiteral(SyntaxType.gtfo, nextToken());
+			
+		} else if (current().getTokenKind() == TokenKind.functionRetToken) {
+			return new NodeExpression(parseFunctionRet(), lineCounter);
+			
+		} else if (current().getTokenKind() == TokenKind.functionCallToken) {
+			return new NodeExpression(parseFunctionCall(), lineCounter);
+			
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword ");
@@ -268,6 +279,10 @@ public class Parser {
 			
 		} else if (current().getTokenKind() == TokenKind.loopStartToken) {
 			return new NodeFlowControl(parseLoop(), lineCounter);
+			
+		} else if (current().getTokenKind() == TokenKind.functionStartToken) {
+			inFunction = true;
+			return new NodeFlowControl(parseFunction(), lineCounter);
 			
 		}
 		
@@ -414,6 +429,38 @@ public class Parser {
 		
 		return new NodeOperation(SyntaxType.vartypechange, operation, expression, vartype);
 	}
+	
+	
+	private SyntaxNode parseFunctionRet() {
+		Token operation = nextToken();
+		SyntaxNode operand1 = parseTerminal();
+		
+		return new NodeOperation(SyntaxType.functionret, operation, operand1);
+	}
+	
+	private SyntaxNode parseFunctionCall() {
+		ArrayList<SyntaxNode> parameters = new ArrayList<SyntaxNode>();
+		Token operation = nextToken();
+		Token functionid = match(TokenKind.idToken);
+		
+		
+		
+		if (current().getTokenKind() == TokenKind.yrToken) {
+			nextToken();
+			parameters.add(parseTerminal());
+			
+			while(current().getTokenKind() == TokenKind.anToken) {
+				nextToken();
+				match(TokenKind.yrToken);
+				parameters.add(parseTerminal());
+			}
+		}
+		
+		match(TokenKind.mkayToken);
+		
+		return new NodeFunctionCall(operation, functionid, parameters);
+	}
+	
 	
 	/*
 	 ========================
@@ -589,7 +636,31 @@ public class Parser {
 		return new NodeMultiLine(operation, loopid, optype, condition, statements);
 	}
 	
-	
+	private SyntaxNode parseFunction() {
+		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
+		ArrayList<SyntaxNode> parameters = new ArrayList<SyntaxNode>();
+		nextToken();
+		Token functionid = match(TokenKind.idToken);
+		
+		if (current().getTokenKind() == TokenKind.yrToken) {
+			nextToken();
+			parameters.add(new NodeLiteral(SyntaxType.varid, match(TokenKind.idToken)));
+			
+			while(current().getTokenKind() == TokenKind.anToken) {
+				nextToken();
+				match(TokenKind.yrToken);
+				parameters.add(new NodeLiteral(SyntaxType.varid, match(TokenKind.idToken)));
+			}
+		}
+		
+		match(TokenKind.eolToken);
+		
+		statements.add(parseStatement());
+		
+		match(TokenKind.functionEndToken);
+		
+		return new NodeMultiLine(SyntaxType.function, functionid, parameters, statements);
+	}
 	
 	
 	
@@ -707,7 +778,8 @@ public class Parser {
 	private boolean isFlowControl() {
 		if (current().getTokenKind() == TokenKind.ifStartToken ||
 			current().getTokenKind() == TokenKind.switchToken ||
-			current().getTokenKind() == TokenKind.loopStartToken) {
+			current().getTokenKind() == TokenKind.loopStartToken ||
+			current().getTokenKind() == TokenKind.functionStartToken) {
 			return true;
 		}
 		

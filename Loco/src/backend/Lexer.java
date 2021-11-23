@@ -151,6 +151,13 @@ public class Lexer {
 		    return new Token(TokenKind.eofToken, "\0", position);
 		}
 		
+		//	Peek at the next 3 lexemes and check if it matches the only 4 word keyword token, functionEndToken
+		lexeme = currentLexeme() + " " + peek(1) + " " + peek(2) + " " + peek(3);
+		if (lexeme.matches(TokenKind.functionEndToken.getRegex())) {
+			position = position + 4;
+			return new Token(TokenKind.functionEndToken, lexeme, position - 4);
+		}
+		
 		for (TokenKind kind : TokenKind.values()) {
 			//	Peek at the next 2 lexemes and check if it matches a 3 word keyword
 			lexeme = currentLexeme() + " " + peek(1) + " " + peek(2);

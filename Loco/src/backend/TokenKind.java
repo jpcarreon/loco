@@ -68,6 +68,11 @@ public enum TokenKind {
 	
 	loopEndToken("IM\sOUTTA\sYR", "loop", 3),
 	
+	functionStartToken("HOW\sIZ\sI", "function", 3),
+	functionRetToken("FOUND\sYR", "function", 2),
+	functionEndToken("IF\sU\sSAY\sSO", "function", 4),
+	functionCallToken("I\sIZ", "function", 2),
+	
 	idToken("[a-zA-Z][a-zA-Z0-9_]*", "varident", 1), 
 
 	quoteToken("\"", "", 1), whitespaceToken("\s", "", 1), escapeCharToken(":[\\)>o\":]", "", 1),

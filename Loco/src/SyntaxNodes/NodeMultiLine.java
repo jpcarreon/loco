@@ -81,6 +81,25 @@ public class NodeMultiLine extends SyntaxNode {
 			printTab(tab);
 			System.out.println("0: ");
 			statements.get(0).printChildren(tab + 1);
+		
+		} else if (type == SyntaxType.function) {
+			printTab(tab);
+			System.out.println("HOW IZ I: " + operation.getValue());
+			
+			printTab(tab);
+			System.out.println("Parameters: ");
+			
+			printTab(tab + 1);
+			for (i = 0; i < ifConditions.size(); i++) {
+				currentLiteral = (NodeLiteral) ifConditions.get(i);
+				
+				System.out.print(currentLiteral.getToken().getValue() + " ");
+			}
+			System.out.println();
+			
+			printTab(tab);
+			System.out.println("0: ");
+			statements.get(0).printChildren(tab + 1);
 		}
 		
 		printTab(tab);

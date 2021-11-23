@@ -11,7 +11,10 @@ public class Parser {
 	private ArrayList<String> diagnostics;
 	private int position;
 	private int lineCounter;
-	private boolean isNested;
+	
+	private boolean inInfarop;
+	private boolean inSmoosh;
+	private boolean insideFlowControl;
 	
 	public Parser (File file) {
 		this.tokens = new ArrayList<Token>();
@@ -19,7 +22,10 @@ public class Parser {
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
 		this.lineCounter = 1;
-		this.isNested = false;
+		
+		this.inInfarop = false;
+		this.inSmoosh = false;
+		this.insideFlowControl = false;
 		
 		Lexer lexer = new Lexer(file);
 		Token curToken;
@@ -49,7 +55,10 @@ public class Parser {
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
 		this.lineCounter = 1;
-		this.isNested = false;
+		
+		this.inInfarop = false;
+		this.inSmoosh = false;
+		this.insideFlowControl = false;
 		
 		Lexer lexer = new Lexer(strFile);
 		Token curToken;
@@ -189,9 +198,9 @@ public class Parser {
 			return new NodeExpression(parseBoolOp(), lineCounter);
 			
 		} else if (current().getTokenKind().getType() == "infarop") {
-			isNested = true;
+			inInfarop = true;
 			SyntaxNode infAr = new NodeExpression(parseInfArOp(nextToken()), lineCounter);
-			isNested = false;
+			inInfarop = false;
 			
 			match(TokenKind.mkayToken);
 			return infAr;
@@ -203,7 +212,9 @@ public class Parser {
 			return new NodeExpression(parseExpTypecast(), lineCounter);
 				
 		} else if (current().getTokenKind() == TokenKind.smooshToken) {
+			inSmoosh = true;
 			SyntaxNode concat = new NodeExpression(parseConcat(nextToken()), lineCounter);
+			inSmoosh = false;
 			lazyMatch(TokenKind.mkayToken);
 			return concat;
 			
@@ -600,16 +611,23 @@ public class Parser {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
 		} else if (current().getTokenKind() == TokenKind.maekToken) {
 			return parseExpTypecast();
-		} else if (current().getTokenKind().getType() == "infarop" && !isNested) {
-			isNested = true;
+		} else if (current().getTokenKind().getType() == "infarop" && !inInfarop) {
+			inInfarop = true;
 			SyntaxNode infAr = parseInfArOp(nextToken());
-			isNested = false;
+			inInfarop = false;
 		
 			match(TokenKind.mkayToken);
 			return infAr;
+		} else if (current().getTokenKind() == TokenKind.smooshToken && !inSmoosh) {
+			inSmoosh = true;
+			SyntaxNode concat = parseConcat(nextToken());
+			inSmoosh = false;
+			
+			lazyMatch(TokenKind.mkayToken);
+			return concat;
 		}
 		
-		if (isNested) nextToken();
+		if (inInfarop || inSmoosh) nextToken();
 		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}

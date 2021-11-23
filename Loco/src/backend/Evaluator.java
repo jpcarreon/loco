@@ -526,7 +526,7 @@ public class Evaluator {
 			errorMsg = "Line " + lineCounter + ": Duplicate instantiation of new variable";
 			return;
 		}
-		
+
 		if (node.getValue() != null) {
 			Token value = evalTerminal(node.getValue());
 			newVar = new SymTabEntry(varid, value.getTokenKind(), value.getValue());
@@ -774,7 +774,7 @@ public class Evaluator {
 	
 	
 	
-	private Token evalTerminal(SyntaxNode operand) {		
+	private Token evalTerminal(SyntaxNode operand) {
 		if (operand.getType() == SyntaxType.varid) {
 			Token token = ((NodeLiteral) operand).getToken();
 			int idx = findVarValue(token.getValue());
@@ -803,6 +803,9 @@ public class Evaluator {
 			
 		} else if (operand.getType() == SyntaxType.vartypechange) {
 			return evalExpTypecast(operand);
+			
+		} else if (operand.getType() == SyntaxType.concat) {
+			return evalConcat((NodeOperation) operand);
 			
 		}
 		

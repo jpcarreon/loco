@@ -17,7 +17,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public static void main(String[] args) {
-		//startEvaluator();
+		startEvaluator();
 		//startLexer();
 		launch(args);
 	}
@@ -66,17 +66,16 @@ public class Main extends Application {
 	}
 	@Override
 	public void start(Stage primaryStage) throws IOException {
-		//Parent root = FXMLLoader.load(getClass().getResource("Window.fxml"));
 		Scene scene = new Scene(loadFXML("Window"), WindowController.WINDOW_WIDTH, WindowController.WINDOW_HEIGHT);
 
-		//scene.getStylesheets().add(getClass().getResource("Window.css").toExternalForm());
+		scene.getStylesheets().add(getClass().getResource("Window.css").toExternalForm());
 
 
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Loco - Lolcode Interpreter");
 
-		//primaryStage.setMinHeight(WindowController.WINDOW_HEIGHT);
-		//primaryStage.setMinWidth(WindowController.WINDOW_WIDTH);
+		primaryStage.setMinHeight(WindowController.WINDOW_HEIGHT);
+		primaryStage.setMinWidth(WindowController.WINDOW_WIDTH);
 
 		primaryStage.show();
 

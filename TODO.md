@@ -3,10 +3,14 @@
 ### Page 4
 
 * All variables must be declared outside any program blocks (if-else, loops, etc), but are not required to be at the start of the program.
-* Initialization may contain any operation that results to a literal value. (`infarop` included)
+* Initialization may contain any operation that results to a literal value:
+  * ~~`infarop`~~
+  * `SMOOSH`
+  * `VISIBLE`
 
 ### Page 5
 * ~~`ALL OF` and `ANY OF` are not binary~~
+* All operations except ``SMOOSH``, ``ALL OF``, and ``ANY OF`` can be nested
 
 ### Misc
 * ~~Disallow explicit access to `IT`~~

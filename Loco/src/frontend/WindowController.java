@@ -12,6 +12,8 @@ import backend.Evaluator;
 import backend.SymTabEntry;
 import backend.Token;
 import backend.TokenKind;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -284,6 +286,11 @@ public class WindowController implements Initializable {
     		alert.setHeaderText("Invalid Input!");
     		alert.show();
     	}
+    }
+    
+    @FXML
+    void checkConsoleText(ActionEvent event) {
+    	System.out.println("Appended");
     }
     
     @FXML

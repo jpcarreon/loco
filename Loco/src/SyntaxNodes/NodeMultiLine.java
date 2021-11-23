@@ -128,7 +128,7 @@ public class NodeMultiLine extends SyntaxNode {
 			
 			for (i = 0; i < statements.size(); i++) {
 				str += getStrTab(tab);
-				str += i + ": ";
+				str += i + ": \n";
 				str += statements.get(i).getStrChildren(tab + 1);
 			}
 			

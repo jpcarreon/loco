@@ -11,7 +11,7 @@ public class Parser {
 	private ArrayList<String> diagnostics;
 	private int position;
 	private int lineCounter;
-	private boolean insideInfArOp;
+	private boolean isNested;
 	
 	public Parser (File file) {
 		this.tokens = new ArrayList<Token>();
@@ -19,7 +19,7 @@ public class Parser {
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
 		this.lineCounter = 1;
-		this.insideInfArOp = false;
+		this.isNested = false;
 		
 		Lexer lexer = new Lexer(file);
 		Token curToken;
@@ -49,7 +49,7 @@ public class Parser {
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
 		this.lineCounter = 1;
-		this.insideInfArOp = false;
+		this.isNested = false;
 		
 		Lexer lexer = new Lexer(strFile);
 		Token curToken;
@@ -189,9 +189,9 @@ public class Parser {
 			return new NodeExpression(parseBoolOp(), lineCounter);
 			
 		} else if (current().getTokenKind().getType() == "infarop") {
-			insideInfArOp = true;
+			isNested = true;
 			SyntaxNode infAr = new NodeExpression(parseInfArOp(nextToken()), lineCounter);
-			insideInfArOp = false;
+			isNested = false;
 			
 			match(TokenKind.mkayToken);
 			return infAr;
@@ -600,16 +600,16 @@ public class Parser {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
 		} else if (current().getTokenKind() == TokenKind.maekToken) {
 			return parseExpTypecast();
-		} else if (current().getTokenKind().getType() == "infarop" && !insideInfArOp) {
-			insideInfArOp = true;
+		} else if (current().getTokenKind().getType() == "infarop" && !isNested) {
+			isNested = true;
 			SyntaxNode infAr = parseInfArOp(nextToken());
-			insideInfArOp = false;
+			isNested = false;
 		
 			match(TokenKind.mkayToken);
 			return infAr;
 		}
 		
-		if (insideInfArOp) nextToken();
+		if (isNested) nextToken();
 		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}

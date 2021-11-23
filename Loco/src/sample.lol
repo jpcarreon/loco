@@ -1,4 +1,3 @@
 HAI
-	I HAS A temp ITZ SMOOSH "Hello" AN "World"
-	VISIBLE SMOOSH ALL OF 1 AN 2 AN 3 MKAY AN "HJello" "hello"
+	BOTH OF 1 AN 1.0
 KTHXBYE

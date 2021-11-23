@@ -307,7 +307,6 @@ public class Evaluator {
 		Token operand1 = evalTerminal(node.getOp1());
 		Token operand2 = evalTerminal(node.getOp2());
 		
-		
 		if (operand1.getTokenKind() == operand2.getTokenKind()) {
 			
 			if (operation.getTokenKind() == TokenKind.bothSameOpToken) {
@@ -419,32 +418,6 @@ public class Evaluator {
 			
 			str += operand1.getValue();
 			
-			/*
-			if (operand1.getType() == SyntaxType.literal) {
-				str += ((NodeLiteral) operand1).getToken().getValue();
-			
-			} else if (operand1.getType() == SyntaxType.varid) {
-				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue());
-				
-				if (symbolTableIdx >= symbolTable.size() ||
-					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
-					
-					errorMsg = "Line " + lineCounter + ": Uninitialized variable ";
-					break;
-					
-				} else if (symbolTableIdx < symbolTable.size()) {
-					
-					str += symbolTable.get(symbolTableIdx).getValue();
-				}
-			
-			} else if (operand1.getType() == SyntaxType.mathop ||
-					   operand1.getType() == SyntaxType.boolop ||
-					   operand1.getType() == SyntaxType.cmpop) {
-				str += evalTerminal(operand1).getValue();
-			}
-			*/
-			
-			
 			if (currentNode.getOp2() == null) break;
 			else currentNode = (NodeOperation) currentNode.getOp2();
 		}
@@ -470,37 +443,6 @@ public class Evaluator {
 				str += operand1.getValue();
 				
 			} else suppressNL = true;
-			
-			
-			
-			/*
-			if (operand1.getType() == SyntaxType.literal) {
-				
-				if (((NodeLiteral) operand1).getToken().getTokenKind() == TokenKind.exclamationToken) {
-					suppressNL = true;
-				} else {
-					str += ((NodeLiteral) operand1).getToken().getValue();
-				}	
-				
-			} else if (operand1.getType() == SyntaxType.varid) {
-				symbolTableIdx = findVarValue(((NodeLiteral) operand1).getToken().getValue());
-				
-				if (symbolTableIdx >= symbolTable.size() ||
-					symbolTable.get(symbolTableIdx).getKind() == TokenKind.noobToken) {
-					
-					errorMsg = "Line " + lineCounter + ": Uninitialized variable ";
-					break;
-					
-				} else if (symbolTableIdx < symbolTable.size()) {
-					str += symbolTable.get(symbolTableIdx).getValue();
-				}
-			
-			} else if (operand1.getType() == SyntaxType.mathop ||
-					   operand1.getType() == SyntaxType.boolop ||
-					   operand1.getType() == SyntaxType.cmpop) {
-				str += evalTerminal(operand1).getValue();
-			}
-			*/
 			
 			if (currentNode.getOp2() == null) break;
 			else currentNode = (NodeOperation) currentNode.getOp2();

@@ -14,7 +14,7 @@ public class Parser {
 	
 	private boolean inInfarop;
 	private boolean inSmoosh;
-	private boolean insideFlowControl;
+	private boolean inFlowControl;
 	
 	public Parser (File file) {
 		this.tokens = new ArrayList<Token>();
@@ -25,7 +25,7 @@ public class Parser {
 		
 		this.inInfarop = false;
 		this.inSmoosh = false;
-		this.insideFlowControl = false;
+		this.inFlowControl = false;
 		
 		Lexer lexer = new Lexer(file);
 		Token curToken;
@@ -58,7 +58,7 @@ public class Parser {
 		
 		this.inInfarop = false;
 		this.inSmoosh = false;
-		this.insideFlowControl = false;
+		this.inFlowControl = false;
 		
 		Lexer lexer = new Lexer(strFile);
 		Token curToken;
@@ -173,6 +173,7 @@ public class Parser {
 		else expression = parseExpression();
 		
 		match(TokenKind.eolToken);
+		inFlowControl = false;
 		
 		while (current().getTokenKind() != TokenKind.byeToken && 
 			   current().getTokenKind() != TokenKind.eofToken &&
@@ -257,6 +258,8 @@ public class Parser {
 	}
 	
 	private SyntaxNode parseFlowControl() {
+		inFlowControl = true;
+		
 		if (current().getTokenKind() == TokenKind.ifStartToken) {
 			return new NodeFlowControl(parseIfBlock(), lineCounter);
 			
@@ -424,8 +427,8 @@ public class Parser {
 		Token operation = nextToken();
 		Token varid = match(TokenKind.idToken);
 		
-		if (varid.getValue().equals("IT")) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
+		if (varid.getValue().equals("IT") || inFlowControl) {
+			diagnostics.add("Line "+ lineCounter + ": Invalid variable instantiation");
 		}
 		
 		if (current().getTokenKind() == TokenKind.itzToken) {
@@ -566,12 +569,6 @@ public class Parser {
 			}
 			condition = new NodeDeclaration(SyntaxType.loopcond, nextToken(), varid, parseCmpOp());
 		} else {
-			/*
-			diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
-					+ "> expected <tilToken>/<wileToken>");
-			Token tempToken = new Token(TokenKind.tilToken, "TIL", -1);
-			condition = new NodeDeclaration(SyntaxType.loopcond, tempToken, varid, parseCmpOp());
-			*/
 			Token tempToken = new Token(TokenKind.troofToken, "WIN", -1);
 			condition = new NodeDeclaration(SyntaxType.loopcond, tempToken, varid);
 		}

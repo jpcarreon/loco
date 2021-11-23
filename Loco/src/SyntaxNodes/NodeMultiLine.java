@@ -46,26 +46,11 @@ public class NodeMultiLine extends SyntaxNode {
 			printTab(tab);
 			System.out.println(operation.getValue() + ": ");
 			
-			
-			/*
-			printTab(tab);
-			System.out.println("0: ");
-			statements.get(0).printChildren(tab + 1);
-			
-			if (statements.size() > 1) {
-				printTab(tab);
-				System.out.println("1: ");
-				statements.get(1).printChildren(tab + 1);
-			}
-			*/
-			
 			for (i = 0; i < statements.size(); i++) {
 				printTab(tab);
 				System.out.println(i + ": ");
 				statements.get(i).printChildren(tab + 1);
 			}
-			
-			
 			
 		} else if (type == SyntaxType.switchcase) {
 			printTab(tab);

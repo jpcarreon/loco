@@ -1,6 +1,7 @@
 package frontend;
 
 import java.io.File;
+import java.io.IOException;
 
 import backend.Evaluator;
 import backend.Lexer;
@@ -22,7 +23,7 @@ public class Main extends Application {
 	}
 	
 	static void startLexer() {
-		File fp = new File("src/sample.lol");
+		File fp = new File("src/main/java/sample.lol");
 		Lexer lexer = new Lexer(fp);
 		//lexer.viewLexemes();
 		
@@ -37,7 +38,7 @@ public class Main extends Application {
 	}
 	
 	static void startParser() {
-		File fp = new File("src/sample.lol");
+		File fp = new File("src/main/java/sample.lol");
 		Parser parser = new Parser(fp);
 		parser.parse();
 		parser.viewErrors();
@@ -46,7 +47,7 @@ public class Main extends Application {
 	}
 	
 	static void startEvaluator() {
-		File fp = new File("src/sample.lol");
+		File fp = new File("src/main/java/sample.lol");
 		Evaluator evaluator = new Evaluator(fp);
 		
 		evaluator.viewParseTree();
@@ -65,23 +66,25 @@ public class Main extends Application {
 	}
 	
 	@Override
-	public void start(Stage primaryStage) {
-		try {
-			Parent root = FXMLLoader.load(getClass().getResource("Window.fxml"));
-			Scene scene = new Scene(root, WindowController.WINDOW_WIDTH, WindowController.WINDOW_HEIGHT);
-			
-			scene.getStylesheets().add(getClass().getResource("Window.css").toExternalForm());
-			
-			
-			primaryStage.setScene(scene);
-			primaryStage.setTitle("Loco - Lolcode Interpreter");
-			
-			primaryStage.setMinHeight(WindowController.WINDOW_HEIGHT);
-			primaryStage.setMinWidth(WindowController.WINDOW_WIDTH);
-			
-			primaryStage.show();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public void start(Stage primaryStage) throws IOException {
+		//Parent root = FXMLLoader.load(getClass().getResource("Window.fxml"));
+		Scene scene = new Scene(loadFXML("Window"), WindowController.WINDOW_WIDTH, WindowController.WINDOW_HEIGHT);
+
+		//scene.getStylesheets().add(getClass().getResource("Window.css").toExternalForm());
+
+
+		primaryStage.setScene(scene);
+		primaryStage.setTitle("Loco - Lolcode Interpreter");
+
+		//primaryStage.setMinHeight(WindowController.WINDOW_HEIGHT);
+		//primaryStage.setMinWidth(WindowController.WINDOW_WIDTH);
+
+		primaryStage.show();
+
+	}
+
+	private static Parent loadFXML (String fxml) throws IOException {
+		FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource(fxml + ".fxml"));
+		return fxmlLoader.load();
 	}
 }

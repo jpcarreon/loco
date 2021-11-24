@@ -30,6 +30,9 @@ public enum SyntaxType {
 	gtfo,
 	loop,
 	loopcond,
+	function,
+	functionret,
+	functioncall,
 	
 	invalid
 }

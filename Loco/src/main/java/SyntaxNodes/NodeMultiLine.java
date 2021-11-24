@@ -46,26 +46,11 @@ public class NodeMultiLine extends SyntaxNode {
 			printTab(tab);
 			System.out.println(operation.getValue() + ": ");
 			
-			
-			/*
-			printTab(tab);
-			System.out.println("0: ");
-			statements.get(0).printChildren(tab + 1);
-			
-			if (statements.size() > 1) {
-				printTab(tab);
-				System.out.println("1: ");
-				statements.get(1).printChildren(tab + 1);
-			}
-			*/
-			
 			for (i = 0; i < statements.size(); i++) {
 				printTab(tab);
 				System.out.println(i + ": ");
 				statements.get(i).printChildren(tab + 1);
 			}
-			
-			
 			
 		} else if (type == SyntaxType.switchcase) {
 			printTab(tab);
@@ -92,6 +77,25 @@ public class NodeMultiLine extends SyntaxNode {
 			printTab(tab);
 			System.out.println("Condition: ");
 			condition.printChildren(tab + 1);
+			
+			printTab(tab);
+			System.out.println("0: ");
+			statements.get(0).printChildren(tab + 1);
+		
+		} else if (type == SyntaxType.function) {
+			printTab(tab);
+			System.out.println("HOW IZ I: " + operation.getValue());
+			
+			printTab(tab);
+			System.out.println("Parameters: ");
+			
+			printTab(tab + 1);
+			for (i = 0; i < ifConditions.size(); i++) {
+				currentLiteral = (NodeLiteral) ifConditions.get(i);
+				
+				System.out.print(currentLiteral.getToken().getValue() + " ");
+			}
+			System.out.println();
 			
 			printTab(tab);
 			System.out.println("0: ");

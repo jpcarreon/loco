@@ -11,7 +11,11 @@ public class Parser {
 	private ArrayList<String> diagnostics;
 	private int position;
 	private int lineCounter;
-	private boolean isNested;
+	
+	private boolean inInfarop;
+	private boolean inSmoosh;
+	private boolean inFlowControl;
+	private boolean inFunction;
 	
 	public Parser (File file) {
 		this.tokens = new ArrayList<Token>();
@@ -19,7 +23,11 @@ public class Parser {
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
 		this.lineCounter = 1;
-		this.isNested = false;
+		
+		this.inInfarop = false;
+		this.inSmoosh = false;
+		this.inFlowControl = false;
+		this.inFunction = false;
 		
 		Lexer lexer = new Lexer(file);
 		Token curToken;
@@ -49,7 +57,11 @@ public class Parser {
 		this.diagnostics = new ArrayList<String>();
 		this.position = 0;
 		this.lineCounter = 1;
-		this.isNested = false;
+		
+		this.inInfarop = false;
+		this.inSmoosh = false;
+		this.inFlowControl = false;
+		this.inFunction = false;
 		
 		Lexer lexer = new Lexer(strFile);
 		Token curToken;
@@ -164,10 +176,12 @@ public class Parser {
 		else expression = parseExpression();
 		
 		match(TokenKind.eolToken);
+		inFlowControl = false;
 		
 		while (current().getTokenKind() != TokenKind.byeToken && 
 			   current().getTokenKind() != TokenKind.eofToken &&
 			   current().getTokenKind() != TokenKind.loopEndToken &&
+			   current().getTokenKind() != TokenKind.functionEndToken &&
 			   current().getTokenKind().getType() != "switch" &&
 			   current().getTokenKind().getType() != "ifblock") {
 			expression = new NodeStatement(expression, parseStatement());
@@ -189,9 +203,9 @@ public class Parser {
 			return new NodeExpression(parseBoolOp(), lineCounter);
 			
 		} else if (current().getTokenKind().getType() == "infarop") {
-			isNested = true;
+			inInfarop = true;
 			SyntaxNode infAr = new NodeExpression(parseInfArOp(nextToken()), lineCounter);
-			isNested = false;
+			inInfarop = false;
 			
 			match(TokenKind.mkayToken);
 			return infAr;
@@ -203,15 +217,24 @@ public class Parser {
 			return new NodeExpression(parseExpTypecast(), lineCounter);
 				
 		} else if (current().getTokenKind() == TokenKind.smooshToken) {
+			inSmoosh = true;
 			SyntaxNode concat = new NodeExpression(parseConcat(nextToken()), lineCounter);
+			inSmoosh = false;
 			lazyMatch(TokenKind.mkayToken);
 			return concat;
 			
 		} else if (current().getTokenKind() == TokenKind.printToken) {
 			return new NodeExpression(parsePrint(nextToken()), lineCounter);
 			
-		} else if  (current().getTokenKind() == TokenKind.breakToken) {
+		} else if (current().getTokenKind() == TokenKind.breakToken) {
 			return new NodeLiteral(SyntaxType.gtfo, nextToken());
+			
+		} else if (current().getTokenKind() == TokenKind.functionRetToken) {
+			return new NodeExpression(parseFunctionRet(), lineCounter);
+			
+		} else if (current().getTokenKind() == TokenKind.functionCallToken) {
+			return new NodeExpression(parseFunctionCall(), lineCounter);
+			
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword ");
@@ -246,6 +269,8 @@ public class Parser {
 	}
 	
 	private SyntaxNode parseFlowControl() {
+		inFlowControl = true;
+		
 		if (current().getTokenKind() == TokenKind.ifStartToken) {
 			return new NodeFlowControl(parseIfBlock(), lineCounter);
 			
@@ -254,6 +279,10 @@ public class Parser {
 			
 		} else if (current().getTokenKind() == TokenKind.loopStartToken) {
 			return new NodeFlowControl(parseLoop(), lineCounter);
+			
+		} else if (current().getTokenKind() == TokenKind.functionStartToken) {
+			inFunction = true;
+			return new NodeFlowControl(parseFunction(), lineCounter);
 			
 		}
 		
@@ -401,6 +430,38 @@ public class Parser {
 		return new NodeOperation(SyntaxType.vartypechange, operation, expression, vartype);
 	}
 	
+	
+	private SyntaxNode parseFunctionRet() {
+		Token operation = nextToken();
+		SyntaxNode operand1 = parseTerminal();
+		
+		return new NodeOperation(SyntaxType.functionret, operation, operand1);
+	}
+	
+	private SyntaxNode parseFunctionCall() {
+		ArrayList<SyntaxNode> parameters = new ArrayList<SyntaxNode>();
+		Token operation = nextToken();
+		Token functionid = match(TokenKind.idToken);
+		
+		
+		
+		if (current().getTokenKind() == TokenKind.yrToken) {
+			nextToken();
+			parameters.add(parseTerminal());
+			
+			while(current().getTokenKind() == TokenKind.anToken) {
+				nextToken();
+				match(TokenKind.yrToken);
+				parameters.add(parseTerminal());
+			}
+		}
+		
+		match(TokenKind.mkayToken);
+		
+		return new NodeFunctionCall(operation, functionid, parameters);
+	}
+	
+	
 	/*
 	 ========================
 	 
@@ -413,8 +474,8 @@ public class Parser {
 		Token operation = nextToken();
 		Token varid = match(TokenKind.idToken);
 		
-		if (varid.getValue().equals("IT")) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
+		if (varid.getValue().equals("IT") || inFlowControl) {
+			diagnostics.add("Line "+ lineCounter + ": Invalid variable instantiation");
 		}
 		
 		if (current().getTokenKind() == TokenKind.itzToken) {
@@ -555,12 +616,6 @@ public class Parser {
 			}
 			condition = new NodeDeclaration(SyntaxType.loopcond, nextToken(), varid, parseCmpOp());
 		} else {
-			/*
-			diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
-					+ "> expected <tilToken>/<wileToken>");
-			Token tempToken = new Token(TokenKind.tilToken, "TIL", -1);
-			condition = new NodeDeclaration(SyntaxType.loopcond, tempToken, varid, parseCmpOp());
-			*/
 			Token tempToken = new Token(TokenKind.troofToken, "WIN", -1);
 			condition = new NodeDeclaration(SyntaxType.loopcond, tempToken, varid);
 		}
@@ -581,7 +636,31 @@ public class Parser {
 		return new NodeMultiLine(operation, loopid, optype, condition, statements);
 	}
 	
-	
+	private SyntaxNode parseFunction() {
+		ArrayList<SyntaxNode> statements = new ArrayList<SyntaxNode>();
+		ArrayList<SyntaxNode> parameters = new ArrayList<SyntaxNode>();
+		nextToken();
+		Token functionid = match(TokenKind.idToken);
+		
+		if (current().getTokenKind() == TokenKind.yrToken) {
+			nextToken();
+			parameters.add(new NodeLiteral(SyntaxType.varid, match(TokenKind.idToken)));
+			
+			while(current().getTokenKind() == TokenKind.anToken) {
+				nextToken();
+				match(TokenKind.yrToken);
+				parameters.add(new NodeLiteral(SyntaxType.varid, match(TokenKind.idToken)));
+			}
+		}
+		
+		match(TokenKind.eolToken);
+		
+		statements.add(parseStatement());
+		
+		match(TokenKind.functionEndToken);
+		
+		return new NodeMultiLine(SyntaxType.function, functionid, parameters, statements);
+	}
 	
 	
 	
@@ -600,16 +679,23 @@ public class Parser {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
 		} else if (current().getTokenKind() == TokenKind.maekToken) {
 			return parseExpTypecast();
-		} else if (current().getTokenKind().getType() == "infarop" && !isNested) {
-			isNested = true;
+		} else if (current().getTokenKind().getType() == "infarop" && !inInfarop) {
+			inInfarop = true;
 			SyntaxNode infAr = parseInfArOp(nextToken());
-			isNested = false;
+			inInfarop = false;
 		
 			match(TokenKind.mkayToken);
 			return infAr;
+		} else if (current().getTokenKind() == TokenKind.smooshToken && !inSmoosh) {
+			inSmoosh = true;
+			SyntaxNode concat = parseConcat(nextToken());
+			inSmoosh = false;
+			
+			lazyMatch(TokenKind.mkayToken);
+			return concat;
 		}
 		
-		if (isNested) nextToken();
+		if (inInfarop || inSmoosh) nextToken();
 		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
@@ -692,7 +778,8 @@ public class Parser {
 	private boolean isFlowControl() {
 		if (current().getTokenKind() == TokenKind.ifStartToken ||
 			current().getTokenKind() == TokenKind.switchToken ||
-			current().getTokenKind() == TokenKind.loopStartToken) {
+			current().getTokenKind() == TokenKind.loopStartToken ||
+			current().getTokenKind() == TokenKind.functionStartToken) {
 			return true;
 		}
 		

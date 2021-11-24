@@ -17,7 +17,8 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
 	public static void main(String[] args) {
-		//startEvaluator();
+		//	TODO SHOW STATEMENT Node in the release version!
+		startEvaluator();
 		//startLexer();
 		launch(args);
 	}
@@ -64,6 +65,7 @@ public class Main extends Application {
 		
 		System.exit(0);
 	}
+	
 	@Override
 	public void start(Stage primaryStage) throws IOException {
 		Scene scene = new Scene(loadFXML("Window"), WindowController.WINDOW_WIDTH, WindowController.WINDOW_HEIGHT);

@@ -34,7 +34,7 @@ public class NodeFunctionCall extends SyntaxNode {
 		if (parameters.size() > 0) {
 			for (i = 0; i < parameters.size(); i++) {
 				printTab(tab);
-				System.out.println(i + ": \n");
+				System.out.println(i + ": ");
 				parameters.get(i).printChildren(tab + 1);
 			}
 		} else {
@@ -49,9 +49,37 @@ public class NodeFunctionCall extends SyntaxNode {
 
 	
 	public String getStrChildren(int tab) {
-		String string = new String();
+		String str = new String();
+		int i;
 		
-		return string;
+		str += getStrTab(tab);
+		str += "{\n";
+		
+		str += getStrTab(tab);
+		str += operation.getValue() + ": \n";
+		
+		str += getStrTab(tab);
+		str += "varID: " + functionid.getValue() + "\n";
+		
+		str += getStrTab(tab);
+		str += "value: \n";
+
+		if (parameters.size() > 0) {
+			for (i = 0; i < parameters.size(); i++) {
+				str += getStrTab(tab);
+				str += i + ": \n";
+				
+				str += parameters.get(i).getStrChildren(tab + 1);
+			}
+		} else {
+			str += getStrTab(tab + 1);
+			str += "<Empty> \n";
+		}
+		
+		str += getStrTab(tab);
+		str += "}\n";
+		
+		return str;
 	}
 	
 	public Token getOperation() {

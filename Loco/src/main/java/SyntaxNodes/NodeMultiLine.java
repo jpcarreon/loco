@@ -118,18 +118,6 @@ public class NodeMultiLine extends SyntaxNode {
 			str += getStrTab(tab);
 			str += operation.getValue() + ": \n";
 			
-			/*
-			str += getStrTab(tab);
-			str += "0: \n";
-			str += statements.get(0).getStrChildren(tab + 1);
-			
-			if (statements.size() > 1) {
-				str += getStrTab(tab);
-				str += "1: \n";
-				str += statements.get(1).getStrChildren(tab + 1);
-			}
-			*/
-			
 			for (i = 0; i < statements.size(); i++) {
 				str += getStrTab(tab);
 				str += i + ": \n";
@@ -169,6 +157,24 @@ public class NodeMultiLine extends SyntaxNode {
 			str += "0: \n";
 			str += statements.get(0).getStrChildren(tab + 1);
 
+		} else if (type == SyntaxType.function) {
+			str += getStrTab(tab);
+			str += "HOW IZ I: " + operation.getValue() + "\n";
+			
+			str += getStrTab(tab);
+			str += "Parameters: \n";
+			
+			str += getStrTab(tab + 1);
+			for (i = 0; i < ifConditions.size(); i++) {
+				currentLiteral = (NodeLiteral) ifConditions.get(i);
+				
+				str += currentLiteral.getToken().getValue() + " ";
+			}
+			str += "\n";
+			
+			str += getStrTab(tab);
+			str += "0: \n";
+			str += statements.get(0).getStrChildren(tab + 1);
 		}
 		
 		str += getStrTab(tab);

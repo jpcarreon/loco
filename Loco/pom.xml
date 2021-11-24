@@ -38,6 +38,7 @@
                     <target>15</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -50,9 +51,6 @@
                         <configuration>
                             <mainClass>frontend.Main</mainClass>
                             <launcher>launch.sh</launcher>
-                            <compress>2</compress>
-                            <jlinkZipName>loco</jlinkZipName>
-                            <jlinkImageName>Lock</jlinkImageName>
                             <noManPages>true</noManPages>
                             <noHeaderFiles>true</noHeaderFiles>
                         </configuration>

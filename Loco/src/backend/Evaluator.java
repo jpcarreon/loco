@@ -133,6 +133,11 @@ public class Evaluator {
 			} else {
 				evalFlowControl((NodeFlowControl) currentLine);
 			}
+			
+			if (!errorMsg.isBlank()) {
+				programCounter = null;
+				return;
+			}
 		}
 		
 		if (statements.getType() == SyntaxType.gtfo) {
@@ -150,6 +155,10 @@ public class Evaluator {
 			evalFlowControl((NodeFlowControl) statements);
 		}
 		
+		if (!errorMsg.isBlank()) {
+			programCounter = null;
+			return;
+		}
 	}
 	
 	private void evalExpression(NodeExpression currentInstruction) {
@@ -473,6 +482,7 @@ public class Evaluator {
 	
 	
 	
+	
 	private Token evalFunctionRet(NodeOperation node) {
 		return evalTerminal(node.getOp1());
 	}
@@ -502,7 +512,7 @@ public class Evaluator {
 			errorMsg = "Line " + lineCounter + ": Unbound function error; given function not found";
 			
 		} else if (parameters.size() != functionTable.get(functionIdx).getIfConditions().size()) {
-			errorMsg = "Line " + lineCounter + ": Parameter mismatch; number of parameters does not match the function";
+			errorMsg = "Line " + lineCounter + ": Parameter mismatch; number of parameters does not match function descriptor";
 
 		} else {
 			function = functionTable.get(functionIdx);
@@ -538,6 +548,7 @@ public class Evaluator {
 
 		return newVar;
 	}
+	
 	
 	
 	
@@ -797,7 +808,7 @@ public class Evaluator {
 
 		switchBreak = false;
 		
-		if (counter >= loopLimit) errorMsg = "Line " + lineCounter + ": InfLoopWarning; Loop has exceeded maximum allowed iterations (" + loopLimit + ")";
+		if (counter >= loopLimit && errorMsg.isEmpty()) errorMsg = "Line " + lineCounter + ": InfLoopWarning; Loop has exceeded maximum allowed iterations (" + loopLimit + ")";
 
 	}
 	
@@ -839,6 +850,9 @@ public class Evaluator {
 			
 		} else if (operand.getType() == SyntaxType.concat) {
 			return evalConcat((NodeOperation) operand);
+			
+		} else if (operand.getType() == SyntaxType.functioncall) {
+			return evalFunctionCall((NodeFunctionCall) operand);
 			
 		}
 		

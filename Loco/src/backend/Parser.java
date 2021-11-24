@@ -229,7 +229,7 @@ public class Parser {
 		} else if (current().getTokenKind() == TokenKind.breakToken) {
 			return new NodeLiteral(SyntaxType.gtfo, nextToken());
 			
-		} else if (current().getTokenKind() == TokenKind.functionRetToken) {
+		} else if (current().getTokenKind() == TokenKind.functionRetToken && inFunction) {
 			return new NodeExpression(parseFunctionRet(), lineCounter);
 			
 		} else if (current().getTokenKind() == TokenKind.functionCallToken) {
@@ -658,6 +658,7 @@ public class Parser {
 		statements.add(parseStatement());
 		
 		match(TokenKind.functionEndToken);
+		inFunction = false;
 		
 		return new NodeMultiLine(SyntaxType.function, functionid, parameters, statements);
 	}
@@ -667,18 +668,28 @@ public class Parser {
 	private SyntaxNode parseTerminal() {
 		if (current().getTokenKind().getType() == "mathop") {
 			return parseMathOp();
+			
 		} else if (current().getTokenKind().getType() == "boolop") {
 			return parseBoolOp();
+			
 		} else if (current().getTokenKind().getType() == "cmpop") {
 			return parseCmpOp();
+			
 		} else if (current().getTokenKind() == TokenKind.quoteToken) {
 			return new NodeLiteral(parseYarn());
+			
 		} else if (current().getTokenKind().getType() == "literal") {
 			return new NodeLiteral(nextToken());
+			
 		} else if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
+			
 		} else if (current().getTokenKind() == TokenKind.maekToken) {
 			return parseExpTypecast();
+			
+		} else if (current().getTokenKind() == TokenKind.functionCallToken) {
+			return parseFunctionCall();
+			
 		} else if (current().getTokenKind().getType() == "infarop" && !inInfarop) {
 			inInfarop = true;
 			SyntaxNode infAr = parseInfArOp(nextToken());

@@ -13,6 +13,7 @@ public class Evaluator {
 	
 	private ArrayList<Token> tokens;
 	private ArrayList<SymTabEntry> symbolTable;
+	private ArrayList<NodeMultiLine> functionTable;
 	private String errorMsg;
 	
 	private NodeRoot root;
@@ -26,6 +27,7 @@ public class Evaluator {
 	public Evaluator(File file) {
 		this.errorMsg = new String();
 		this.symbolTable = new ArrayList<SymTabEntry>();
+		this.functionTable = new ArrayList<NodeMultiLine>();
 		this.lineCounter = 1;
 		this.loopLimit = 999;
 		this.switchBreak = false;
@@ -47,6 +49,7 @@ public class Evaluator {
 		
 		this.errorMsg = new String();
 		this.symbolTable = new ArrayList<SymTabEntry>();
+		this.functionTable = new ArrayList<NodeMultiLine>();
 		this.lineCounter = 1;
 		this.loopLimit = 999;
 		this.switchBreak = false;
@@ -177,7 +180,14 @@ public class Evaluator {
 			token = evalPrint((NodeOperation) node);
 			
 			if (window != null && errorMsg.isEmpty()) window.updateConsole(token.getValue());
-		} 
+		
+		} else if (node.getType() == SyntaxType.functioncall) {
+			token = evalFunctionCall((NodeFunctionCall) node);
+			
+		} else if (node.getType() == SyntaxType.functionret) {
+			token = evalFunctionRet((NodeOperation) node);
+			
+		}
 		
 		symbolTable.get(0).setKindValue(token);
 		if (window == null) token.viewToken();
@@ -212,6 +222,9 @@ public class Evaluator {
 			
 		} else if (node.getType() == SyntaxType.loop) {
 			evalLoop((NodeMultiLine) node);
+			
+		} else if (node.getType() == SyntaxType.function) {
+			functionTable.add((NodeMultiLine) node);
 			
 		}
 	}
@@ -460,6 +473,76 @@ public class Evaluator {
 	
 	
 	
+	private Token evalFunctionRet(NodeOperation node) {
+		return evalTerminal(node.getOp1());
+	}
+	
+	private Token evalFunctionCall(NodeFunctionCall node) {
+		ArrayList<SyntaxNode> parameters = node.getParameters();
+		String functionid = node.getFunctionid().getValue();
+		NodeMultiLine function;
+		Token newVar = new Token(TokenKind.noobToken, "", -1), parameterToken;
+		int functionIdx = 0, symbolTableIdx = 0, i;
+		
+		ArrayList<SymTabEntry> symbolTableBackup = new ArrayList<SymTabEntry>();
+		
+		
+		for (i = 0; i < symbolTable.size(); i++) {
+			symbolTableBackup.add(symbolTable.get(i));
+		}
+		
+		for (NodeMultiLine j : functionTable) {
+			if (j.getOperation().getValue().equals(functionid)) {
+				break;
+			}	
+			functionIdx++;
+		}
+		
+		if (functionIdx >= functionTable.size()) {
+			errorMsg = "Line " + lineCounter + ": Unbound function error; given function not found";
+			
+		} else if (parameters.size() != functionTable.get(functionIdx).getIfConditions().size()) {
+			errorMsg = "Line " + lineCounter + ": Parameter mismatch; number of parameters does not match the function";
+
+		} else {
+			function = functionTable.get(functionIdx);
+			
+			for (i = 0; i < parameters.size(); i++) {
+				newVar = evalTerminal(parameters.get(i));
+				parameterToken = (((NodeLiteral) function.getIfConditions().get(i)).getToken());
+				
+				symbolTableIdx = findVarValue(parameterToken.getValue());
+					
+				if (symbolTableIdx >= symbolTable.size()) {
+					symbolTable.add(new SymTabEntry(parameterToken.getValue(), newVar.getTokenKind(), newVar.getValue()));
+				} else {
+					symbolTable.get(symbolTableIdx).setKindValue(newVar);
+				}
+			}
+			
+			evaluate(function.getStatements().get(0));
+			newVar = symbolTable.get(0).getToken();
+			
+			if (switchBreak) {
+				switchBreak = false;
+				newVar = new Token(TokenKind.noobToken, "", -1);
+			}
+			else newVar = symbolTable.get(0).getToken();
+		}
+		
+		symbolTable.clear();
+		
+		for (i = 0; i < symbolTableBackup.size(); i++) {
+			symbolTable.add(symbolTableBackup.get(i));
+		}
+
+		return newVar;
+	}
+	
+	
+	
+	
+	
 	private void evalNewVar(NodeDeclaration node) {		
 		SymTabEntry newVar;
 		String varid = node.getVarID().getValue();
@@ -550,6 +633,10 @@ public class Evaluator {
 		
 		symbolTable.get(symbolTableIdx).setKindValue(token);	
 	}
+	
+	
+	
+	
 	
 	
 	private void evalIfBlock(NodeMultiLine node) {
@@ -716,6 +803,10 @@ public class Evaluator {
 	
 	
 	
+	
+	
+	
+	
 	private Token evalTerminal(SyntaxNode operand) {
 		if (operand.getType() == SyntaxType.varid) {
 			Token token = ((NodeLiteral) operand).getToken();
@@ -834,8 +925,8 @@ public class Evaluator {
 		
 		}
 		
-		if (kind == TokenKind.numbrToken && isInt) {
-			return new Token(TokenKind.numbrToken, Integer.toString(numbr), token.getPosition());
+		if (kind == TokenKind.numbrToken && (isInt || isFloat)) {
+			return new Token(TokenKind.numbrToken, Integer.toString((int) numbar), token.getPosition());
 			
 		} else if (kind == TokenKind.numbarToken && isFloat) {
 			return new Token(TokenKind.numbarToken, Float.toString(numbar), token.getPosition());

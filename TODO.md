@@ -25,5 +25,5 @@
 * ~~Loop-nesting~~
 * ~~If-then nesting~~
 * ~~Else-if clauses~~
-* Functions
+* ~~Functions~~
 * ~~Suppress `\n` in `VISIBLE` by ending a statement with `!`~~

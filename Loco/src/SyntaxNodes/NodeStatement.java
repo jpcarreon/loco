@@ -17,17 +17,17 @@ public class NodeStatement extends SyntaxNode{
 	
 	public void printChildren(int tab) {
 		
-		//printTree(tab);
-		operand1.printChildren(tab);
-		operand2.printChildren(tab);
+		printTree(tab);
+		//operand1.printChildren(tab);
+		//operand2.printChildren(tab);
 	}
 	
 	public String getStrChildren(int tab) {
 		String str = new String();
 		
-		//str += getStrTree(tab);
-		str += operand1.getStrChildren(tab);
-		str += operand2.getStrChildren(tab);
+		str += getStrTree(tab);
+		//str += operand1.getStrChildren(tab);
+		//str += operand2.getStrChildren(tab);
 		
 		return str;
 	}

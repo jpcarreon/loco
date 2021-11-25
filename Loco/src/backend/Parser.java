@@ -32,6 +32,7 @@ public class Parser {
 		Lexer lexer = new Lexer(file);
 		Token curToken;
 		
+		//	Get all the tokens from the lexer
 		do {
 			curToken = lexer.nextToken();
 			
@@ -69,7 +70,6 @@ public class Parser {
 		do {
 			curToken = lexer.nextToken();
 			
-			// ignore single line comment
 			if (curToken.getTokenKind() == TokenKind.btwToken) {
 				while (curToken.getTokenKind() != TokenKind.eolToken && curToken.getTokenKind() != TokenKind.eofToken) {
 					allTokens.add(curToken);
@@ -86,6 +86,7 @@ public class Parser {
 	}
 	
 	private Token peek(int offset) {
+		//	check if peek value is within the bounds
 		if (position + offset >= tokens.size()) return tokens.get(tokens.size() - 1);
 		
 		return tokens.get(position + offset);
@@ -101,6 +102,7 @@ public class Parser {
 		return curToken;
 	}
 	
+	//	Optionally matches the given parameter; if no match, no error is thrown
 	private Token lazyMatch(TokenKind kind) {
 		if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
 			lineCounter++;
@@ -115,16 +117,20 @@ public class Parser {
 		return new Token(kind, null, current().getPosition() - 1);
 	}
 	
+	//	Check if current token matches the given parameter; if no match, an error is thrown
 	private Token match(TokenKind kind) {
+		
 		if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
 			lineCounter++;
 
+			//	Console multiple eol tokens
 			return consumeEOL();
 			
 		} else if (current().getTokenKind() == kind) {
 			
 			return nextToken();
-		}
+			
+		} 
 		
 		diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
 				+ "> expected <"+ kind + ">");
@@ -135,7 +141,7 @@ public class Parser {
 			nextToken();
 		}
 		
-		
+		//	create a fake token for the parse tree
 		return new Token(kind, null, current().getPosition() - 1);
 	}
 
@@ -143,15 +149,17 @@ public class Parser {
 	public NodeRoot parse() {
 		NodeRoot root;
 		
+		//	optionally matches any eol before the HAI keyword
 		lazyMatch(TokenKind.eolToken);
 		Token start = match(TokenKind.haiToken);
 		
-		//	Version number
+		//	matches with version number incase any is provided
 		lazyMatch(TokenKind.numbarToken);
 		lazyMatch(TokenKind.numbrToken);
 		
 		match(TokenKind.eolToken);
 		
+		//	check if file has atleast 1 line of code between hai and kthxbye
 		if (current().getTokenKind() != TokenKind.byeToken && current().getTokenKind() != TokenKind.eofToken) {
 			SyntaxNode statement = parseStatement();
 			Token end = match(TokenKind.byeToken);
@@ -178,6 +186,7 @@ public class Parser {
 		match(TokenKind.eolToken);
 		inFlowControl = false;
 		
+		//	recursively create statement nodes for the parse tree
 		while (current().getTokenKind() != TokenKind.byeToken && 
 			   current().getTokenKind() != TokenKind.eofToken &&
 			   current().getTokenKind() != TokenKind.loopEndToken &&
@@ -248,6 +257,7 @@ public class Parser {
 		if (current().getTokenKind() == TokenKind.ihasToken) {
 			return new NodeAssignment(parseDeclaration(), lineCounter);
 			
+		// if a line starts with a varid, it can fall in either R (assignment) or IS NOW A (typecast)
 		} else if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
 			Token varid = nextToken();
 			
@@ -307,6 +317,7 @@ public class Parser {
 		}
 		Token end = match(TokenKind.tldrToken);
 		
+		//	multiline comments need atleast 2 newlines to be considered valid
 		if (counter < 2) diagnostics.add("Line "+ lineCounter + ": Invalid comment structure");
 		
 		return new NodeComment(start, inner, end);
@@ -350,6 +361,7 @@ public class Parser {
 	private SyntaxNode parseInfArOp(Token operation) {		
 		SyntaxNode operand1 = parseTerminal();
 		
+		//	Recursive construction of parsetree for infinite arity operations
 		if (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.mkayToken) {
 			match(TokenKind.anToken);
 			operand1 = new NodeOperation(SyntaxType.infarop , operation, operand1, parseInfArOp(operation));
@@ -373,6 +385,7 @@ public class Parser {
 	private SyntaxNode parseConcat(Token operation) {
 		SyntaxNode operand1 = parseTerminal();
 		
+		//	Recursive construction of parsetree for concatenation operation
 		if (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.mkayToken) {
 			match(TokenKind.anToken);
 			operand1 = new NodeOperation(SyntaxType.concat, operation, operand1, parseConcat(operation));
@@ -387,6 +400,7 @@ public class Parser {
 	private SyntaxNode parsePrint(Token operation) {
 		SyntaxNode operand1 = new NodeLiteral(new Token(TokenKind.badToken, "", -1));
 		
+		//	Stop recursion if exclamation is encountered
 		if (current().getTokenKind() == TokenKind.exclamationToken) {
 			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(nextToken()));
 		} else {
@@ -397,6 +411,7 @@ public class Parser {
 		if (current().getTokenKind() != TokenKind.eolToken && operand1.getType() != SyntaxType.invalid) {
 			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
 
+		//	prevents infinite loop when the current operand is invalid by calling nextToken()
 		} else if (operand1.getType() == SyntaxType.invalid) {
 			nextToken();
 			operand1 = new NodeOperation(SyntaxType.print, operation, operand1);
@@ -412,7 +427,7 @@ public class Parser {
 	private SyntaxNode parseExpTypecast() {
 		Token operation = nextToken();
 		
-		
+		//	Prevent IT from being used as a varid
 		if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
 			Token varid = nextToken();
 			
@@ -423,6 +438,7 @@ public class Parser {
 			return new NodeDeclaration(SyntaxType.vartypechange, operation, varid, vartype);
 		}
 		
+		//	typecast the result of an expression
 		SyntaxNode expression = parseTerminal();
 		lazyMatch(TokenKind.aToken);
 		SyntaxNode vartype = new NodeLiteral(SyntaxType.vartype, match(TokenKind.typeToken));
@@ -444,11 +460,12 @@ public class Parser {
 		Token functionid = match(TokenKind.idToken);
 		
 		
-		
+		//	check if function call includes parameters
 		if (current().getTokenKind() == TokenKind.yrToken) {
 			nextToken();
 			parameters.add(parseTerminal());
 			
+			//	add to arraylist all the parameters
 			while(current().getTokenKind() == TokenKind.anToken) {
 				nextToken();
 				match(TokenKind.yrToken);
@@ -474,10 +491,12 @@ public class Parser {
 		Token operation = nextToken();
 		Token varid = match(TokenKind.idToken);
 		
+		//	prevents variable declaration inside flowcontrol statements
 		if (varid.getValue().equals("IT") || inFlowControl) {
 			diagnostics.add("Line "+ lineCounter + ": Invalid variable instantiation");
 		}
 		
+		//	assign an expression if there is an ITZ keyword
 		if (current().getTokenKind() == TokenKind.itzToken) {
 			nextToken();
 			
@@ -533,6 +552,7 @@ public class Parser {
 		
 		statements.add(parseStatement());
 		
+		//	add any number of MEBBE blocks
 		while (current().getTokenKind() == TokenKind.elifBlockToken) {
 			match(TokenKind.elifBlockToken);
 			ifConditions.add(parseTerminal());
@@ -540,6 +560,7 @@ public class Parser {
 			statements.add(parseStatement());
 		}
 
+		//	optional else block
 		if (current().getTokenKind() == TokenKind.elseBlockToken) {
 			
 			ifConditions.add(new NodeLiteral(nextToken()));
@@ -560,6 +581,7 @@ public class Parser {
 		Token operation = nextToken();
 		match(TokenKind.eolToken);
 		
+		//	get all literals used as considitions for switch case
 		do {
 			
 			match(TokenKind.caseToken);
@@ -570,6 +592,7 @@ public class Parser {
 			
 		} while (current().getTokenKind() != TokenKind.ifEndToken && current().getTokenKind() != TokenKind.defaultToken);
 		
+		//	optional default case
 		if (current().getTokenKind() == TokenKind.defaultToken) {
 			switchLiterals.add(new NodeLiteral(nextToken()));
 			match(TokenKind.eolToken);
@@ -608,7 +631,7 @@ public class Parser {
 			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
 		}
 		
-		
+		//	check if loop has a condition
 		if (current().getTokenKind() == TokenKind.tilToken || current().getTokenKind() == TokenKind.wileToken) {
 			if (peek(1).getTokenKind().getType() != "cmpop") {
 				diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ peek(1).getTokenKind().getType() 
@@ -642,6 +665,7 @@ public class Parser {
 		nextToken();
 		Token functionid = match(TokenKind.idToken);
 		
+		//	match with function parameters if any
 		if (current().getTokenKind() == TokenKind.yrToken) {
 			nextToken();
 			parameters.add(new NodeLiteral(SyntaxType.varid, match(TokenKind.idToken)));
@@ -665,7 +689,10 @@ public class Parser {
 	
 	
 	
+	
+	//	checker if operand is a valid expression or literal or varid
 	private SyntaxNode parseTerminal() {
+		
 		if (current().getTokenKind().getType() == "mathop") {
 			return parseMathOp();
 			
@@ -675,6 +702,7 @@ public class Parser {
 		} else if (current().getTokenKind().getType() == "cmpop") {
 			return parseCmpOp();
 			
+		//	check if current is a yarn delimiter
 		} else if (current().getTokenKind() == TokenKind.quoteToken) {
 			return new NodeLiteral(parseYarn());
 			
@@ -689,7 +717,8 @@ public class Parser {
 			
 		} else if (current().getTokenKind() == TokenKind.functionCallToken) {
 			return parseFunctionCall();
-			
+		
+		//	stop infarop and concat from nesting
 		} else if (current().getTokenKind().getType() == "infarop" && !inInfarop) {
 			inInfarop = true;
 			SyntaxNode infAr = parseInfArOp(nextToken());
@@ -704,6 +733,7 @@ public class Parser {
 			
 			lazyMatch(TokenKind.mkayToken);
 			return concat;
+			
 		}
 		
 		if (inInfarop || inSmoosh) nextToken();
@@ -711,6 +741,7 @@ public class Parser {
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
 	
+	//	Makes sure the operand is a literal
 	private NodeLiteral parseLiteral() {
 		if (current().getTokenKind() == TokenKind.quoteToken) {
 			return new NodeLiteral(parseYarn());
@@ -722,10 +753,12 @@ public class Parser {
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
 	
+	//	 creates a new yarnToken
 	private Token parseYarn() {
 		String value = new String();
 		nextToken();
 		
+		//	uses string concatenation to add succeeding tokens until it encounters another quote token
 		while (current().getTokenKind() != TokenKind.quoteToken && current().getTokenKind() != TokenKind.eolToken) {
 			
 			if (current().getValue().equals(":")) nextToken();
@@ -743,7 +776,7 @@ public class Parser {
 	}
 	
 	
-	
+	//	skips newline tokens until it encounters a different token
 	private Token consumeEOL() {
 		Token token = nextToken();
 		
@@ -755,6 +788,7 @@ public class Parser {
 		return token;
 	}
 
+	//	skips all tokens until unless its haitoken, eoftoken or a multiline token
 	private void omitPreamble() {
 		boolean insideComment = false;
 		

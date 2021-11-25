@@ -103,9 +103,11 @@ public class Evaluator {
 		
 		updateLineCounter();
 		
+		//	prevents next lines from executing if Evaluator encounters an error
 		if (!errorMsg.isBlank()) programCounter = null;
 	}
 	
+	//	Evaluate a statement node
 	private void evaluate(SyntaxNode statements) {
 		SyntaxNode currentLine;
 		
@@ -119,8 +121,8 @@ public class Evaluator {
 			currentLine = ((NodeStatement) statements).getOp1();
 			statements = ((NodeStatement) statements).getOp2();
 			
+			//	stop evaluating if break is encountered
 			if (currentLine.getType() == SyntaxType.gtfo) {
-				//errorMsg = "Line " + lineCounter + ": Invalid placement of <breakToken>";
 				switchBreak = true;
 				return;
 				
@@ -155,6 +157,7 @@ public class Evaluator {
 			evalFlowControl((NodeFlowControl) statements);
 		}
 		
+		//	stop evaluation if there is an error
 		if (!errorMsg.isBlank()) {
 			programCounter = null;
 			return;
@@ -188,6 +191,7 @@ public class Evaluator {
 		} else if (node.getType() == SyntaxType.print) {
 			token = evalPrint((NodeOperation) node);
 			
+			//	prints to the GUI the result of the print operation
 			if (window != null && errorMsg.isEmpty()) window.updateConsole(token.getValue());
 		
 		} else if (node.getType() == SyntaxType.functioncall) {
@@ -198,6 +202,8 @@ public class Evaluator {
 			
 		}
 		
+		
+		//	Assign IT the result of the expression
 		symbolTable.get(0).setKindValue(token);
 		if (window == null) token.viewToken();
 	}
@@ -233,6 +239,7 @@ public class Evaluator {
 			evalLoop((NodeMultiLine) node);
 			
 		} else if (node.getType() == SyntaxType.function) {
+			//	add current node to the function table to be executed if called
 			functionTable.add((NodeMultiLine) node);
 			
 		}
@@ -249,14 +256,15 @@ public class Evaluator {
 		Token operand1 = evalTerminal(node.getOp1());
 		Token operand2 = evalTerminal(node.getOp2());
 		
+		//	check if any operand contains a decimal point 
 		if (operand1.getValue().contains(".") || operand2.getValue().contains(".")) isFloat = true;
 		
-		
+		//	cast operands to float
 		op1 = Float.parseFloat(typecastToken(operand1, TokenKind.numbarToken).getValue());
 		op2 = Float.parseFloat(typecastToken(operand2, TokenKind.numbarToken).getValue());
 		
 		
-		
+		//	perform float math operation
 		if (operation.getTokenKind() == TokenKind.sumOpToken) {
 			result = op1 + op2;
 		} else if (operation.getTokenKind() == TokenKind.diffOpToken) {
@@ -273,10 +281,12 @@ public class Evaluator {
 			result = op1 % op2;
 		}
 		
+		
 		if (operand1.getTokenKind() == TokenKind.numbarToken || operand2.getTokenKind() == TokenKind.numbarToken || isFloat) {
 			return new Token(TokenKind.numbarToken, Float.toString(result), -1);
 		}
 		
+		//	cast to Int if both operands are numbr 
 		return new Token(TokenKind.numbrToken, Integer.toString((int)result), -1);
 	}
 	
@@ -288,7 +298,7 @@ public class Evaluator {
 		Token operation = node.getOperation();
 		Token operand1 = evalTerminal(node.getOp1());
 		
-		
+		//	cast operands to boolean datatypes
 		operand1 = typecastToken(operand1, TokenKind.troofToken);
 		if (operand1.getValue().equals("WIN")) op1 = true;
 		else op1 = false;
@@ -329,6 +339,7 @@ public class Evaluator {
 		Token operand1 = evalTerminal(node.getOp1());
 		Token operand2 = evalTerminal(node.getOp2());
 		
+		//	only checks values if both operand has the same datatype
 		if (operand1.getTokenKind() == operand2.getTokenKind()) {
 			
 			if (operation.getTokenKind() == TokenKind.bothSameOpToken) {
@@ -360,6 +371,7 @@ public class Evaluator {
 		
 		if (operation.getTokenKind() == TokenKind.anyOpToken) result = false;
 		
+		//	iterates through the operands of the node to get the result
 		while (true) {
 			operand1 = evalTerminal(currentNode.getOp1());
 			operand1 = typecastToken(operand1, TokenKind.troofToken);
@@ -413,6 +425,7 @@ public class Evaluator {
 			
 		}
 		
+		//	get a new token according to what the cast is asking
 		if (varType.getValue().matches("YARN")) {
 			value = typecastToken(value, TokenKind.yarnToken);
 		} else if (varType.getValue().matches("NUMBR")) {
@@ -434,6 +447,7 @@ public class Evaluator {
 		Token operand1;
 		NodeOperation currentNode = node;
 
+		//	goes through the node until operand 2 is empty 
 		while (true) {
 			operand1 = evalTerminal(currentNode.getOp1());
 			operand1 = typecastToken(operand1, TokenKind.yarnToken);
@@ -444,6 +458,7 @@ public class Evaluator {
 			else currentNode = (NodeOperation) currentNode.getOp2();
 		}
 		
+		//	replace \n and \t with the proper newline and tab
 		str = str.replaceAll("\\\\n", "\n");
 		str = str.replaceAll("\\\\t", "\t");
 		
@@ -459,6 +474,7 @@ public class Evaluator {
 		while (true) {
 			operand1 = evalTerminal(currentNode.getOp1());
 			
+			//	cast operand to yarn unless exclamation is spotted
 			if (operand1.getTokenKind() != TokenKind.exclamationToken) {
 				operand1 = typecastToken(operand1, TokenKind.yarnToken);
 				
@@ -470,6 +486,7 @@ public class Evaluator {
 			else currentNode = (NodeOperation) currentNode.getOp2();
 		}
 		
+		//	replace special string escape characters with their intended values
 		str = str.replaceAll(":>", "\t");
 		str = str.replaceAll(":\\)", "\n");
 		str = str.replaceAll(":o", "\\\\g");
@@ -496,11 +513,12 @@ public class Evaluator {
 		
 		ArrayList<SymTabEntry> symbolTableBackup = new ArrayList<SymTabEntry>();
 		
-		
+		//	store a backup of the symboltable before execution of function
 		for (i = 0; i < symbolTable.size(); i++) {
 			symbolTableBackup.add(symbolTable.get(i));
 		}
 		
+		//	check if function called actually exists
 		for (NodeMultiLine j : functionTable) {
 			if (j.getOperation().getValue().equals(functionid)) {
 				break;
@@ -517,12 +535,14 @@ public class Evaluator {
 		} else {
 			function = functionTable.get(functionIdx);
 			
+			//	assign the function variables to the given values from the function call
 			for (i = 0; i < parameters.size(); i++) {
 				newVar = evalTerminal(parameters.get(i));
 				parameterToken = (((NodeLiteral) function.getIfConditions().get(i)).getToken());
 				
 				symbolTableIdx = findVarValue(parameterToken.getValue());
-					
+				
+				//	add or change the value of the variable in the symboltable
 				if (symbolTableIdx >= symbolTable.size()) {
 					symbolTable.add(new SymTabEntry(parameterToken.getValue(), newVar.getTokenKind(), newVar.getValue()));
 				} else {
@@ -530,9 +550,11 @@ public class Evaluator {
 				}
 			}
 			
+			//	execute instructions inside function
 			evaluate(function.getStatements().get(0));
 			newVar = symbolTable.get(0).getToken();
 			
+			//	return noob token if GTFO is encountered
 			if (switchBreak) {
 				switchBreak = false;
 				newVar = new Token(TokenKind.noobToken, "", -1);
@@ -540,8 +562,8 @@ public class Evaluator {
 			else newVar = symbolTable.get(0).getToken();
 		}
 		
+		//	restore the symboltable to its state before the function call
 		symbolTable.clear();
-		
 		for (i = 0; i < symbolTableBackup.size(); i++) {
 			symbolTable.add(symbolTableBackup.get(i));
 		}
@@ -563,6 +585,7 @@ public class Evaluator {
 			return;
 		}
 
+		//	create a new symbol table entry to add to the table
 		if (node.getValue() != null) {
 			Token value = evalTerminal(node.getValue());
 			newVar = new SymTabEntry(varid, value.getTokenKind(), value.getValue());
@@ -583,6 +606,7 @@ public class Evaluator {
 			return;
 		}
 		
+		//	update variable in the symboltable with the value given
 		symbolTable.get(symbolTableIdx).setKindValue(value);
 		
 	}
@@ -600,6 +624,7 @@ public class Evaluator {
 		
 		value = symbolTable.get(symbolTableIdx).getToken();
 		
+		//	typecast value to the given type
 		if (varType.getValue().matches("YARN")) {
 			value = typecastToken(value, TokenKind.yarnToken);
 		} else if (varType.getValue().matches("NUMBR")) {
@@ -611,7 +636,6 @@ public class Evaluator {
 		} else {
 			value = typecastToken(value, TokenKind.noobToken);
 		}
-		
 		
 		symbolTable.get(symbolTableIdx).setKindValue(value);
 	}
@@ -629,8 +653,10 @@ public class Evaluator {
 		}
 		
 		if (window != null) {
+			//	ask user for value
 			value = window.getYarnInput(varid);
 			
+			//	replace special characters if used
 			value = value.replaceAll(":>", "\t");
 			value = value.replaceAll(":\\)", "\n");
 			value = value.replaceAll(":o", "\\\\g");
@@ -657,11 +683,13 @@ public class Evaluator {
 		boolCondition = typecastToken(boolCondition, TokenKind.troofToken);
 		int counter = 1;
 		
+		//	execute the first statement node if true
 		if (boolCondition.getValue().equals("WIN")) {
 			evaluate(statements.get(0));
 			
 			return;
 		} else if (ifConditions.size() > 0) {
+			//	checks MEBBE block if its true
 			for (SyntaxNode i : ifConditions) {
 				boolCondition = typecastToken(evalTerminal(i), TokenKind.troofToken);
 				
@@ -673,6 +701,7 @@ public class Evaluator {
 				counter++;
 			}
 			
+			//	execute else block if it exists
 			if (ifConditions.get(ifConditions.size() - 1) instanceof NodeLiteral) {
 				evaluate(statements.get(statements.size() - 1));
 			}
@@ -690,6 +719,7 @@ public class Evaluator {
 		for (SyntaxNode i : switchLiterals) {
 			comparison = new NodeOperation(SyntaxType.cmpop, new Token(TokenKind.bothSameOpToken, "BOTH SAEM", -1), switchCondition, i);
 			
+			//	execute statement if IT value matches one of the literals in the cases or it has a default block
 			if (evalCmpOp(comparison).getValue().equals("WIN") ||
 				((NodeLiteral) i).getToken().getTokenKind() == TokenKind.defaultToken) {
 				
@@ -717,7 +747,7 @@ public class Evaluator {
 		int incFactor, counter = 0, symbolTableIdx = findVarValue(varid.getValue());
 		
 		
-		
+		//	checking if given variable is valid
 		if (symbolTableIdx >= symbolTable.size()) {
 			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
 			return;
@@ -732,19 +762,24 @@ public class Evaluator {
 			
 		}
 		
+		//	decide if variable will be incremented or decremented
 		if (node.getOpType().getTokenKind() == TokenKind.incToken) incFactor = 1;
 		else incFactor = -1;
 		
+		//	check if loop is an infinite loop
 		if (condition.getOperation().getTokenKind() != TokenKind.troofToken) {
 			boolCondition = evalCmpOp((NodeOperation) condition.getValue());
 			
+			//	TIL loop; executes while condition is FAIL
 			if (condition.getOperation().getTokenKind() == TokenKind.tilToken) {
 				while (boolCondition.getValue().equals("FAIL") && counter++ < loopLimit) {
 					varid = symbolTable.get(symbolTableIdx).getToken();
 					
+					//	execute code blocks
 					evaluate(node.getStatements().get(0));
 					if (switchBreak) break;
 					
+					//	update variable
 					if (varid.getTokenKind() == TokenKind.numbrToken) {
 						newValue = new Token(TokenKind.numbrToken, 
 											 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
@@ -758,10 +793,12 @@ public class Evaluator {
 						
 					}
 					
+					//	update condition value
 					boolCondition = evalCmpOp((NodeOperation) condition.getValue());
 				}
 				
 			} else {
+				//	WILE loop; executes while condition is WIN
 				while (boolCondition.getValue().equals("WIN") && counter++ < loopLimit) {
 					varid = symbolTable.get(symbolTableIdx).getToken();
 					
@@ -785,6 +822,7 @@ public class Evaluator {
 				}
 			}
 		} else {
+			//	indefinite loop since no condition was entered
 			while (true && counter++ < loopLimit) {
 				varid = symbolTable.get(symbolTableIdx).getToken();
 				
@@ -817,8 +855,9 @@ public class Evaluator {
 	
 	
 	
-	
+	//	return a token which is the value of the given operand
 	private Token evalTerminal(SyntaxNode operand) {
+		//	check if operand is a varid and if it is in the symboltable
 		if (operand.getType() == SyntaxType.varid) {
 			Token token = ((NodeLiteral) operand).getToken();
 			int idx = findVarValue(token.getValue());
@@ -859,6 +898,7 @@ public class Evaluator {
 		return ((NodeLiteral) operand).getToken();
 	}
 	
+	//	typecast the given token to the given kind specified
 	private Token typecastToken(Token token, TokenKind kind) {
 		float numbar = 0;
 		int numbr = 0;
@@ -868,7 +908,7 @@ public class Evaluator {
 		
 		if (token.getTokenKind() == kind) return token;
 		
-		
+		//	typecasting token to all types
 		if (token.getTokenKind() == TokenKind.numbrToken) {
 			numbar = Float.parseFloat(token.getValue());
 			numbr = (int) Float.parseFloat(token.getValue());
@@ -888,6 +928,7 @@ public class Evaluator {
 			else troof = true;
 			
 		} else if (token.getTokenKind() == TokenKind.yarnToken) {
+			//	attempt to convert yarn to int/float
 			try {
 				numbar = Float.parseFloat(token.getValue());
 			} catch (Exception e) {
@@ -926,6 +967,8 @@ public class Evaluator {
 		}
 		
  		
+		//	return a new token which is typecasted to the indicated type
+		
 		if (kind == TokenKind.noobToken) {
 			return new Token(token.getTokenKind(), noob, token.getPosition());
 		}
@@ -946,13 +989,14 @@ public class Evaluator {
 			return new Token(TokenKind.numbarToken, Float.toString(numbar), token.getPosition());
 		}
 		
+		
 		errorMsg = "Line "+ lineCounter + ": Type mismatch <" + token.getTokenKind() + "> cannot be typecasted to "
 				+ "<" + kind + "> ";
 		return new Token(TokenKind.badToken, "0", -1);
 	}
 	
 	
-	
+	//	go through the symboltable to check if variable exists
 	private int findVarValue(String varid) {
 		int counter = 0;
 		for (SymTabEntry entry : symbolTable) {

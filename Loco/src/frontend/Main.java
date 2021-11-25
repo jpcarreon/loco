@@ -15,9 +15,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-	public static void main(String[] args) {
-		//	TODO SHOW STATEMENT Node in the release version!
-	
+	public static void main(String[] args) {	
 		//startEvaluator();
 		//startLexer();
 		launch(args);

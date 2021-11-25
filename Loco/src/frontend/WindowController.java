@@ -142,28 +142,35 @@ public class WindowController implements Initializable {
     	
     	evaluator.changeLoopLimit(loopLimit);
     	
+    	//	hide console text area
     	verticalSplit.setDividerPosition(0, 1.0);
     	
+    	//	update symboltable and tokentable
     	symbolTable.getItems().clear();
     	tokenTable.getItems().clear();
     	for (Token token : evaluator.getTokens()) {
     		tokenTable.getItems().add(token);
     	}
     	
+    	//	update parsetree
     	parseTreeTextArea.clear();
     	parseTreeTextArea.appendText(evaluator.getStrParseTree());
     	
+    	
+    	//	check if there are any parser errors
     	consoleTextArea.clear();
     	for (String string: evaluator.getParserDiagnostics()) {
     		consoleTextArea.appendText(string + "\n");
     		verticalSplit.setDividerPosition(0, 0.8);
     	}
     	
+    	//	 repeatedly executes the lines of code
     	while (!evaluator.isPCEmpty()) {
 			evaluator.nextInstruction();
 			updateSymbolTable();
 		}
     	
+    	//	check if there are any semantic analyzer errors
     	if (!evaluator.getEvalDiagnostics().isBlank()) {
     		verticalSplit.setDividerPosition(0, 0.8);
     		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
@@ -172,6 +179,7 @@ public class WindowController implements Initializable {
     	parseTreeTextArea.positionCaret(0);
     }
     
+    //	does almost the same thing as runProgram() except it doesn't run instructions until the file is done
     @FXML
     void runDebug(ActionEvent event) {
     	if (!codeTextArea.isEditable()) return;
@@ -212,6 +220,7 @@ public class WindowController implements Initializable {
     	nextLineBtn.setDisable(false);
     }
     
+    //	executes the next line of code
     @FXML
     void runNextLine(ActionEvent event) {
     	if (evaluator.isPCEmpty()) {
@@ -242,6 +251,7 @@ public class WindowController implements Initializable {
     	double fontSize = codeTextArea.getFont().getSize();
     	Alert alert = new Alert(AlertType.ERROR);
     	
+    	//	check if input is empty
     	if (input.isEmpty() || input.isBlank()) {
     		alert.setHeaderText("Empty Input!");
     		alert.show();
@@ -249,6 +259,7 @@ public class WindowController implements Initializable {
     		return;
     	}
     	
+    	//	check if input is a valid number
     	try {
     		fontSize = Double.parseDouble(input);
     	} catch(Exception e) {
@@ -256,6 +267,7 @@ public class WindowController implements Initializable {
     		alert.show();
     	}
     	
+    	//	change font size
     	codeTextArea.setFont(Font.font("Consolas", fontSize));
     	consoleTextArea.setFont(Font.font("Consolas", fontSize));
     	parseTreeTextArea.setFont(Font.font("Consolas", fontSize));
@@ -315,6 +327,7 @@ public class WindowController implements Initializable {
     
     @FXML
     void showParseTree(ActionEvent event) {
+    	//	sends the symboltable to the front if parsetree is showing and vice-versa
     	if (isPTreeShow) {
     		symbolTableLabel.setText("Symbol Table");
     		symbolTable.toFront();
@@ -346,12 +359,14 @@ public class WindowController implements Initializable {
     }
     
     public void updateConsole(String string) {
+    	//	add text to the console text area
     	if (!string.isEmpty()) {
     		verticalSplit.setDividerPosition(0, 0.8);
         	consoleTextArea.appendText(string);
     	}
     }
     
+    //	ask for user input
     public String getYarnInput(String varid) {
     	InputWindow popup = new InputWindow("GIMMEH", "Set " + varid + ": ");
     	Alert alert = new Alert(AlertType.ERROR);
@@ -361,6 +376,7 @@ public class WindowController implements Initializable {
     	
     	string = popup.getValue();
     	
+    	//	input must not be empty
     	if (string.isEmpty() || string.isBlank()) {
     		alert.setHeaderText("Empty Input!");
     		alert.show();
@@ -371,6 +387,7 @@ public class WindowController implements Initializable {
     	return string;
     }
     
+    //	modifies the codeTextArea to show which line is being executed
     private void setDebugText() {
     	int counter = 0;
     	int currentLine = evaluator.getCurrentLine() - 1;
@@ -379,9 +396,11 @@ public class WindowController implements Initializable {
     	
     	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");
 
+    	//	looks for the next line to be executed
     	for (String i : codeBackup.split("\n")) {
     		
     		if (!i.isBlank()) {
+    			//	print an indicator for the next line
     			if (counter++ == currentLine) {
         			codeTextArea.appendText("=>\t" + i + "\n");
         			caretpos = codeTextArea.getLength();

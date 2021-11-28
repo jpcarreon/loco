@@ -37,7 +37,6 @@ public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
 	private boolean isPTreeShow;
-	private boolean isCodeArea;
 	private String codeBackup;
 	private int loopLimit;
 
@@ -50,8 +49,7 @@ public class WindowController implements Initializable {
 	@FXML private SplitPane horizontalSplit;
 
 	@FXML private StackPane codeStackPane;
-	
-	@FXML private TextArea codeTextArea;
+
 	@FXML private TextArea consoleTextArea;
 	@FXML private TextArea parseTreeTextArea;
 	
@@ -77,15 +75,21 @@ public class WindowController implements Initializable {
 
 		codeArea = new CodeArea();
 
+		codeArea.appendText("HAI\n" +
+				"\tI HAS A var1 ITZ 4\n" +
+				"\n" +
+				"\tSUM OF 1 AN 2\n" +
+				"\tDIFF OF 4.6 AN \"2\"\n" +
+				"\tPRODUKT OF var1 AN 2.6\n" +
+				"KTHXBYE"
+		);
+
 		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 
 		codeArea.setLineHighlighterFill(Paint.valueOf("#E8E8FF"));
 		codeArea.setLineHighlighterOn(true);
 
 		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
-
-		codeTextArea.toBack();
-		isCodeArea = true;
 
 		isPTreeShow = false;
 		loopLimit = 999;
@@ -266,7 +270,7 @@ public class WindowController implements Initializable {
     @FXML
     void changeFont(ActionEvent event) {
     	String input = displayInputBox("Change Font Size", "Font Size: ");
-    	double fontSize = codeTextArea.getFont().getSize();
+    	double fontSize = 20;
     	Alert alert = new Alert(AlertType.ERROR);
 
 		System.out.println(codeArea.getStyleClass());
@@ -288,12 +292,10 @@ public class WindowController implements Initializable {
     	}
     	
     	//	change font size
-    	codeTextArea.setFont(Font.font("Consolas", fontSize));
 		codeArea.setStyle("-fx-font-size: "+fontSize+"px;");
     	consoleTextArea.setFont(Font.font("Consolas", fontSize));
     	parseTreeTextArea.setFont(Font.font("Consolas", fontSize));
-    	
-    	codeTextArea.positionCaret(0);
+
     	consoleTextArea.positionCaret(0);
     	parseTreeTextArea.positionCaret(0);
     }
@@ -364,14 +366,6 @@ public class WindowController implements Initializable {
     	
     	isPTreeShow = !isPTreeShow;
     }
-
-	@FXML
-	void showCodeArea(ActionEvent event) {
-		if (isCodeArea) codeTextArea.toFront();
-		else codeTextArea.toBack();
-
-		isCodeArea = !isCodeArea;
-	}
     
     @FXML
     void closeProgram(ActionEvent event) {
@@ -416,33 +410,26 @@ public class WindowController implements Initializable {
     	return string;
     }
     
-    //	modifies the codeTextArea to show which line is being executed
+    //	modifies the codeArea to show which line is being executed
     private void setDebugText() {
     	int counter = 0;
-    	int currentLine = evaluator.getCurrentLine() - 1;
+    	int currentLine = evaluator.getNextLineNum() - 1;
     	int caretpos = 0;
-    	
-    	
-    	codeArea.appendText("==== DEBUGGING MODE ====\n\n");
 
-    	//	looks for the next line to be executed
-    	for (String i : codeBackup.split("\n")) {
-    		
-    		if (!i.isBlank()) {
-    			//	print an indicator for the next line
-    			if (counter++ == currentLine) {
-        			codeArea.appendText("=>\t" + i + "\n");
-        			caretpos = codeArea.getLength();
-        		} else {
-        			codeArea.appendText("\t" + i + "\n");
-        		}
-    		} else {
-    			codeArea.appendText("\t" + i + "\n");
-    		}
-    	}
+		codeArea.appendText("==== DEBUGGING MODE ====\n\n");
+		for (String i : codeBackup.split("\n")) {
+			if (counter++ == currentLine) {
+				codeArea.appendText("=>\t" + i + "\n");
+				caretpos = codeArea.getLength();
+			} else {
+				codeArea.appendText("\t" + i + "\n");
+			}
+		}
 
-		codeArea.displaceCaret(caretpos - 1);
-		codeArea.requestFollowCaret();
+		if (currentLine > 0) {
+			codeArea.displaceCaret(caretpos - 1);
+			codeArea.requestFollowCaret();
+		}
     }
     
     private void updateSymbolTable() {

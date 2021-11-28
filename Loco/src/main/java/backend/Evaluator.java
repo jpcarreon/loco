@@ -1065,6 +1065,28 @@ public class Evaluator {
 	public int getCurrentLine() {
 		return lineCounter;
 	}
-	
-	
+
+	//	gets the line number of the next instruction
+	public int getNextLineNum() {
+		SyntaxNode nextInstruction;
+
+		//	no next line
+		if (programCounter == null) return -1;
+
+		//	get next instruction SyntaxNode
+		if (programCounter.getType() == SyntaxType.statement) {
+			nextInstruction = ((NodeStatement) programCounter).getOp1();
+		} else {
+			nextInstruction = programCounter;
+		}
+
+
+		if (nextInstruction.getType() == SyntaxType.expression) {
+			return ((NodeExpression) nextInstruction).getLineCounter();
+		} else if (nextInstruction.getType() == SyntaxType.assignment) {
+			return ((NodeAssignment) nextInstruction).getLineCounter();
+		} else {
+			return ((NodeFlowControl) nextInstruction).getLineCounter();
+		}
+	}
 }

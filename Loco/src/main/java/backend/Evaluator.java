@@ -108,6 +108,8 @@ public class Evaluator {
 			evalFlowControl((NodeFlowControl) currentInstruction);
 		}
 		
+		//updateLineCounter();
+		
 		//	prevents next lines from executing if Evaluator encounters an error
 		if (!errorMsg.isBlank()) programCounter = null;
 	}

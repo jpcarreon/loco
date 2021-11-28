@@ -1,9 +1,6 @@
 package frontend;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
@@ -27,6 +24,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -78,10 +76,13 @@ public class WindowController implements Initializable {
 		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
 		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
 
-		//codeTextArea.setStyle("-fx-border-width: 2px; -fx-border-color: black");
-
 		codeArea = new CodeArea();
+
 		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+
+		codeArea.setLineHighlighterFill(Paint.valueOf("#E8E8FF"));
+		codeArea.setLineHighlighterOn(true);
+
 		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
 
 		codeTextArea.toBack();
@@ -94,7 +95,7 @@ public class WindowController implements Initializable {
 	
 	@FXML
 	void openFile(ActionEvent event) {
-		if (!codeTextArea.isEditable()) return;
+		if (!codeArea.isEditable()) return;
 		
 		FileChooser filechooser = new FileChooser();
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Lolcode File", "*.lol");
@@ -113,8 +114,9 @@ public class WindowController implements Initializable {
 				}
 				
 				sc.close();
-				
-				//codeArea.positionCaret(0);
+
+				codeArea.displaceCaret(0);
+				codeArea.requestFollowCaret();
 				
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -125,7 +127,7 @@ public class WindowController implements Initializable {
 	
 	@FXML
 	void saveFile(ActionEvent event) {
-		if (!codeTextArea.isEditable()) return;
+		if (!codeArea.isEditable()) return;
 		
 		FileChooser filechooser = new FileChooser();
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Lolcode File", "*.lol");
@@ -136,7 +138,7 @@ public class WindowController implements Initializable {
 		if (file != null) {
 			try {
 				FileWriter writer = new FileWriter(file);
-				writer.write(codeTextArea.getText());
+				writer.write(codeArea.getText());
 				writer.close();
 				
 			} catch (IOException e) {
@@ -147,7 +149,7 @@ public class WindowController implements Initializable {
 
     @FXML
     void runProgram(ActionEvent event) {
-    	if (!codeTextArea.isEditable()) return;
+    	if (!codeArea.isEditable()) return;
     	
     	long startTime = System.nanoTime();
     	
@@ -205,10 +207,11 @@ public class WindowController implements Initializable {
     //	does almost the same thing as runProgram() except it doesn't run instructions until the file is done
     @FXML
     void runDebug(ActionEvent event) {
-    	if (!codeTextArea.isEditable()) return;
+    	if (!codeArea.isEditable()) return;
     	
     	try {
-    		String fp = codeTextArea.getText();
+    		String fp = codeArea.getText();
+        	fp = fp.replaceAll("\t", "");
         	
         	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
@@ -234,9 +237,9 @@ public class WindowController implements Initializable {
     		verticalSplit.setDividerPosition(0, 0.8);
     	}
     	
-    	codeBackup = codeTextArea.getText();
-    	codeTextArea.clear();
-    	codeTextArea.setEditable(false);
+    	codeBackup = codeArea.getText();
+    	codeArea.clear();
+    	codeArea.setEditable(false);
     	setDebugText();
     	
     	nextLineBtn.setDisable(false);
@@ -251,10 +254,10 @@ public class WindowController implements Initializable {
 	    		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
 	    	}
 			
-			if (!codeTextArea.isEditable()) {
-				codeTextArea.clear();
-				codeTextArea.setText(codeBackup);
-		    	codeTextArea.setEditable(true);
+			if (!codeArea.isEditable()) {
+				codeArea.clear();
+				codeArea.appendText(codeBackup);
+		    	codeArea.setEditable(true);
 			}
 			
 			nextLineBtn.setDisable(true);
@@ -262,7 +265,7 @@ public class WindowController implements Initializable {
     		evaluator.nextInstruction();
     		updateSymbolTable();
     		
-    		codeTextArea.clear();
+    		codeArea.clear();
     		setDebugText();
     	}
     }
@@ -272,7 +275,9 @@ public class WindowController implements Initializable {
     	String input = displayInputBox("Change Font Size", "Font Size: ");
     	double fontSize = codeTextArea.getFont().getSize();
     	Alert alert = new Alert(AlertType.ERROR);
-    	
+
+		System.out.println(codeArea.getStyleClass());
+
     	//	check if input is empty
     	if (input.isEmpty() || input.isBlank()) {
     		alert.setHeaderText("Empty Input!");
@@ -291,6 +296,7 @@ public class WindowController implements Initializable {
     	
     	//	change font size
     	codeTextArea.setFont(Font.font("Consolas", fontSize));
+		codeArea.setStyle("-fx-font-size: "+fontSize+"px;");
     	consoleTextArea.setFont(Font.font("Consolas", fontSize));
     	parseTreeTextArea.setFont(Font.font("Consolas", fontSize));
     	
@@ -389,7 +395,7 @@ public class WindowController implements Initializable {
     void setHotKey(KeyEvent event) {
     	if (event.getCode() == KeyCode.F6) runProgram(null);
     	else if (event.getCode() == KeyCode.F7) runDebug(null);
-    	else if (event.getCode() == KeyCode.F8 && !codeTextArea.isEditable()) runNextLine(null);
+    	else if (event.getCode() == KeyCode.F8 && !codeArea.isEditable()) runNextLine(null);
     	else if (event.getCode() == KeyCode.F12) displayAbout(null);
     }
     
@@ -433,20 +439,26 @@ public class WindowController implements Initializable {
     		return;
     	}
     	
-    	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");
+    	codeArea.appendText("==== DEBUGGING MODE ====\n\n");
 
     	//	looks for the next line to be executed
     	for (String i : codeBackup.split("\n")) {
     		
-    		if (counter++ == currentLine) {
-				codeTextArea.appendText("=>\t" + i + "\n");
-				caretpos = codeTextArea.getLength();
-			} else {
-				codeTextArea.appendText("\t" + i + "\n");
-			}
+    		if (!i.isBlank()) {
+    			//	print an indicator for the next line
+    			if (counter++ == currentLine) {
+        			codeArea.appendText("=>\t" + i + "\n");
+        			caretpos = codeArea.getLength();
+        		} else {
+        			codeArea.appendText("\t" + i + "\n");
+        		}
+    		} else {
+    			codeArea.appendText("\t" + i + "\n");
+    		}
     	}
-    	
-    	codeTextArea.positionCaret(caretpos);
+
+		codeArea.displaceCaret(caretpos - 1);
+		codeArea.requestFollowCaret();
     }
     
     public void updateSymbolTable() {

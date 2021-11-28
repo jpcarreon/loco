@@ -2,7 +2,15 @@
 	-fx-padding: 0 0.30em;
 }
 
+.code-area {
+    -fx-font-size: 20px;
+}
+
 .code-area .text {
     -fx-font-family: "Consolas";
+
+}
+
+.lineno {
     -fx-font-size: 20px;
 }

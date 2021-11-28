@@ -92,16 +92,19 @@ public class Evaluator {
 		
 		
 		if (currentInstruction.getType() == SyntaxType.expression) {
+			lineCounter = ((NodeExpression) currentInstruction).getLineCounter();
 			evalExpression((NodeExpression) currentInstruction);
 			
 		} else if (currentInstruction.getType() == SyntaxType.assignment) {
+			lineCounter = ((NodeAssignment) currentInstruction).getLineCounter();
 			evalAssignment((NodeAssignment) currentInstruction);
 			
 		} else {
+			lineCounter = ((NodeFlowControl) currentInstruction).getLineCounter();
 			evalFlowControl((NodeFlowControl) currentInstruction);
 		}
 		
-		updateLineCounter();
+		//updateLineCounter();
 		
 		//	prevents next lines from executing if Evaluator encounters an error
 		if (!errorMsg.isBlank()) programCounter = null;

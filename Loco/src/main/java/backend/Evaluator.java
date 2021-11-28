@@ -1036,7 +1036,8 @@ public class Evaluator {
 	public int getCurrentLine() {
 		return lineCounter;
 	}
-	
+
+	//	gets the line number of the next instruction
 	public int getNextLineNum() {
 		SyntaxNode nextInstruction;
 
@@ -1059,5 +1060,4 @@ public class Evaluator {
 			return ((NodeFlowControl) nextInstruction).getLineCounter();
 		}
 	}
-	
 }

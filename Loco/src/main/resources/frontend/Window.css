@@ -1,3 +1,8 @@
 .split-pane-divider {
 	-fx-padding: 0 0.30em;
 }
+
+.code-area .text {
+    -fx-font-family: "Consolas";
+    -fx-font-size: 20px;
+}

@@ -25,24 +25,33 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
 
 
 public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
 	private boolean isPTreeShow;
+	private boolean isCodeArea;
 	private String codeBackup;
 	private int loopLimit;
-	
+
+	private CodeArea codeArea;
+
 	public final static int WINDOW_HEIGHT = 675;
 	public final static int WINDOW_WIDTH = 1200;
 	
 	@FXML private SplitPane verticalSplit;
 	@FXML private SplitPane horizontalSplit;
+
+	@FXML private StackPane codeStackPane;
 	
 	@FXML private TextArea codeTextArea;
 	@FXML private TextArea consoleTextArea;
@@ -67,7 +76,16 @@ public class WindowController implements Initializable {
 		
 		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
 		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
-		
+
+		//codeTextArea.setStyle("-fx-border-width: 2px; -fx-border-color: black");
+
+		codeArea = new CodeArea();
+		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
+
+		codeTextArea.toBack();
+		isCodeArea = true;
+
 		isPTreeShow = false;
 		loopLimit = 999;
 	}
@@ -83,25 +101,23 @@ public class WindowController implements Initializable {
 		File file = filechooser.showOpenDialog(null);
 		
 		if (file != null) {
-			codeTextArea.clear();
+			codeArea.clear();
 			
 			try {
 				Scanner sc = new Scanner(file);
 				
 				while(sc.hasNextLine()) {
-					codeTextArea.appendText(sc.nextLine() + "\n");
+					codeArea.appendText(sc.nextLine() + "\n");
 				}
 				
 				sc.close();
 				
-				codeTextArea.positionCaret(0);
+				//codeArea.positionCaret(0);
 				
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 		}
-	
-		
 		
 	}
 	
@@ -132,7 +148,7 @@ public class WindowController implements Initializable {
     	if (!codeTextArea.isEditable()) return;
     	
     	try {
-    		String fp = codeTextArea.getText();
+    		String fp = codeArea.getText();
         	fp = fp.replaceAll("\t", "");
         	
         	evaluator = new Evaluator(fp, this);
@@ -343,6 +359,14 @@ public class WindowController implements Initializable {
     	
     	isPTreeShow = !isPTreeShow;
     }
+
+	@FXML
+	void showCodeArea(ActionEvent event) {
+		if (isCodeArea) codeTextArea.toFront();
+		else codeTextArea.toBack();
+
+		isCodeArea = !isCodeArea;
+	}
     
     @FXML
     void closeProgram(ActionEvent event) {

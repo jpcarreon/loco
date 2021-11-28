@@ -492,9 +492,10 @@ public class Parser {
 		Token varid = match(TokenKind.idToken);
 		
 		//	prevents variable declaration inside flowcontrol statements
-		if (varid.getValue().equals("IT") || inFlowControl) {
+		if (varid.getValue() != null && (varid.getValue().equals("IT") || inFlowControl)) {
 			diagnostics.add("Line "+ lineCounter + ": Invalid variable instantiation");
 		}
+		
 		
 		//	assign an expression if there is an ITZ keyword
 		if (current().getTokenKind() == TokenKind.itzToken) {
@@ -526,7 +527,7 @@ public class Parser {
 		Token operation = nextToken();
 		Token varid = match(TokenKind.idToken);
 		
-		if (varid.getValue().equals("IT")) {
+		if (varid.getValue() != null && varid.getValue().equals("IT")) {
 			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
 		}
 		
@@ -612,7 +613,7 @@ public class Parser {
 		Token optype;
 		SyntaxNode condition;
 		
-		if (loopid.getValue().equals("IT")) {
+		if (loopid.getValue() != null && loopid.getValue().equals("IT")) {
 			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
 		}
 		
@@ -627,7 +628,7 @@ public class Parser {
 		match(TokenKind.yrToken);
 		Token varid = match(TokenKind.idToken);
 		
-		if (varid.getValue().equals("IT")) {
+		if (varid.getValue() != null && varid.getValue().equals("IT")) {
 			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
 		}
 		

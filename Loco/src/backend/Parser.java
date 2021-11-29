@@ -279,20 +279,21 @@ public class Parser {
 	}
 	
 	private SyntaxNode parseFlowControl() {
+		int currentLineNum = lineCounter;
 		inFlowControl = true;
 		
 		if (current().getTokenKind() == TokenKind.ifStartToken) {
-			return new NodeFlowControl(parseIfBlock(), lineCounter);
+			return new NodeFlowControl(parseIfBlock(), currentLineNum);
 			
 		} else if (current().getTokenKind() == TokenKind.switchToken) {
-			return new NodeFlowControl(parseSwitchCase(), lineCounter);
+			return new NodeFlowControl(parseSwitchCase(), currentLineNum);
 			
 		} else if (current().getTokenKind() == TokenKind.loopStartToken) {
-			return new NodeFlowControl(parseLoop(), lineCounter);
+			return new NodeFlowControl(parseLoop(), currentLineNum);
 			
 		} else if (current().getTokenKind() == TokenKind.functionStartToken) {
 			inFunction = true;
-			return new NodeFlowControl(parseFunction(), lineCounter);
+			return new NodeFlowControl(parseFunction(), currentLineNum);
 			
 		}
 		

@@ -133,7 +133,6 @@ public class WindowController implements Initializable {
     	
     	try {
     		String fp = codeTextArea.getText();
-        	fp = fp.replaceAll("\t", "");
         	
         	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
@@ -186,7 +185,6 @@ public class WindowController implements Initializable {
     	
     	try {
     		String fp = codeTextArea.getText();
-        	fp = fp.replaceAll("\t", "");
         	
         	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
@@ -415,7 +413,7 @@ public class WindowController implements Initializable {
     	codeTextArea.positionCaret(caretpos);
     }
     
-    private void updateSymbolTable() {
+    public void updateSymbolTable() {
     	symbolTable.getItems().clear();
     	for (SymTabEntry entry : evaluator.getSymbolTable()) {
     		symbolTable.getItems().add(entry);

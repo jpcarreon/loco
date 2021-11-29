@@ -75,7 +75,8 @@ public class WindowController implements Initializable {
 		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
 		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
 
-		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeHighlighter.getCodeArea()));
+		codeArea = codeHighlighter.getCodeArea();
+		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
 
 		isPTreeShow = false;
 		loopLimit = 999;
@@ -258,8 +259,6 @@ public class WindowController implements Initializable {
     	String input = displayInputBox("Change Font Size", "Font Size: ");
     	double fontSize = 20;
     	Alert alert = new Alert(AlertType.ERROR);
-
-		System.out.println(codeArea.getStyleClass());
 
     	//	check if input is empty
     	if (input.isEmpty() || input.isBlank()) {

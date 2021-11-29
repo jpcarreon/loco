@@ -6,8 +6,13 @@
     -fx-font-size: 20px;
 }
 
+.code-area .selection {
+    -fx-fill: #A6D2FF;
+}
+
 .code-area .text {
     -fx-font-family: "Consolas";
+
 }
 
 .lineno {
@@ -15,30 +20,33 @@
     -fx-padding: 0 0.5em;
 }
 
-.literal {
-    -fx-fill: black;
-}
-
 .expression {
-    -fx-fill: #B22222;
+    -fx-fill: #778899;
+    -fx-font-weight: 700;
 }
 
 .assignment {
-    -fx-fill: #A0522D;
+    -fx-fill: #B22222;
+    -fx-font-weight: 700;
 }
 
 .flowcontrol {
     -fx-fill: #663399;
+    -fx-font-weight: 700;
+
+}
+
+.io {
+    -fx-fill: #4169E1;
+    -fx-font-weight: 700;
+
 }
 
 .misc {
-    -fx-fill: #2E8B57;
-}
-
-.se {
-    -fx-fill: #4169E1;
+    -fx-fill: #A0522D;
 }
 
 .comment {
-	-fx-fill: #696969;
+	-fx-fill: #3CB371;
+	-fx-font-style: italic;
 }

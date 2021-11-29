@@ -14,3 +14,31 @@
     -fx-font-size: 18px;
     -fx-padding: 0 0.5em;
 }
+
+.literal {
+    -fx-fill: black;
+}
+
+.expression {
+    -fx-fill: #B22222;
+}
+
+.assignment {
+    -fx-fill: #A0522D;
+}
+
+.flowcontrol {
+    -fx-fill: #663399;
+}
+
+.misc {
+    -fx-fill: #2E8B57;
+}
+
+.se {
+    -fx-fill: #4169E1;
+}
+
+.comment {
+	-fx-fill: #696969;
+}

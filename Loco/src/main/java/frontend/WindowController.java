@@ -76,6 +76,7 @@ public class WindowController implements Initializable {
 
 		codeArea = new CodeArea();
 
+		//	TODO Remove this before final release
 		codeArea.appendText("HAI\n" +
 				"\tI HAS A var1 ITZ 4\n" +
 				"\n" +

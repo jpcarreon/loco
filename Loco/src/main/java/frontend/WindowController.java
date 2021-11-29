@@ -67,30 +67,15 @@ public class WindowController implements Initializable {
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
+		CodeHighlighter codeHighlighter = new CodeHighlighter();
+
 		lexemeColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("value"));
 		tokenKindColumn.setCellValueFactory(new PropertyValueFactory<Token, TokenKind>("tokenKind"));
 		
 		identifierColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("identifier"));
 		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
 
-		codeArea = new CodeArea();
-
-		//	TODO Remove this before final release
-		codeArea.appendText("HAI\n" +
-				"\tI HAS A var1 ITZ 4\n" +
-				"\n" +
-				"\tSUM OF 1 AN 2\n" +
-				"\tDIFF OF 4.6 AN \"2\"\n" +
-				"\tPRODUKT OF var1 AN 2.6\n" +
-				"KTHXBYE"
-		);
-
-		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-
-		codeArea.setLineHighlighterFill(Paint.valueOf("#E8E8FF"));
-		codeArea.setLineHighlighterOn(true);
-
-		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
+		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeHighlighter.getCodeArea()));
 
 		isPTreeShow = false;
 		loopLimit = 999;

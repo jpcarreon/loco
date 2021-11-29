@@ -1,7 +1,8 @@
 HAI
-        GIMMEH 
-
-        IM IN YR print10 UPPIN YR temp TIL BOTH SAEM temp AN 10
+        I HAS A temp ITZ 1
+        
+        IM IN YR print10 UPPIN YR temp	BTW dsfs
                 VISIBLE temp
+                GTFO
         IM OUTTA YR print10
 KTHXBYE

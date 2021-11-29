@@ -40,9 +40,6 @@ public class Lexer {
 				
 				//	Extract words/digits in the current line
 				for (String i : curLine.split("")) {
-					//	Remove any indentation in the current word
-					i = i.replaceAll("\t", "");
-					
 					lexemes.add(i);
 				}
 				
@@ -88,7 +85,8 @@ public class Lexer {
 		for (int i = 0; i < lexemes.size(); i++) {
 			currentString = lexemes.get(i);
 			
-			if (currentString.matches("[^\s\"\n:]")) {
+			//	If current chracter isn't whitespace, quote or a colon
+			if (currentString.matches("[^\s\t\"\n:]")) {
 				newLexeme += currentString;
 				
 			} else if (i + 1 < lexemes.size() && (currentString + lexemes.get(i + 1)).matches(":[\\)>o\":]")) {

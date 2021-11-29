@@ -246,6 +246,8 @@ public class Evaluator {
 			functionTable.add((NodeMultiLine) node);
 			
 		}
+		
+		if (window != null) window.updateSymbolTable();
 	}
 	
 	
@@ -424,6 +426,12 @@ public class Evaluator {
 			
 		} else {
 			value = evalTerminal(((NodeOperation) node).getOp1());
+			
+			//	make sure value to type cast is a valid literal/expression
+			if (value.getTokenKind() == TokenKind.typeToken) {
+				errorMsg = "Line " + lineCounter + ": Invalid operand; Expected valid Literal/Expression";
+			}
+			
 			varType = ((NodeLiteral) ((NodeOperation) node).getOp2()).getToken();
 			
 		}
@@ -1006,7 +1014,7 @@ public class Evaluator {
 			if (entry.getIdentifier().equals(varid)) break;
 			counter++;
 		}
-		
+
 		return counter;
 	}
 	

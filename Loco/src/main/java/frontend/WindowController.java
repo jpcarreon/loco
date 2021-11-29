@@ -125,6 +125,8 @@ public class WindowController implements Initializable {
 				e.printStackTrace();
 			}
 		}
+	
+		
 		
 	}
 	
@@ -156,8 +158,7 @@ public class WindowController implements Initializable {
     	
     	try {
     		String fp = codeArea.getText();
-        	fp = fp.replaceAll("\t", "");
-        	
+
         	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
     		return;
@@ -209,7 +210,6 @@ public class WindowController implements Initializable {
     	
     	try {
     		String fp = codeArea.getText();
-        	fp = fp.replaceAll("\t", "");
         	
         	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
@@ -433,7 +433,7 @@ public class WindowController implements Initializable {
 		}
     }
     
-    private void updateSymbolTable() {
+    public void updateSymbolTable() {
     	symbolTable.getItems().clear();
     	for (SymTabEntry entry : evaluator.getSymbolTable()) {
     		symbolTable.getItems().add(entry);

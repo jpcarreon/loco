@@ -516,6 +516,7 @@ public class Evaluator {
 		ArrayList<SyntaxNode> parameters = node.getParameters();
 		String functionid = node.getFunctionid().getValue();
 		NodeMultiLine function;
+		SymTabEntry entry;
 		Token newVar = new Token(TokenKind.noobToken, "", -1), parameterToken;
 		int functionIdx = 0, symbolTableIdx = 0, i;
 		
@@ -523,7 +524,8 @@ public class Evaluator {
 		
 		//	store a backup of the symboltable before execution of function
 		for (i = 0; i < symbolTable.size(); i++) {
-			symbolTableBackup.add(symbolTable.get(i));
+			entry = symbolTable.get(i);
+			symbolTableBackup.add(new SymTabEntry(entry.getIdentifier(), entry.getKind(), entry.getValue()));
 		}
 		
 		//	check if function called actually exists

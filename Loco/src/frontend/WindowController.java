@@ -388,26 +388,25 @@ public class WindowController implements Initializable {
     //	modifies the codeTextArea to show which line is being executed
     private void setDebugText() {
     	int counter = 0;
-    	int currentLine = evaluator.getCurrentLine() - 1;
+    	int currentLine = evaluator.getNextLineNum() - 1;
     	int caretpos = 0;
     	
+    	if (currentLine < 0) {
+    		runNextLine(null);
+    		return;
+    	}
     	
     	codeTextArea.appendText("==== DEBUGGING MODE ====\n\n");
 
     	//	looks for the next line to be executed
     	for (String i : codeBackup.split("\n")) {
     		
-    		if (!i.isBlank()) {
-    			//	print an indicator for the next line
-    			if (counter++ == currentLine) {
-        			codeTextArea.appendText("=>\t" + i + "\n");
-        			caretpos = codeTextArea.getLength();
-        		} else {
-        			codeTextArea.appendText("\t" + i + "\n");
-        		}
-    		} else {
-    			codeTextArea.appendText("\t" + i + "\n");
-    		}
+    		if (counter++ == currentLine) {
+				codeTextArea.appendText("=>\t" + i + "\n");
+				caretpos = codeTextArea.getLength();
+			} else {
+				codeTextArea.appendText("\t" + i + "\n");
+			}
     	}
     	
     	codeTextArea.positionCaret(caretpos);

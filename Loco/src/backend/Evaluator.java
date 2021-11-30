@@ -39,9 +39,14 @@ public class Evaluator {
 		this.tokens = parser.getTokens();
 		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
-		updateLineCounter();
-		
-		this.programCounter = root.getStatements();
+		if (parser.getDiagnostics().size() > 0) {
+			programCounter = null;
+		} else {
+			
+			updateLineCounter();
+			
+			this.programCounter = root.getStatements();
+		}
 	}
 	
 	public Evaluator(String strFile, WindowController window) {
@@ -61,17 +66,21 @@ public class Evaluator {
 		this.tokens = parser.getTokens();
 		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
-		updateLineCounter();
+		if (parser.getDiagnostics().size() > 0) {
+			programCounter = null;
+		} else {
+			
+			updateLineCounter();
+			
+			this.programCounter = root.getStatements();
+		}
 		
-		this.programCounter = root.getStatements();
+		
 	}
 	
 	public void nextInstruction() {
 		
-		if (parser.getDiagnostics().size() > 0) {
-			programCounter = null;
-			return;
-		}
+		
 		
 		// check if PC holds only 1 line of code 
 		if (programCounter.getType() == SyntaxType.expression ||
@@ -100,8 +109,6 @@ public class Evaluator {
 		} else {
 			evalFlowControl((NodeFlowControl) currentInstruction);
 		}
-		
-		updateLineCounter();
 		
 		//	prevents next lines from executing if Evaluator encounters an error
 		if (!errorMsg.isBlank()) programCounter = null;
@@ -1025,5 +1032,27 @@ public class Evaluator {
 		return lineCounter;
 	}
 	
+	public int getNextLineNum() {
+		SyntaxNode nextInstruction;
+
+		//	no next line
+		if (programCounter == null) return -1;
+
+		//	get next instruction SyntaxNode
+		if (programCounter.getType() == SyntaxType.statement) {
+			nextInstruction = ((NodeStatement) programCounter).getOp1();
+		} else {
+			nextInstruction = programCounter;
+		}
+
+
+		if (nextInstruction.getType() == SyntaxType.expression) {
+			return ((NodeExpression) nextInstruction).getLineCounter();
+		} else if (nextInstruction.getType() == SyntaxType.assignment) {
+			return ((NodeAssignment) nextInstruction).getLineCounter();
+		} else {
+			return ((NodeFlowControl) nextInstruction).getLineCounter();
+		}
+	}
 	
 }

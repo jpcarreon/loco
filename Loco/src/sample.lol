@@ -1,7 +1,2 @@
 HAI
-	I HAS A temp ITZ 2
-
-	IM IN YR print10 UPPIN YR temp TIL BOTH SAEM temp AN 20
-		VISIBLE temp
-	IM OUTTA YR print10
-KTHXBYE
+	VISIBLE "hello" 

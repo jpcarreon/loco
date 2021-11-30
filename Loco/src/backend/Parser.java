@@ -135,9 +135,10 @@ public class Parser {
 		diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
 				+ "> expected <"+ kind + ">");
 			
-		if (current().getTokenKind() == TokenKind.miscToken ||
+		if (current().getTokenKind() != TokenKind.eofToken &&
+			(current().getTokenKind() == TokenKind.miscToken ||
 			current().getTokenKind() == TokenKind.badToken ||
-			kind == TokenKind.eolToken ) {
+			kind == TokenKind.eolToken) ) {
 			nextToken();
 		}
 		
@@ -247,7 +248,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword ");
-		while (current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -272,7 +273,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
-		while (current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -298,7 +299,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
-		while (current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -404,6 +405,10 @@ public class Parser {
 		//	Stop recursion if exclamation is encountered
 		if (current().getTokenKind() == TokenKind.exclamationToken) {
 			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(nextToken()));
+			
+		//	Stop recursion if eofToken is encountered
+		} else if (current().getTokenKind() == TokenKind.eofToken) {
+			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(lazyMatch(TokenKind.numbrToken)));
 		} else {
 			operand1 = parseTerminal();
 		}
@@ -761,7 +766,9 @@ public class Parser {
 		nextToken();
 		
 		//	uses string concatenation to add succeeding tokens until it encounters another quote token
-		while (current().getTokenKind() != TokenKind.quoteToken && current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.quoteToken && 
+			   current().getTokenKind() != TokenKind.eolToken &&
+			   current().getTokenKind() != TokenKind.eofToken) {
 			
 			if (current().getValue().equals(":")) nextToken();
 			else if (current().getValue().equals(":\"")) {

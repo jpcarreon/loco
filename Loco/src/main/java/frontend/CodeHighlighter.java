@@ -48,7 +48,7 @@ public class CodeHighlighter {
 
     CodeHighlighter() {
         codeArea = new CodeArea();
-        codeArea.setLineHighlighterFill(Paint.valueOf("#FFFFE4"));
+        codeArea.setLineHighlighterFill(Paint.valueOf("#FFFFE6"));
         codeArea.setLineHighlighterOn(true);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 
@@ -61,7 +61,7 @@ public class CodeHighlighter {
                 "(?<EXPRESSION>" + expressionPattern + ")"
                         + "|(?<ASSIGNMENT>" + assignmentPattern + ")"
                         + "|(?<FLOWCONTROL>" + flowcontrolPattern + "|(\\?))"
-                        + "|(?<MISC>((\".+?\")))"
+                        + "|(?<MISC>((\".*?\")))"
                         + "|(?<COMMENT>((OBTW.+?TLDR)|(BTW[^\n]*)))"
                         + "|(?<IO>(VISIBLE|GIMMEH|!))",
                 Pattern.DOTALL
@@ -91,7 +91,7 @@ public class CodeHighlighter {
 
             if (i.getType().equals("mathop") || i.getType().equals("boolop") || i.getType().equals("cmpop") ||
                     i.getType().equals("infarop") || i.getType().equals("concat") || i.getType().equals("exptypecast") ||
-                    i == TokenKind.anToken || i == TokenKind.aToken
+                    i == TokenKind.anToken || i == TokenKind.aToken  || i == TokenKind.typeToken
             ) {
                 expressionPattern += regex + "|";
             } else

@@ -776,86 +776,38 @@ public class Evaluator {
 		if (node.getOpType().getTokenKind() == TokenKind.incToken) incFactor = 1;
 		else incFactor = -1;
 		
-		//	check if loop is an infinite loop
-		if (condition.getOperation().getTokenKind() != TokenKind.troofToken) {
-			boolCondition = evalCmpOp((NodeOperation) condition.getValue());
-			
-			//	TIL loop; executes while condition is FAIL
-			if (condition.getOperation().getTokenKind() == TokenKind.tilToken) {
-				while (boolCondition.getValue().equals("FAIL") && counter++ < loopLimit) {
-					varid = symbolTable.get(symbolTableIdx).getToken();
-					
-					//	execute code blocks
-					evaluate(node.getStatements().get(0));
-					if (switchBreak) break;
-					
-					//	update variable
-					if (varid.getTokenKind() == TokenKind.numbrToken) {
-						newValue = new Token(TokenKind.numbrToken, 
-											 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
-						
-						symbolTable.get(symbolTableIdx).setKindValue(newValue);
-					} else {
-						newValue = new Token(TokenKind.numbarToken, 
-								 Double.toString(Double.parseDouble(varid.getValue()) + incFactor), -1);
-			
-						symbolTable.get(symbolTableIdx).setKindValue(newValue);
-						
-					}
-					
-					//	update condition value
-					boolCondition = evalCmpOp((NodeOperation) condition.getValue());
-				}
-				
-			} else {
-				//	WILE loop; executes while condition is WIN
-				while (boolCondition.getValue().equals("WIN") && counter++ < loopLimit) {
-					varid = symbolTable.get(symbolTableIdx).getToken();
-					
-					evaluate(node.getStatements().get(0));
-					if (switchBreak) break;
-					
-					if (varid.getTokenKind() == TokenKind.numbrToken) {
-						newValue = new Token(TokenKind.numbrToken, 
-											 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
-						
-						symbolTable.get(symbolTableIdx).setKindValue(newValue);
-					} else {
-						newValue = new Token(TokenKind.numbarToken, 
-								 Double.toString(Double.parseDouble(varid.getValue()) + incFactor), -1);
-			
-						symbolTable.get(symbolTableIdx).setKindValue(newValue);
-						
-					}
-					
-					boolCondition = evalCmpOp((NodeOperation) condition.getValue());
-				}
-			}
-		} else {
-			//	indefinite loop since no condition was entered
-			while (true && counter++ < loopLimit) {
-				varid = symbolTable.get(symbolTableIdx).getToken();
-				
-				evaluate(node.getStatements().get(0));
-				if (switchBreak) break;
-				
-				if (varid.getTokenKind() == TokenKind.numbrToken) {
-					newValue = new Token(TokenKind.numbrToken, 
-										 Integer.toString(Integer.parseInt(varid.getValue()) + incFactor), -1);
-					
-					symbolTable.get(symbolTableIdx).setKindValue(newValue);
-				} else {
-					newValue = new Token(TokenKind.numbarToken, 
-							 Double.toString(Double.parseDouble(varid.getValue()) + incFactor), -1);
 		
-					symbolTable.get(symbolTableIdx).setKindValue(newValue);
-					
-				}
+		while (counter++ < loopLimit) {
+			if (condition.getOperation().getTokenKind() != TokenKind.troofToken) {
+				boolCondition = evalCmpOp((NodeOperation) condition.getValue());
+				
+				if (condition.getOperation().getTokenKind() == TokenKind.tilToken &&
+					boolCondition.getValue().equals("WIN")) break;
+				else 
+				if (condition.getOperation().getTokenKind() == TokenKind.wileToken &&
+					boolCondition.getValue().equals("FAIL")) break; 
 			}
+			varid = symbolTable.get(symbolTableIdx).getToken();
+			
+			//	execute code blocks
+			evaluate(node.getStatements().get(0));
+			if (switchBreak) break;
+			
+			//	update variable
+			if (varid.getTokenKind() == TokenKind.numbrToken) {
+				newValue = new Token(TokenKind.numbrToken, Long.toString(Long.parseLong(varid.getValue()) + incFactor), -1);
+				
+				symbolTable.get(symbolTableIdx).setKindValue(newValue);
+			} else {
+				newValue = new Token(TokenKind.numbarToken, Double.toString(Double.parseDouble(varid.getValue()) + incFactor), -1);
+	
+				symbolTable.get(symbolTableIdx).setKindValue(newValue);
+				
+			}
+			
 		}
 
-		switchBreak = false;
-		
+		switchBreak = false;		
 		if (counter >= loopLimit && errorMsg.isEmpty()) errorMsg = "Line " + lineCounter + ": InfLoopWarning; Loop has exceeded maximum allowed iterations (" + loopLimit + ")";
 
 	}

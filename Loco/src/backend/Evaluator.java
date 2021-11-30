@@ -251,7 +251,7 @@ public class Evaluator {
 	
 	
 	private Token evalMathOp(NodeOperation node) {
-		float op1, op2, result;
+		double op1, op2, result;
 		boolean isFloat = false;
 		
 		Token operation = node.getOperation();
@@ -261,9 +261,9 @@ public class Evaluator {
 		//	check if any operand contains a decimal point 
 		if (operand1.getValue().contains(".") || operand2.getValue().contains(".")) isFloat = true;
 		
-		//	cast operands to float
-		op1 = Float.parseFloat(typecastToken(operand1, TokenKind.numbarToken).getValue());
-		op2 = Float.parseFloat(typecastToken(operand2, TokenKind.numbarToken).getValue());
+		//	cast operands to double
+		op1 = Double.parseDouble(typecastToken(operand1, TokenKind.numbarToken).getValue());
+		op2 = Double.parseDouble(typecastToken(operand2, TokenKind.numbarToken).getValue());
 		
 		
 		//	perform float math operation
@@ -285,11 +285,11 @@ public class Evaluator {
 		
 		
 		if (operand1.getTokenKind() == TokenKind.numbarToken || operand2.getTokenKind() == TokenKind.numbarToken || isFloat) {
-			return new Token(TokenKind.numbarToken, Float.toString(result), -1);
+			return new Token(TokenKind.numbarToken, Double.toString(result), -1);
 		}
 		
-		//	cast to Int if both operands are numbr 
-		return new Token(TokenKind.numbrToken, Integer.toString((int)result), -1);
+		//	cast to long if both operands are numbr 
+		return new Token(TokenKind.numbrToken, Long.toString((long) result), -1);
 	}
 	
 	private Token evalBoolOp(NodeOperation node) {
@@ -797,7 +797,7 @@ public class Evaluator {
 						symbolTable.get(symbolTableIdx).setKindValue(newValue);
 					} else {
 						newValue = new Token(TokenKind.numbarToken, 
-								 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
+								 Double.toString(Double.parseDouble(varid.getValue()) + incFactor), -1);
 			
 						symbolTable.get(symbolTableIdx).setKindValue(newValue);
 						
@@ -822,7 +822,7 @@ public class Evaluator {
 						symbolTable.get(symbolTableIdx).setKindValue(newValue);
 					} else {
 						newValue = new Token(TokenKind.numbarToken, 
-								 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
+								 Double.toString(Double.parseDouble(varid.getValue()) + incFactor), -1);
 			
 						symbolTable.get(symbolTableIdx).setKindValue(newValue);
 						
@@ -846,7 +846,7 @@ public class Evaluator {
 					symbolTable.get(symbolTableIdx).setKindValue(newValue);
 				} else {
 					newValue = new Token(TokenKind.numbarToken, 
-							 Float.toString(Float.parseFloat(varid.getValue()) + incFactor), -1);
+							 Double.toString(Double.parseDouble(varid.getValue()) + incFactor), -1);
 		
 					symbolTable.get(symbolTableIdx).setKindValue(newValue);
 					
@@ -910,8 +910,8 @@ public class Evaluator {
 	
 	//	typecast the given token to the given kind specified
 	private Token typecastToken(Token token, TokenKind kind) {
-		float numbar = 0;
-		int numbr = 0;
+		double numbar = 0;
+		long numbr = 0;
 		boolean troof = true, isFloat = true, isInt = true;
 		String yarn = new String();
 		String noob = new String();
@@ -920,8 +920,8 @@ public class Evaluator {
 		
 		//	typecasting token to all types
 		if (token.getTokenKind() == TokenKind.numbrToken) {
-			numbar = Float.parseFloat(token.getValue());
-			numbr = (int) Float.parseFloat(token.getValue());
+			numbar = Double.parseDouble(token.getValue());
+			numbr = (long) Double.parseDouble(token.getValue());
 			yarn = token.getValue();
 			noob = "0";
 			
@@ -929,24 +929,24 @@ public class Evaluator {
 			else troof = true;
 			
 		} else if (token.getTokenKind() == TokenKind.numbarToken) {
-			numbar = Float.parseFloat(token.getValue());
-			numbr = (int) Float.parseFloat(token.getValue());
+			numbar = Double.parseDouble(token.getValue());
+			numbr = (long) Double.parseDouble(token.getValue());
 			yarn = token.getValue();
 			noob = "0";
 			
-			if (numbar == (float) 0) troof = false;
+			if (numbar == (double) 0) troof = false;
 			else troof = true;
 			
 		} else if (token.getTokenKind() == TokenKind.yarnToken) {
-			//	attempt to convert yarn to int/float
+			//	attempt to convert yarn to long/double
 			try {
-				numbar = Float.parseFloat(token.getValue());
+				numbar = Double.parseDouble(token.getValue());
 			} catch (Exception e) {
 				isFloat = false;
 			}
 			
 			try {
-				numbr = Integer.parseInt(token.getValue());
+				numbr = Long.parseLong(token.getValue());
 			} catch (Exception e) {
 				isInt = false;
 			}
@@ -960,12 +960,12 @@ public class Evaluator {
 			yarn = token.getValue();
 			
 			if (yarn.equals("WIN")) {
-				numbar = (float) 1;
+				numbar = (double) 1;
 				numbr = 1;
 				troof = true;
 				
 			} else {
-				numbar = (float) 0;
+				numbar = (double) 0;
 				numbr = 0;
 				troof = false;
 			}
@@ -993,10 +993,10 @@ public class Evaluator {
 		}
 		
 		if (kind == TokenKind.numbrToken && (isInt || isFloat)) {
-			return new Token(TokenKind.numbrToken, Integer.toString((int) numbar), token.getPosition());
+			return new Token(TokenKind.numbrToken, Long.toString((long) numbr), token.getPosition());
 			
 		} else if (kind == TokenKind.numbarToken && isFloat) {
-			return new Token(TokenKind.numbarToken, Float.toString(numbar), token.getPosition());
+			return new Token(TokenKind.numbarToken, Double.toString(numbar), token.getPosition());
 		}
 		
 		

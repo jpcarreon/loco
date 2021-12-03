@@ -259,7 +259,7 @@ public class Parser {
 			return new NodeAssignment(parseDeclaration(), lineCounter);
 			
 		// if a line starts with a varid, it can fall in either R (assignment) or IS NOW A (typecast)
-		} else if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
+		} else if (current().getTokenKind() == TokenKind.idToken) {
 			Token varid = nextToken();
 			
 			if (current().getTokenKind() == TokenKind.rToken) {
@@ -413,7 +413,6 @@ public class Parser {
 			operand1 = parseTerminal();
 		}
 		
-		
 		if (current().getTokenKind() != TokenKind.eolToken && operand1.getType() != SyntaxType.invalid) {
 			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
 
@@ -434,7 +433,7 @@ public class Parser {
 		Token operation = nextToken();
 		
 		//	Prevent IT from being used as a varid
-		if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
+		if (current().getTokenKind() == TokenKind.idToken) {
 			Token varid = nextToken();
 			
 			lazyMatch(TokenKind.aToken);
@@ -451,7 +450,6 @@ public class Parser {
 		
 		return new NodeOperation(SyntaxType.vartypechange, operation, expression, vartype);
 	}
-	
 	
 	private SyntaxNode parseFunctionRet() {
 		Token operation = nextToken();
@@ -498,7 +496,7 @@ public class Parser {
 		Token varid = match(TokenKind.idToken);
 		
 		//	prevents variable declaration inside flowcontrol statements
-		if (varid.getValue() != null && (varid.getValue().equals("IT") || inFlowControl)) {
+		if (inFlowControl) {
 			diagnostics.add("Line "+ lineCounter + ": Invalid variable instantiation");
 		}
 		
@@ -532,10 +530,6 @@ public class Parser {
 	private SyntaxNode parseScan() {
 		Token operation = nextToken();
 		Token varid = match(TokenKind.idToken);
-		
-		if (varid.getValue() != null && varid.getValue().equals("IT")) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
-		}
 		
 		return new NodeDeclaration(SyntaxType.scan, operation, varid);
 	}
@@ -634,10 +628,6 @@ public class Parser {
 		match(TokenKind.yrToken);
 		Token varid = match(TokenKind.idToken);
 		
-		if (varid.getValue() != null && varid.getValue().equals("IT")) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
-		}
-		
 		//	check if loop has a condition
 		if (current().getTokenKind() == TokenKind.tilToken || current().getTokenKind() == TokenKind.wileToken) {
 			if (peek(1).getTokenKind().getType() != "cmpop") {
@@ -716,7 +706,7 @@ public class Parser {
 		} else if (current().getTokenKind().getType() == "literal") {
 			return new NodeLiteral(nextToken());
 			
-		} else if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
+		} else if (current().getTokenKind() == TokenKind.idToken) {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
 			
 		} else if (current().getTokenKind() == TokenKind.maekToken) {

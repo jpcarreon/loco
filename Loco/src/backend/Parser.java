@@ -152,11 +152,11 @@ public class Parser {
 		
 		//	optionally matches any eol before the HAI keyword
 		lazyMatch(TokenKind.eolToken);
+		omitPreamble();
 		Token start = match(TokenKind.haiToken);
 		
 		//	matches with version number incase any is provided
 		lazyMatch(TokenKind.numbarToken);
-		lazyMatch(TokenKind.numbrToken);
 		
 		match(TokenKind.eolToken);
 		
@@ -172,6 +172,7 @@ public class Parser {
 		}
 		
 		lazyMatch(TokenKind.eolToken);
+		omitPreamble();
 		match(TokenKind.eofToken);
 		
 		return root;

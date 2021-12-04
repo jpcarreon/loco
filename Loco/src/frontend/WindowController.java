@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import backend.Evaluator;
 import backend.SymTabEntry;
@@ -35,6 +36,7 @@ public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
 	private boolean isPTreeShow;
+	private boolean showRuntime;
 	private String codeBackup;
 	private int loopLimit;
 	
@@ -69,6 +71,7 @@ public class WindowController implements Initializable {
 		valueColumn.setCellValueFactory(new PropertyValueFactory<SymTabEntry, String>("value"));
 		
 		isPTreeShow = false;
+		showRuntime = false;
 		loopLimit = 999;
 	}
 	
@@ -131,6 +134,8 @@ public class WindowController implements Initializable {
     void runProgram(ActionEvent event) {
     	if (!codeTextArea.isEditable()) return;
     	
+    	long startTime = System.nanoTime();
+    	
     	try {
     		String fp = codeTextArea.getText();
         	
@@ -174,6 +179,9 @@ public class WindowController implements Initializable {
     		verticalSplit.setDividerPosition(0, 0.8);
     		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
     	}
+    	
+    	long totalTime = System.nanoTime() - startTime;
+    	if (showRuntime) updateConsole("\nProgram Runtime: " + totalTime / 1000000.0 + "ms");
     	
     	parseTreeTextArea.positionCaret(0);
     }
@@ -340,6 +348,11 @@ public class WindowController implements Initializable {
     	}
     	
     	isPTreeShow = !isPTreeShow;
+    }
+    
+    @FXML
+    void showProgramRuntime(ActionEvent event) {
+    	showRuntime = !showRuntime;
     }
     
     @FXML

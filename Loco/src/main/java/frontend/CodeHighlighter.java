@@ -81,7 +81,6 @@ public class CodeHighlighter {
         assignmentPattern = "\\b(";
         flowcontrolPattern = "\\b(";
 
-
         for (TokenKind i : TokenKind.values()) {
             regex = i.getRegex();
             regex = regex.replaceAll("\s", "\\\\s");
@@ -143,8 +142,6 @@ public class CodeHighlighter {
             } else {
                 styleClass = null;
             }
-
-
 
             spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
             spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());

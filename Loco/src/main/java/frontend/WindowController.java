@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import backend.Evaluator;
 import backend.SymTabEntry;
@@ -37,6 +38,7 @@ public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
 	private boolean isPTreeShow;
+	private boolean showRuntime;
 	private String codeBackup;
 	private int loopLimit;
 
@@ -79,6 +81,7 @@ public class WindowController implements Initializable {
 		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
 
 		isPTreeShow = false;
+		showRuntime = false;
 		loopLimit = 999;
 	}
 	
@@ -142,6 +145,8 @@ public class WindowController implements Initializable {
     void runProgram(ActionEvent event) {
     	if (!codeArea.isEditable()) return;
     	
+    	long startTime = System.nanoTime();
+
     	try {
     		String fp = codeArea.getText();
 
@@ -186,6 +191,9 @@ public class WindowController implements Initializable {
     		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
     	}
     	
+    	long totalTime = System.nanoTime() - startTime;
+    	if (showRuntime) updateConsole("\nProgram Runtime: " + totalTime / 1000000.0 + "ms");
+
     	parseTreeTextArea.positionCaret(0);
     }
     
@@ -353,6 +361,11 @@ public class WindowController implements Initializable {
     }
     
     @FXML
+    void showProgramRuntime(ActionEvent event) {
+    	showRuntime = !showRuntime;
+    }
+
+    @FXML
     void closeProgram(ActionEvent event) {
     	Stage stage = (Stage) tokenTable.getScene().getWindow();
     	stage.close();
@@ -400,21 +413,25 @@ public class WindowController implements Initializable {
     	int counter = 0;
     	int currentLine = evaluator.getNextLineNum() - 1;
     	int caretpos = 0;
+    	
+    	if (currentLine < 0) {
+    		runNextLine(null);
+    		return;
+    	}
 
-		codeArea.appendText("==== DEBUGGING MODE ====\n\n");
-		for (String i : codeBackup.split("\n")) {
-			if (counter++ == currentLine) {
-				codeArea.appendText("=>\t" + i + "\n");
+        codeArea.appendText("==== DEBUGGING MODE ====\n\n");
+    	//	looks for the next line to be executed
+    	for (String i : codeBackup.split("\n")) {
+    		if (counter++ == currentLine) {
+                codeArea.appendText("=>\t" + i + "\n");
 				caretpos = codeArea.getLength();
 			} else {
-				codeArea.appendText("\t" + i + "\n");
+                codeArea.appendText("\t" + i + "\n");
 			}
-		}
+    	}
 
-		if (currentLine > 0) {
-			codeArea.displaceCaret(caretpos - 1);
-			codeArea.requestFollowCaret();
-		}
+        codeArea.displaceCaret(caretpos - 1);
+        codeArea.requestFollowCaret();
     }
     
     public void updateSymbolTable() {

@@ -33,6 +33,7 @@
                   <MenuItem mnemonicParsing="false" onAction="#defaultFold" text="Default Layout" />
                   <MenuItem mnemonicParsing="false" onAction="#changeFont" text="Set Font Size" />
                   <MenuItem mnemonicParsing="false" onAction="#changeLoopLimit" text="Set Loop Limit" />
+                  <CheckMenuItem mnemonicParsing="false" onAction="#showProgramRuntime" text="Show Program Runtime" />
                   <CheckMenuItem mnemonicParsing="false" onAction="#showParseTree" text="Show Parse Tree" />
             </items>
           </Menu>

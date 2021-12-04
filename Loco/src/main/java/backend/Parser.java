@@ -135,9 +135,10 @@ public class Parser {
 		diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
 				+ "> expected <"+ kind + ">");
 			
-		if (current().getTokenKind() == TokenKind.miscToken ||
+		if (current().getTokenKind() != TokenKind.eofToken &&
+			(current().getTokenKind() == TokenKind.miscToken ||
 			current().getTokenKind() == TokenKind.badToken ||
-			kind == TokenKind.eolToken ) {
+			kind == TokenKind.eolToken) ) {
 			nextToken();
 		}
 		
@@ -151,11 +152,11 @@ public class Parser {
 		
 		//	optionally matches any eol before the HAI keyword
 		lazyMatch(TokenKind.eolToken);
+		omitPreamble();
 		Token start = match(TokenKind.haiToken);
 		
 		//	matches with version number incase any is provided
 		lazyMatch(TokenKind.numbarToken);
-		lazyMatch(TokenKind.numbrToken);
 		
 		match(TokenKind.eolToken);
 		
@@ -171,6 +172,7 @@ public class Parser {
 		}
 		
 		lazyMatch(TokenKind.eolToken);
+		omitPreamble();
 		match(TokenKind.eofToken);
 		
 		return root;
@@ -247,7 +249,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword ");
-		while (current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -258,7 +260,7 @@ public class Parser {
 			return new NodeAssignment(parseDeclaration(), lineCounter);
 			
 		// if a line starts with a varid, it can fall in either R (assignment) or IS NOW A (typecast)
-		} else if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
+		} else if (current().getTokenKind() == TokenKind.idToken) {
 			Token varid = nextToken();
 			
 			if (current().getTokenKind() == TokenKind.rToken) {
@@ -272,7 +274,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
-		while (current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -298,7 +300,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
-		while (current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -404,10 +406,13 @@ public class Parser {
 		//	Stop recursion if exclamation is encountered
 		if (current().getTokenKind() == TokenKind.exclamationToken) {
 			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(nextToken()));
+			
+		//	Stop recursion if eofToken is encountered
+		} else if (current().getTokenKind() == TokenKind.eofToken) {
+			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(lazyMatch(TokenKind.numbrToken)));
 		} else {
 			operand1 = parseTerminal();
 		}
-		
 		
 		if (current().getTokenKind() != TokenKind.eolToken && operand1.getType() != SyntaxType.invalid) {
 			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
@@ -429,7 +434,7 @@ public class Parser {
 		Token operation = nextToken();
 		
 		//	Prevent IT from being used as a varid
-		if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
+		if (current().getTokenKind() == TokenKind.idToken) {
 			Token varid = nextToken();
 			
 			lazyMatch(TokenKind.aToken);
@@ -446,7 +451,6 @@ public class Parser {
 		
 		return new NodeOperation(SyntaxType.vartypechange, operation, expression, vartype);
 	}
-	
 	
 	private SyntaxNode parseFunctionRet() {
 		Token operation = nextToken();
@@ -493,7 +497,7 @@ public class Parser {
 		Token varid = match(TokenKind.idToken);
 		
 		//	prevents variable declaration inside flowcontrol statements
-		if (varid.getValue() != null && (varid.getValue().equals("IT") || inFlowControl)) {
+		if (inFlowControl) {
 			diagnostics.add("Line "+ lineCounter + ": Invalid variable instantiation");
 		}
 		
@@ -527,10 +531,6 @@ public class Parser {
 	private SyntaxNode parseScan() {
 		Token operation = nextToken();
 		Token varid = match(TokenKind.idToken);
-		
-		if (varid.getValue() != null && varid.getValue().equals("IT")) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
-		}
 		
 		return new NodeDeclaration(SyntaxType.scan, operation, varid);
 	}
@@ -629,10 +629,6 @@ public class Parser {
 		match(TokenKind.yrToken);
 		Token varid = match(TokenKind.idToken);
 		
-		if (varid.getValue() != null && varid.getValue().equals("IT")) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
-		}
-		
 		//	check if loop has a condition
 		if (current().getTokenKind() == TokenKind.tilToken || current().getTokenKind() == TokenKind.wileToken) {
 			if (peek(1).getTokenKind().getType() != "cmpop") {
@@ -711,7 +707,7 @@ public class Parser {
 		} else if (current().getTokenKind().getType() == "literal") {
 			return new NodeLiteral(nextToken());
 			
-		} else if (current().getTokenKind() == TokenKind.idToken && !current().getValue().equals("IT")) {
+		} else if (current().getTokenKind() == TokenKind.idToken) {
 			return new NodeLiteral(SyntaxType.varid, nextToken());
 			
 		} else if (current().getTokenKind() == TokenKind.maekToken) {
@@ -761,7 +757,9 @@ public class Parser {
 		nextToken();
 		
 		//	uses string concatenation to add succeeding tokens until it encounters another quote token
-		while (current().getTokenKind() != TokenKind.quoteToken && current().getTokenKind() != TokenKind.eolToken) {
+		while (current().getTokenKind() != TokenKind.quoteToken && 
+			   current().getTokenKind() != TokenKind.eolToken &&
+			   current().getTokenKind() != TokenKind.eofToken) {
 			
 			if (current().getValue().equals(":")) nextToken();
 			else if (current().getValue().equals(":\"")) {

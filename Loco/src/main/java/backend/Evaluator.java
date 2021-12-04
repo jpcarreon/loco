@@ -39,9 +39,14 @@ public class Evaluator {
 		this.tokens = parser.getTokens();
 		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
-		updateLineCounter();
-		
-		this.programCounter = root.getStatements();
+		if (parser.getDiagnostics().size() > 0) {
+			programCounter = null;
+		} else {
+
+			updateLineCounter();
+
+			this.programCounter = root.getStatements();
+		}
 	}
 	
 	public Evaluator(String strFile, WindowController window) {
@@ -61,17 +66,21 @@ public class Evaluator {
 		this.tokens = parser.getTokens();
 		this.symbolTable.add(new SymTabEntry("IT", TokenKind.noobToken, ""));
 		
-		updateLineCounter();
-		
-		this.programCounter = root.getStatements();
+		if (parser.getDiagnostics().size() > 0) {
+			programCounter = null;
+		} else {
+
+			updateLineCounter();
+
+			this.programCounter = root.getStatements();
+		}
+
+
 	}
 	
 	public void nextInstruction() {
 		
-		if (parser.getDiagnostics().size() > 0) {
-			programCounter = null;
-			return;
-		}
+
 		
 		// check if PC holds only 1 line of code 
 		if (programCounter.getType() == SyntaxType.expression ||
@@ -103,9 +112,7 @@ public class Evaluator {
 			lineCounter = ((NodeFlowControl) currentInstruction).getLineCounter();
 			evalFlowControl((NodeFlowControl) currentInstruction);
 		}
-		
-		//updateLineCounter();
-		
+
 		//	prevents next lines from executing if Evaluator encounters an error
 		if (!errorMsg.isBlank()) programCounter = null;
 	}

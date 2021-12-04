@@ -21,12 +21,12 @@
 }
 
 .expression {
-    -fx-fill: #778899;
+    -fx-fill: LightSlateGray;
     -fx-font-weight: 700;
 }
 
 .assignment {
-    -fx-fill: #B22222;
+    -fx-fill: FireBrick;
     -fx-font-weight: 700;
 }
 
@@ -37,16 +37,16 @@
 }
 
 .io {
-    -fx-fill: #4169E1;
+    -fx-fill: RoyalBlue;
     -fx-font-weight: 700;
 
 }
 
 .misc {
-    -fx-fill: #A0522D;
+    -fx-fill: Sienna;
 }
 
 .comment {
-	-fx-fill: #3CB371;
+	-fx-fill: MediumSeaGreen;
 	-fx-font-style: italic;
 }

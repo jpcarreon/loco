@@ -38,6 +38,8 @@ public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
 	private boolean isPTreeShow;
+	private boolean showRuntime;
+	private boolean wrapText;
 	private String codeBackup;
 	private int loopLimit;
 
@@ -79,8 +81,7 @@ public class WindowController implements Initializable {
 		codeArea = codeHighlighter.getCodeArea();
 		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
 
-		isPTreeShow = false;
-		showRuntime = false;
+		isPTreeShow = showRuntime = wrapText = false;
 		loopLimit = 999;
 	}
 	
@@ -363,7 +364,13 @@ public class WindowController implements Initializable {
     void showProgramRuntime(ActionEvent event) {
     	showRuntime = !showRuntime;
     }
-    
+
+	@FXML
+	void wrapText(ActionEvent event) {
+		wrapText = !wrapText;
+		codeArea.setWrapText(wrapText);
+	}
+
     @FXML
     void closeProgram(ActionEvent event) {
     	Stage stage = (Stage) tokenTable.getScene().getWindow();

@@ -67,7 +67,7 @@ public class CodeHighlighter {
                 Pattern.DOTALL
         );
 
-        codeArea.replaceText(0, 0, sampleCode);
+        //codeArea.replaceText(0, 0, sampleCode);
 
     }
 

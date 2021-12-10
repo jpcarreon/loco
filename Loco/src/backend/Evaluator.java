@@ -287,7 +287,8 @@ public class Evaluator {
 			result = op1 % op2;
 		}
 		
-		if (Double.isInfinite(result)) {
+		//	Check if result of math operation is valid
+		if (Double.isInfinite(result) || Double.isNaN(result)) {
 			if (op2 == 0 && errorMsg.isEmpty()) errorMsg = "Line " + lineCounter + ": Math Error; Attempt to divide by zero";
 			result = -1;
 		}
@@ -423,7 +424,7 @@ public class Evaluator {
 			symbolTableIdx = findVarValue(varid);
 			
 			if (symbolTableIdx >= symbolTable.size()) {
-				errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+				errorMsg = "Line " + lineCounter + ": ID Error; Given variable id is not instantiated ";
 				return new Token (TokenKind.badToken, "", -1);
 			}
 			
@@ -434,7 +435,7 @@ public class Evaluator {
 			
 			//	make sure value to type cast is a valid literal/expression
 			if (value.getTokenKind() == TokenKind.typeToken) {
-				errorMsg = "Line " + lineCounter + ": Invalid operand; Expected valid Literal/Expression";
+				errorMsg = "Line " + lineCounter + ": Type Error; Expected valid Literal/Expression";
 			}
 			
 			varType = ((NodeLiteral) ((NodeOperation) node).getOp2()).getToken();
@@ -545,10 +546,10 @@ public class Evaluator {
 		}
 		
 		if (functionIdx >= functionTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Unbound function error; given function not found";
+			errorMsg = "Line " + lineCounter + ": ID Error; " + functionid + " is not defined";
 			
 		} else if (parameters.size() != functionTable.get(functionIdx).getIfConditions().size()) {
-			errorMsg = "Line " + lineCounter + ": Parameter mismatch; number of parameters does not match function descriptor";
+			errorMsg = "Line " + lineCounter + ": Syntax Error; number of parameters does not match function descriptor";
 
 		} else {
 			function = functionTable.get(functionIdx);
@@ -599,7 +600,7 @@ public class Evaluator {
 		String varid = node.getVarID().getValue();
 		
 		if (findVarValue(varid) < symbolTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Duplicate instantiation of new variable";
+			errorMsg = "Line " + lineCounter + ": ID Error; Duplicate instantiation of new variable";
 			return;
 		}
 
@@ -620,7 +621,7 @@ public class Evaluator {
 		int symbolTableIdx = findVarValue(varid);
 		
 		if (symbolTableIdx >= symbolTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			errorMsg = "Line " + lineCounter + ": ID Error; Given variable id is not instantiated ";
 			return;
 		}
 		
@@ -636,7 +637,7 @@ public class Evaluator {
 		int symbolTableIdx = findVarValue(varid);
 		
 		if (symbolTableIdx >= symbolTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			errorMsg = "Line " + lineCounter + ": ID Error; Given variable id is not instantiated ";
 			return;
 		}
 		
@@ -666,7 +667,7 @@ public class Evaluator {
 		int symbolTableIdx = findVarValue(varid);
 		
 		if (symbolTableIdx >= symbolTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			errorMsg = "Line " + lineCounter + ": ID Error; Given variable id is not instantiated ";
 			return;
 		}
 		
@@ -767,14 +768,14 @@ public class Evaluator {
 		
 		//	checking if given variable is valid
 		if (symbolTableIdx >= symbolTable.size()) {
-			errorMsg = "Line " + lineCounter + ": Given variable id is not instantiated ";
+			errorMsg = "Line " + lineCounter + ": ID Error; Given variable id is not instantiated ";
 			return;
 		} else {
 			varid = symbolTable.get(symbolTableIdx).getToken();
 			
 			if (varid.getTokenKind() != TokenKind.numbarToken &&
 				varid.getTokenKind() != TokenKind.numbrToken) {
-				errorMsg = "Line " + lineCounter + ": Given variable id cannot be incremented/decremented ";
+				errorMsg = "Line " + lineCounter + ": Type Error; Given variable id cannot be incremented/decremented ";
 				return;
 			}
 			
@@ -833,10 +834,10 @@ public class Evaluator {
 			int idx = findVarValue(token.getValue());
 			
 			if (idx == symbolTable.size()) {
-				this.errorMsg = "Line "+ lineCounter + ": Unbound variable <"+token.getValue()+">";
+				this.errorMsg = "Line "+ lineCounter + ": ID Error; Unbound variable <"+token.getValue()+">";
 				return new Token(TokenKind.numbrToken, "0", -1);
 			} else if (symbolTable.get(idx).getValue().isEmpty()) {
-				this.errorMsg = "Line "+ lineCounter + ": Uninitialized variable <"+token.getValue()+">";
+				this.errorMsg = "Line "+ lineCounter + ": ID Error; Uninitialized variable <"+token.getValue()+">";
 				return new Token(TokenKind.numbrToken, "0", -1);
 			} else {				
 				return symbolTable.get(idx).getToken();
@@ -960,7 +961,7 @@ public class Evaluator {
 		}
 		
 		
-		errorMsg = "Line "+ lineCounter + ": Type mismatch <" + token.getTokenKind() + "> cannot be typecasted to "
+		errorMsg = "Line "+ lineCounter + ": Type Error; <" + token.getTokenKind() + "> cannot be typecasted to "
 				+ "<" + kind + "> ";
 		return new Token(TokenKind.badToken, "0", -1);
 	}

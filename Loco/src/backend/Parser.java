@@ -132,7 +132,7 @@ public class Parser {
 			
 		} 
 		
-		diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
+		diagnostics.add("Line "+ lineCounter + ": Type Error; Unexpected <"+ current().getTokenKind() 
 				+ "> expected <"+ kind + ">");
 			
 		if (current().getTokenKind() != TokenKind.eofToken &&
@@ -248,7 +248,7 @@ public class Parser {
 			
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword ");
+		diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid Keyword ");
 		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
@@ -273,7 +273,7 @@ public class Parser {
 			return new NodeAssignment(parseScan(), lineCounter);
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
+		diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid Keyword");
 		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
@@ -299,7 +299,7 @@ public class Parser {
 			
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid Keyword");
+		diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid Keyword");
 		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
 			nextToken();
 		}
@@ -321,7 +321,7 @@ public class Parser {
 		Token end = match(TokenKind.tldrToken);
 		
 		//	multiline comments need atleast 2 newlines to be considered valid
-		if (counter < 2) diagnostics.add("Line "+ lineCounter + ": Invalid comment structure");
+		if (counter < 2) diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid comment structure");
 		
 		return new NodeComment(start, inner, end);
 	}
@@ -498,7 +498,7 @@ public class Parser {
 		
 		//	prevents variable declaration inside flowcontrol statements
 		if (inFlowControl) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid variable instantiation");
+			diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid variable instantiation");
 		}
 		
 		
@@ -615,13 +615,13 @@ public class Parser {
 		SyntaxNode condition;
 		
 		if (loopid.getValue() != null && loopid.getValue().equals("IT")) {
-			diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
+			diagnostics.add("Line "+ lineCounter + ": Type Error; expected valid Literal/VarId/Expression");
 		}
 		
 		if (current().getTokenKind() == TokenKind.incToken || current().getTokenKind() == TokenKind.decToken) {
 			optype = nextToken();
 		} else {
-			diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
+			diagnostics.add("Line "+ lineCounter + ": Type Error; Unexpected <"+ current().getTokenKind() 
 					+ "> expected <incToken>/<decToken>");
 			optype = new Token(TokenKind.incToken, "UPPIN", -1);
 		}
@@ -632,7 +632,7 @@ public class Parser {
 		//	check if loop has a condition
 		if (current().getTokenKind() == TokenKind.tilToken || current().getTokenKind() == TokenKind.wileToken) {
 			if (peek(1).getTokenKind().getType() != "cmpop") {
-				diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ peek(1).getTokenKind().getType() 
+				diagnostics.add("Line "+ lineCounter + ": Type Error; Unexpected <"+ peek(1).getTokenKind().getType() 
 						+ "> expected comparison operator <cmpop>");
 			}
 			condition = new NodeDeclaration(SyntaxType.loopcond, nextToken(), varid, parseCmpOp());
@@ -648,7 +648,7 @@ public class Parser {
 		match(TokenKind.loopEndToken);
 		
 		if (!loopid.getValue().equals(current().getValue())) {
-			diagnostics.add("Line "+ lineCounter + ": Loop id mismatch");
+			diagnostics.add("Line "+ lineCounter + ": ID Error; Loop id mismatch");
 			
 		} 
 		
@@ -735,7 +735,7 @@ public class Parser {
 		}
 		
 		if (inInfarop || inSmoosh) nextToken();
-		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid Literal/VarId/Expression");
+		diagnostics.add("Line "+ lineCounter + ": Type Error; expected valid Literal/VarId/Expression");
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
 	
@@ -747,7 +747,7 @@ public class Parser {
 			return new NodeLiteral(nextToken());
 		}
 		
-		diagnostics.add("Line "+ lineCounter + ": Invalid operand; expected valid NUMBR/NUMBAR/YARN/TROOF");
+		diagnostics.add("Line "+ lineCounter + ": Type Error; expected valid NUMBR/NUMBAR/YARN/TROOF");
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
 	
@@ -798,7 +798,7 @@ public class Parser {
 				current().getTokenKind() != TokenKind.tldrToken &&
 				current().getTokenKind() != TokenKind.eolToken &&
 				!insideComment) {
-				diagnostics.add("Line "+ lineCounter + ": Unexpected <"+ current().getTokenKind() 
+				diagnostics.add("Line "+ lineCounter + ": Syntax Error; Unexpected <"+ current().getTokenKind() 
 						+ "> before <haiToken>");
 			}
 			

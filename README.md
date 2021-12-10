@@ -44,6 +44,9 @@ Prerequisites are [Java][5] and [Maven][6].
 * [RichTextFx][7] for the code editor
 * [Flowless][8] for scrollbars in the code editor
 
+##  License
+This software is licensed under the [GNU General Public License v3](LICENSE).
+
 
 
 [1]: http://www.lolcode.org/

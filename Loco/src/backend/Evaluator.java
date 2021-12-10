@@ -42,7 +42,6 @@ public class Evaluator {
 		if (parser.getDiagnostics().size() > 0) {
 			programCounter = null;
 		} else {
-			
 			updateLineCounter();
 			
 			this.programCounter = root.getStatements();
@@ -69,7 +68,6 @@ public class Evaluator {
 		if (parser.getDiagnostics().size() > 0) {
 			programCounter = null;
 		} else {
-			
 			updateLineCounter();
 			
 			this.programCounter = root.getStatements();
@@ -79,9 +77,6 @@ public class Evaluator {
 	}
 	
 	public void nextInstruction() {
-		
-		
-		
 		// check if PC holds only 1 line of code 
 		if (programCounter.getType() == SyntaxType.expression ||
 			programCounter.getType() == SyntaxType.assignment ||
@@ -101,12 +96,15 @@ public class Evaluator {
 		
 		
 		if (currentInstruction.getType() == SyntaxType.expression) {
+			lineCounter = ((NodeExpression) currentInstruction).getLineCounter();
 			evalExpression((NodeExpression) currentInstruction);
 			
 		} else if (currentInstruction.getType() == SyntaxType.assignment) {
+			lineCounter = ((NodeAssignment) currentInstruction).getLineCounter();
 			evalAssignment((NodeAssignment) currentInstruction);
 			
 		} else {
+			lineCounter = ((NodeFlowControl) currentInstruction).getLineCounter();
 			evalFlowControl((NodeFlowControl) currentInstruction);
 		}
 		
@@ -122,7 +120,6 @@ public class Evaluator {
 			programCounter = null;
 			return;
 		}
-		
 		
 		while (statements instanceof NodeStatement) {
 			currentLine = ((NodeStatement) statements).getOp1();
@@ -290,6 +287,10 @@ public class Evaluator {
 			result = op1 % op2;
 		}
 		
+		if (Double.isInfinite(result)) {
+			if (op2 == 0 && errorMsg.isEmpty()) errorMsg = "Line " + lineCounter + ": Math Error; Attempt to divide by zero";
+			result = -1;
+		}
 		
 		if (operand1.getTokenKind() == TokenKind.numbarToken || operand2.getTokenKind() == TokenKind.numbarToken || isFloat) {
 			return new Token(TokenKind.numbarToken, Double.toString(result), -1);

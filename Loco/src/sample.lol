@@ -1,3 +1,6 @@
 HAI
-	VISIBLE QUOSHUNT OF 1 AN 0
+
+	VISIBLE SUM OF 1 AN 2 "World" ... BTW dsfsdf
+	!
+	VISIBLE "test" BTW dsfsdfs
 KTHXBYE

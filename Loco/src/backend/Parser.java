@@ -14,6 +14,7 @@ public class Parser {
 	
 	private boolean inInfarop;
 	private boolean inSmoosh;
+	private boolean inPrint;
 	private boolean inFlowControl;
 	private boolean inFunction;
 	
@@ -26,6 +27,7 @@ public class Parser {
 		
 		this.inInfarop = false;
 		this.inSmoosh = false;
+		this.inPrint = false;
 		this.inFlowControl = false;
 		this.inFunction = false;
 		
@@ -61,6 +63,7 @@ public class Parser {
 		
 		this.inInfarop = false;
 		this.inSmoosh = false;
+		this.inPrint = false;
 		this.inFlowControl = false;
 		this.inFunction = false;
 		
@@ -88,6 +91,10 @@ public class Parser {
 	private Token peek(int offset) {
 		//	check if peek value is within the bounds
 		if (position + offset >= tokens.size()) return tokens.get(tokens.size() - 1);
+		else if (tokens.get(position + offset).getTokenKind() == TokenKind.dotsToken) {
+			if (offset == 0) position += 2;
+			else offset += 2;
+		}
 		
 		return tokens.get(position + offset);
 	}
@@ -104,13 +111,17 @@ public class Parser {
 	
 	//	Optionally matches the given parameter; if no match, no error is thrown
 	private Token lazyMatch(TokenKind kind) {
-		if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
+		if (current().getTokenKind() == TokenKind.commaToken && kind == TokenKind.eolToken) {
+			nextToken();
+			return new Token(kind, "\n", -1);
+			
+		} else if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
 			lineCounter++;
 
 			return consumeEOL();
 			
 		} else if (current().getTokenKind() == kind) {
-			if (kind == TokenKind.eolToken) lineCounter++;
+
 			return nextToken();
 		}
 		
@@ -118,9 +129,12 @@ public class Parser {
 	}
 	
 	//	Check if current token matches the given parameter; if no match, an error is thrown
-	private Token match(TokenKind kind) {
-		
-		if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
+	private Token match(TokenKind kind) {		
+		if (current().getTokenKind() == TokenKind.commaToken && kind == TokenKind.eolToken) {
+			nextToken();
+			return new Token(kind, "\n", -1);
+			
+		} else if (current().getTokenKind() == kind && kind == TokenKind.eolToken) {
 			lineCounter++;
 
 			//	Console multiple eol tokens
@@ -186,6 +200,7 @@ public class Parser {
 		else expression = parseExpression();
 		
 		match(TokenKind.eolToken);
+		
 		inFlowControl = false;
 		
 		//	recursively create statement nodes for the parse tree
@@ -200,6 +215,7 @@ public class Parser {
 		
 		return expression;
 	}
+
 	
 	
 	private SyntaxNode parseExpression() {
@@ -231,11 +247,16 @@ public class Parser {
 			inSmoosh = true;
 			SyntaxNode concat = new NodeExpression(parseConcat(nextToken()), lineCounter);
 			inSmoosh = false;
+			
 			lazyMatch(TokenKind.mkayToken);
 			return concat;
 			
 		} else if (current().getTokenKind() == TokenKind.printToken) {
-			return new NodeExpression(parsePrint(nextToken()), lineCounter);
+			inPrint = true;
+			SyntaxNode print = new NodeExpression(parsePrint(nextToken()), lineCounter);
+			inPrint = false;
+			
+			return print;
 			
 		} else if (current().getTokenKind() == TokenKind.breakToken) {
 			return new NodeLiteral(SyntaxType.gtfo, nextToken());
@@ -249,7 +270,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid Keyword ");
-		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
+		while (!isEOL()) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -274,7 +295,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid Keyword");
-		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
+		while (!isEOL()) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -300,7 +321,7 @@ public class Parser {
 		}
 		
 		diagnostics.add("Line "+ lineCounter + ": Syntax Error; Invalid Keyword");
-		while (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.eofToken) {
+		while (!isEOL()) {
 			nextToken();
 		}
 		return new NodeLiteral(new Token(TokenKind.badToken, null, -1));
@@ -365,7 +386,7 @@ public class Parser {
 		SyntaxNode operand1 = parseTerminal();
 		
 		//	Recursive construction of parsetree for infinite arity operations
-		if (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.mkayToken) {
+		if (!isEOL() && current().getTokenKind() != TokenKind.mkayToken) {
 			match(TokenKind.anToken);
 			operand1 = new NodeOperation(SyntaxType.infarop , operation, operand1, parseInfArOp(operation));
 		} else {
@@ -389,10 +410,9 @@ public class Parser {
 		SyntaxNode operand1 = parseTerminal();
 		
 		//	Recursive construction of parsetree for concatenation operation
-		if (current().getTokenKind() != TokenKind.eolToken && current().getTokenKind() != TokenKind.mkayToken) {
+		if (!isEOL() && current().getTokenKind() != TokenKind.mkayToken) {
 			match(TokenKind.anToken);
 			operand1 = new NodeOperation(SyntaxType.concat, operation, operand1, parseConcat(operation));
-			
 		} else {
 			operand1 = new NodeOperation(SyntaxType.concat, operation, operand1);
 		}
@@ -401,31 +421,19 @@ public class Parser {
 	}
 	
 	private SyntaxNode parsePrint(Token operation) {
-		SyntaxNode operand1 = new NodeLiteral(new Token(TokenKind.badToken, "", -1));
+		SyntaxNode operand1 = parseTerminal();
 		
-		//	Stop recursion if exclamation is encountered
-		if (current().getTokenKind() == TokenKind.exclamationToken) {
-			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(nextToken()));
-			
-		//	Stop recursion if eofToken is encountered
-		} else if (current().getTokenKind() == TokenKind.eofToken) {
-			return new NodeOperation(SyntaxType.print, operation, new NodeLiteral(lazyMatch(TokenKind.numbrToken)));
-		} else {
-			operand1 = parseTerminal();
-		}
-		
-		if (current().getTokenKind() != TokenKind.eolToken && operand1.getType() != SyntaxType.invalid) {
+		//	Recursive construction of parsetree for print operation
+		if (!isEOL() && current().getTokenKind() != TokenKind.exclamationToken) {
 			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, parsePrint(operation));
-
-		//	prevents infinite loop when the current operand is invalid by calling nextToken()
-		} else if (operand1.getType() == SyntaxType.invalid) {
-			nextToken();
-			operand1 = new NodeOperation(SyntaxType.print, operation, operand1);
-
-		} else {
+		
+		} else if (current().getTokenKind() == TokenKind.exclamationToken) {
+			operand1 = new NodeOperation(SyntaxType.print, operation, operand1, new NodeOperation(SyntaxType.print, operation, new NodeLiteral(nextToken())));
 			
+		} else {
 			operand1 = new NodeOperation(SyntaxType.print, operation, operand1);
 		}
+		
 		
 		return operand1;
 	}
@@ -734,7 +742,7 @@ public class Parser {
 			
 		}
 		
-		if (inInfarop || inSmoosh) nextToken();
+		if (inInfarop || inSmoosh || inPrint) nextToken();
 		diagnostics.add("Line "+ lineCounter + ": Type Error; expected valid Literal/VarId/Expression");
 		return new NodeLiteral(SyntaxType.invalid, new Token(TokenKind.badToken, null, -1));
 	}
@@ -757,9 +765,7 @@ public class Parser {
 		nextToken();
 		
 		//	uses string concatenation to add succeeding tokens until it encounters another quote token
-		while (current().getTokenKind() != TokenKind.quoteToken && 
-			   current().getTokenKind() != TokenKind.eolToken &&
-			   current().getTokenKind() != TokenKind.eofToken) {
+		while (!isEOL() && current().getTokenKind() != TokenKind.quoteToken) {
 			
 			if (current().getValue().equals(":")) nextToken();
 			else if (current().getValue().equals(":\"")) {
@@ -825,6 +831,16 @@ public class Parser {
 			current().getTokenKind() == TokenKind.switchToken ||
 			current().getTokenKind() == TokenKind.loopStartToken ||
 			current().getTokenKind() == TokenKind.functionStartToken) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	private boolean isEOL() {
+		if (current().getTokenKind() == TokenKind.eolToken ||
+			current().getTokenKind() == TokenKind.commaToken ||
+			current().getTokenKind() == TokenKind.eofToken) {
 			return true;
 		}
 		

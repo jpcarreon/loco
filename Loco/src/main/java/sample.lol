@@ -1,3 +1,6 @@
 HAI
-	SMOOSH fsd AN SUM OF 1 AN 2 AN IS NOW A MKAY
+
+	VISIBLE SUM OF 1 AN 2 "World" ... BTW dsfsdf
+	!
+	VISIBLE "test" BTW dsfsdfs
 KTHXBYE

@@ -50,7 +50,7 @@ public class Main extends Application {
 		File fp = new File("src/main/java/sample.lol");
 		Evaluator evaluator = new Evaluator(fp);
 		
-		//evaluator.viewParseTree();
+		evaluator.viewParseTree();
 		//System.out.println(evaluator.getStrParseTree());
 		evaluator.viewParserErrors();
 		

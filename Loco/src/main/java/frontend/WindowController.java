@@ -10,17 +10,17 @@ import backend.Evaluator;
 import backend.SymTabEntry;
 import backend.Token;
 import backend.TokenKind;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.Effect;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
@@ -40,9 +40,12 @@ public class WindowController implements Initializable {
 	private boolean isPTreeShow;
 	private boolean showRuntime;
 	private boolean wrapText;
+	private boolean hideHighlight;
+
 	private String codeBackup;
 	private int loopLimit;
 
+	private CodeHighlighter codeHighlighter;
 	private CodeArea codeArea;
 
 	public final static int WINDOW_HEIGHT = 675;
@@ -70,7 +73,7 @@ public class WindowController implements Initializable {
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
-		CodeHighlighter codeHighlighter = new CodeHighlighter();
+		codeHighlighter = new CodeHighlighter();
 
 		lexemeColumn.setCellValueFactory(new PropertyValueFactory<Token, String>("value"));
 		tokenKindColumn.setCellValueFactory(new PropertyValueFactory<Token, TokenKind>("tokenKind"));
@@ -81,7 +84,7 @@ public class WindowController implements Initializable {
 		codeArea = codeHighlighter.getCodeArea();
 		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
 
-		isPTreeShow = showRuntime = wrapText = false;
+		hideHighlight = isPTreeShow = showRuntime = wrapText = false;
 		loopLimit = 999;
 	}
 	
@@ -292,6 +295,20 @@ public class WindowController implements Initializable {
     	consoleTextArea.positionCaret(0);
     	parseTreeTextArea.positionCaret(0);
     }
+
+	@FXML
+	void setCodeHighlight(ActionEvent event) {
+		int pos = codeArea.getCaretPosition();
+
+		codeHighlighter.setHightlight(hideHighlight);
+		hideHighlight = !hideHighlight;
+
+		codeBackup = codeArea.getText();
+		codeArea.clear();
+		codeArea.appendText(codeBackup);
+
+		codeArea.displaceCaret(pos);
+	}
     
     @FXML
     void changeLoopLimit(ActionEvent event) {
@@ -325,20 +342,6 @@ public class WindowController implements Initializable {
     	
     	
     	alert.showAndWait();
-    }
-    
-    @FXML
-    void foldAll(ActionEvent event) {
-		verticalSplit.setDividerPosition(0, 1.0);
-    	horizontalSplit.setDividerPosition(1, 1.0);
-    	horizontalSplit.setDividerPosition(0, 1.0);
-    }
-    
-    @FXML
-    void defaultFold(ActionEvent event) {
-    	verticalSplit.setDividerPosition(0, 0.8);
-    	horizontalSplit.setDividerPosition(0, 0.6);
-    	horizontalSplit.setDividerPosition(1, 0.8);
     }
     
     @FXML
@@ -376,7 +379,32 @@ public class WindowController implements Initializable {
     	Stage stage = (Stage) tokenTable.getScene().getWindow();
     	stage.close();
     }
-    
+
+	@FXML
+	void testClick(ActionEvent event) {
+		Button btn = (Button) event.getSource();
+
+		if (btn.getStyle().equals("-fx-background-color: #BDBDBD;")) {
+			btn.setStyle("-fx-background-color: none;");
+
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, 1);
+			else if (btn.getText().equals("Symbol Table")) horizontalSplit.setDividerPositions(1, 1);
+			else verticalSplit.setDividerPosition(0, 1);
+
+		} else {
+			btn.setStyle("-fx-background-color: #BDBDBD;");
+
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, 0.8);
+			else if (btn.getText().equals("Symbol Table")) horizontalSplit.setDividerPosition(1, 0.8);
+			else verticalSplit.setDividerPosition(0, 0.8);
+		}
+
+		if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(1, 1);
+		else if (btn.getText().equals("Symbol Table")) {
+			horizontalSplit.setDividerPosition(0, 0.8);
+		}
+	}
+
     @FXML
     void setHotKey(KeyEvent event) {
     	if (event.getCode() == KeyCode.F6) runProgram(null);

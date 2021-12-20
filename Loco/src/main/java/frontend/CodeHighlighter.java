@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 public class CodeHighlighter {
     private CodeArea codeArea;
+    private boolean showHighlighting;
 
     private static String expressionPattern;
     private static String assignmentPattern;
@@ -52,8 +53,9 @@ public class CodeHighlighter {
         codeArea.setLineHighlighterOn(true);
         codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
 
+        showHighlighting = true;
         codeArea.textProperty().addListener((obs, oldText, newText) -> {
-            codeArea.setStyleSpans(0, computeHighlighting(newText));
+            if (showHighlighting) codeArea.setStyleSpans(0, computeHighlighting(newText));
         });
 
         keywordSetup();
@@ -74,6 +76,8 @@ public class CodeHighlighter {
     public CodeArea getCodeArea() {
         return codeArea;
     }
+
+    public void setHightlight(boolean flag) { showHighlighting = flag; }
 
     private void keywordSetup() {
         String regex;

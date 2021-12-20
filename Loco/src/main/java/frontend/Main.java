@@ -71,7 +71,6 @@ public class Main extends Application {
 
 		scene.getStylesheets().add(getClass().getResource("Window.css").toExternalForm());
 
-
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Loco - Lolcode Interpreter");
 

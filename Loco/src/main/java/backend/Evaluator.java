@@ -986,7 +986,8 @@ public class Evaluator {
 		//tokens.get(position).viewToken();
 
 			
-		while (tokens.get(position).getTokenKind() != TokenKind.eolToken) {
+		while (tokens.get(position).getTokenKind() != TokenKind.eolToken &&
+			   tokens.get(position).getTokenKind() != TokenKind.eofToken) {
 			position++;
 		}
 		position++;

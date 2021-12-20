@@ -1,6 +1,1 @@
-HAI
-
-	VISIBLE SUM OF 1 AN 2 "World" ... BTW dsfsdf
-	!
-	VISIBLE "test" BTW dsfsdfs
-KTHXBYE
+HAI , QUOSHUNT OF 1 AN 0 , KTHXBYE

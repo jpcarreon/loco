@@ -12,6 +12,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -73,12 +74,12 @@ public class Main extends Application {
 
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Loco - Lolcode Interpreter");
+		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("Loco_48.png")));
 
 		primaryStage.setMinHeight(WindowController.WINDOW_HEIGHT);
 		primaryStage.setMinWidth(WindowController.WINDOW_WIDTH);
 
 		primaryStage.show();
-
 	}
 
 	private static Parent loadFXML (String fxml) throws IOException {

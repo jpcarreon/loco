@@ -765,7 +765,9 @@ public class Parser {
 		nextToken();
 		
 		//	uses string concatenation to add succeeding tokens until it encounters another quote token
-		while (!isEOL() && current().getTokenKind() != TokenKind.quoteToken) {
+		while (current().getTokenKind() != TokenKind.eolToken && 
+			   current().getTokenKind() != TokenKind.eofToken &&
+			   current().getTokenKind() != TokenKind.quoteToken) {
 			
 			if (current().getValue().equals(":")) nextToken();
 			else if (current().getValue().equals(":\"")) {

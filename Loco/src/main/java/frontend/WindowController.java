@@ -4,7 +4,6 @@ import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 import backend.Evaluator;
 import backend.SymTabEntry;
@@ -15,34 +14,28 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.Effect;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.LineNumberFactory;
-
 
 public class WindowController implements Initializable {
 	private Evaluator evaluator;
 	
 	private boolean isPTreeShow;
-	private boolean showRuntime;
 	private boolean wrapText;
 	private boolean hideHighlight;
 
 	private String codeBackup;
+	private String fileName;
 	private int loopLimit;
 
 	private CodeHighlighter codeHighlighter;
@@ -68,8 +61,13 @@ public class WindowController implements Initializable {
 	@FXML private TableColumn<SymTabEntry, String> valueColumn;
 	
 	@FXML private Text symbolTableLabel;
+	@FXML private Text programStatus;
 	
 	@FXML private MenuItem nextLineBtn;
+	@FXML private Button terminalBtn;
+	@FXML private Button lexemeBtn;
+	@FXML private Button symTabBtn;
+
 	
 	@Override
 	public void initialize(URL arg0, ResourceBundle arg1) {
@@ -84,7 +82,11 @@ public class WindowController implements Initializable {
 		codeArea = codeHighlighter.getCodeArea();
 		codeStackPane.getChildren().add(new VirtualizedScrollPane<>(codeArea));
 
-		hideHighlight = isPTreeShow = showRuntime = wrapText = false;
+		setDividerListeners();
+
+		programStatus.setText("Idle");
+
+		hideHighlight = isPTreeShow = wrapText = false;
 		loopLimit = 999;
 	}
 	
@@ -100,6 +102,8 @@ public class WindowController implements Initializable {
 		
 		if (file != null) {
 			codeArea.clear();
+			fileName = file.getName();
+			programStatus.setText(fileName);
 			
 			try {
 				Scanner sc = new Scanner(file);
@@ -131,6 +135,9 @@ public class WindowController implements Initializable {
 		File file = filechooser.showSaveDialog(null);
 		
 		if (file != null) {
+			fileName = file.getName();
+			programStatus.setText(fileName);
+
 			try {
 				FileWriter writer = new FileWriter(file);
 				writer.write(codeArea.getText());
@@ -144,19 +151,22 @@ public class WindowController implements Initializable {
 
     @FXML
     void runProgram(ActionEvent event) {
+		long startTime, totalTime;
     	if (!codeArea.isEditable()) return;
     	
-    	long startTime = System.nanoTime();
-    	
+    	startTime = System.nanoTime();
+
     	try {
     		String fp = codeArea.getText();
         	fp = fp.replaceAll("\t", "");
         	
         	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
+			programStatus.setText(fileName + " > Java Fatal ERROR");
     		return;
     	}
-    	
+
+		programStatus.setText(fileName + " > Program running");
     	evaluator.changeLoopLimit(loopLimit);
     	
     	//	hide console text area
@@ -193,9 +203,9 @@ public class WindowController implements Initializable {
     		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
     	}
     	
-    	long totalTime = System.nanoTime() - startTime;
-    	if (showRuntime) updateConsole("\nProgram Runtime: " + totalTime / 1000000.0 + "ms");
-    	
+    	totalTime = System.nanoTime() - startTime;
+		programStatus.setText(fileName + " > Execution completed in " + totalTime / 1000000.0 + " ms");
+
     	parseTreeTextArea.positionCaret(0);
     }
     
@@ -210,9 +220,11 @@ public class WindowController implements Initializable {
         	
         	evaluator = new Evaluator(fp, this);
     	} catch (Exception e) {
+			programStatus.setText(fileName + " > Java Fatal ERROR");
     		return;
     	}
-    	
+
+		programStatus.setText(fileName + " > Program debugging");
     	evaluator.changeLoopLimit(loopLimit);
     	
     	verticalSplit.setDividerPosition(0, 1.0);
@@ -254,7 +266,8 @@ public class WindowController implements Initializable {
 				codeArea.appendText(codeBackup);
 		    	codeArea.setEditable(true);
 			}
-			
+
+			programStatus.setText(fileName + " > Debugging completed");
 			nextLineBtn.setDisable(true);
     	} else {
     		evaluator.nextInstruction();
@@ -362,11 +375,6 @@ public class WindowController implements Initializable {
     	
     	isPTreeShow = !isPTreeShow;
     }
-    
-    @FXML
-    void showProgramRuntime(ActionEvent event) {
-    	showRuntime = !showRuntime;
-    }
 
 	@FXML
 	void wrapText(ActionEvent event) {
@@ -381,28 +389,34 @@ public class WindowController implements Initializable {
     }
 
 	@FXML
-	void testClick(ActionEvent event) {
+	void sidePanelButtons(ActionEvent event) {
 		Button btn = (Button) event.getSource();
 
+		//	Check if btn is clicked depending on its background color
 		if (btn.getStyle().equals("-fx-background-color: #BDBDBD;")) {
 			btn.setStyle("-fx-background-color: none;");
 
 			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, 1);
-			else if (btn.getText().equals("Symbol Table")) horizontalSplit.setDividerPositions(1, 1);
+			else if (btn.getText().equals("Symbol Table")) {
+				horizontalSplit.setDividerPosition(1,1);
+				horizontalSplit.layout();
+				horizontalSplit.setDividerPosition(0, 1);
+				horizontalSplit.layout();
+			}
 			else verticalSplit.setDividerPosition(0, 1);
 
 		} else {
 			btn.setStyle("-fx-background-color: #BDBDBD;");
 
 			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, 0.8);
-			else if (btn.getText().equals("Symbol Table")) horizontalSplit.setDividerPosition(1, 0.8);
+			else if (btn.getText().equals("Symbol Table")) {
+				horizontalSplit.setDividerPosition(0, 0.8);
+				horizontalSplit.setDividerPosition(1, 0.8);
+			}
 			else verticalSplit.setDividerPosition(0, 0.8);
 		}
 
 		if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(1, 1);
-		else if (btn.getText().equals("Symbol Table")) {
-			horizontalSplit.setDividerPosition(0, 0.8);
-		}
 	}
 
     @FXML
@@ -470,11 +484,43 @@ public class WindowController implements Initializable {
     		symbolTable.getItems().add(entry);
     	}
     }
-    
+
+	private void setDividerListeners() {
+		verticalSplit.getDividers().get(0).positionProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+				if ((double) t1 < 0.98) terminalBtn.setStyle("-fx-background-color: #BDBDBD;");
+				else terminalBtn.setStyle("-fx-background-color: none;");
+			}
+		});
+
+		horizontalSplit.getDividers().get(0).positionProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+				//	Set css of the button depending on divider positions
+				double relativePos = horizontalSplit.getDividers().get(1).getPosition() - (double) t1;
+				if ((double) t1 < 0.98 && relativePos > 0.09) lexemeBtn.setStyle("-fx-background-color: #BDBDBD;");
+				else lexemeBtn.setStyle("-fx-background-color: none;");
+			}
+		});
+
+		horizontalSplit.getDividers().get(1).positionProperty().addListener(new ChangeListener<Number>() {
+			@Override
+			public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+				double relativePos = (double) t1 - horizontalSplit.getDividers().get(0).getPosition();
+				if ((double) t1 < 0.98) symTabBtn.setStyle("-fx-background-color: #BDBDBD;");
+				else symTabBtn.setStyle("-fx-background-color: none;");
+
+				//	Update lexemebtn background based on divider positions
+				if (relativePos > 0.09) lexemeBtn.setStyle("-fx-background-color: #BDBDBD;");
+				else lexemeBtn.setStyle("-fx-background-color: none;");
+			}
+		});
+	}
+
     private String displayInputBox(String title, String prompt) {
     	InputWindow popup = new InputWindow(title, prompt);
     	popup.display();
-    	
     	
     	return popup.getValue();
     }

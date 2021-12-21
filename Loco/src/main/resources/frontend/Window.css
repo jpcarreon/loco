@@ -7,7 +7,6 @@
     -fx-cursor: hand;
 
     -fx-background-color: none;
-    -fx-border-color: none;
     -fx-background-radius: 0px;
 
     -fx-pref-height: 25px;
@@ -28,7 +27,9 @@
 }
 
 .split-pane-divider {
-    -fx-padding: 0 0.3em;
+    -fx-padding: 0 0.1em;
+    -fx-background-color: #F4F4F4;
+    -fx-border-color: #BDBDBD;
 }
 
 .code-area {

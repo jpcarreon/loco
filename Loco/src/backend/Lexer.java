@@ -27,7 +27,6 @@ public class Lexer {
 		
 		parseStrFile();
 		fixLexemes();
-
 	}
 
 	//	Read the file to popular the ArrayList lexemes
@@ -86,7 +85,7 @@ public class Lexer {
 			currentString = lexemes.get(i);
 			
 			//	If current chracter isn't whitespace, quote or a colon
-			if (currentString.matches("[^\s\t\"\n:]")) {
+			if (currentString.matches("[^\s\t\"\n:,]")) {
 				newLexeme += currentString;
 				
 			} else if (i + 1 < lexemes.size() && (currentString + lexemes.get(i + 1)).matches(":[\\)>o\":]")) {

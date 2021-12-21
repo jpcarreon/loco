@@ -3,6 +3,25 @@
     -fx-font-smoothing-type: gray;
 }
 
+.toggle-button {
+    -fx-cursor: hand;
+
+    -fx-background-color: none;
+    -fx-background-radius: 0px;
+
+    -fx-pref-height: 25px;
+
+    -fx-font-size: 12px;
+}
+
+.toggle-button:hover {
+    -fx-background-color: #D9D9D9;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #BDBDBD;
+}
+
 .button {
     -fx-cursor: hand;
 

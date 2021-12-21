@@ -61,12 +61,12 @@ public class WindowController implements Initializable {
 	@FXML private TableColumn<SymTabEntry, String> valueColumn;
 	
 	@FXML private Text symbolTableLabel;
-	@FXML private Text programStatus;
+	@FXML private Label programStatus;
 	
 	@FXML private MenuItem nextLineBtn;
-	@FXML private Button terminalBtn;
-	@FXML private Button lexemeBtn;
-	@FXML private Button symTabBtn;
+	@FXML private ToggleButton terminalBtn;
+	@FXML private ToggleButton lexemeBtn;
+	@FXML private ToggleButton symTabBtn;
 
 	
 	@Override
@@ -390,25 +390,26 @@ public class WindowController implements Initializable {
 
 	@FXML
 	void sidePanelButtons(ActionEvent event) {
-		Button btn = (Button) event.getSource();
+		double dpos = horizontalSplit.getDividers().get(1).getPosition();
+		ToggleButton btn = (ToggleButton) event.getSource();
 
-		//	Check if btn is clicked depending on its background color
-		if (btn.getStyle().equals("-fx-background-color: #BDBDBD;")) {
-			btn.setStyle("-fx-background-color: none;");
+		if (!btn.isSelected()) {
+			btn.setSelected(false);
 
-			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, 1);
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos);
 			else if (btn.getText().equals("Symbol Table")) {
 				horizontalSplit.setDividerPosition(1,1);
 				horizontalSplit.layout();
-				horizontalSplit.setDividerPosition(0, 1);
+
+				if (dpos - horizontalSplit.getDividers().get(0).getPosition() > 0.09) horizontalSplit.setDividerPosition(0, 0.8);
+				else horizontalSplit.setDividerPosition(0, 1);
 				horizontalSplit.layout();
 			}
 			else verticalSplit.setDividerPosition(0, 1);
-
 		} else {
-			btn.setStyle("-fx-background-color: #BDBDBD;");
+			btn.setSelected(true);
 
-			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, 0.8);
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos - 0.2);
 			else if (btn.getText().equals("Symbol Table")) {
 				horizontalSplit.setDividerPosition(0, 0.8);
 				horizontalSplit.setDividerPosition(1, 0.8);
@@ -416,7 +417,36 @@ public class WindowController implements Initializable {
 			else verticalSplit.setDividerPosition(0, 0.8);
 		}
 
-		if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(1, 1);
+		/*
+		Button btn = (Button) event.getSource();
+
+		//	Check if btn is clicked depending on its background color
+		if (btn.getStyle().equals("-fx-background-color: #BDBDBD;")) {
+			btn.setStyle("-fx-background-color: none;");
+
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos);
+			else if (btn.getText().equals("Symbol Table")) {
+				horizontalSplit.setDividerPosition(1,1);
+				horizontalSplit.layout();
+
+				if (dpos - horizontalSplit.getDividers().get(0).getPosition() > 0.09) horizontalSplit.setDividerPosition(0, 0.8);
+				else horizontalSplit.setDividerPosition(0, 1);
+				horizontalSplit.layout();
+			}
+			else verticalSplit.setDividerPosition(0, 1);
+
+		} else {
+			btn.setStyle("-fx-background-color: #BDBDBD;");
+
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos - 0.2);
+			else if (btn.getText().equals("Symbol Table")) {
+				horizontalSplit.setDividerPosition(0, 0.8);
+				horizontalSplit.setDividerPosition(1, 0.8);
+			}
+			else verticalSplit.setDividerPosition(0, 0.8);
+		}
+
+		*/
 	}
 
     @FXML
@@ -489,8 +519,8 @@ public class WindowController implements Initializable {
 		verticalSplit.getDividers().get(0).positionProperty().addListener(new ChangeListener<Number>() {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-				if ((double) t1 < 0.98) terminalBtn.setStyle("-fx-background-color: #BDBDBD;");
-				else terminalBtn.setStyle("-fx-background-color: none;");
+				if ((double) t1 < 0.98) terminalBtn.setSelected(true);
+				else terminalBtn.setSelected(false);
 			}
 		});
 
@@ -499,8 +529,8 @@ public class WindowController implements Initializable {
 			public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
 				//	Set css of the button depending on divider positions
 				double relativePos = horizontalSplit.getDividers().get(1).getPosition() - (double) t1;
-				if ((double) t1 < 0.98 && relativePos > 0.09) lexemeBtn.setStyle("-fx-background-color: #BDBDBD;");
-				else lexemeBtn.setStyle("-fx-background-color: none;");
+				if ((double) t1 < 0.98 && relativePos > 0.09) lexemeBtn.setSelected(true);
+				else lexemeBtn.setSelected(false);
 			}
 		});
 
@@ -508,12 +538,12 @@ public class WindowController implements Initializable {
 			@Override
 			public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
 				double relativePos = (double) t1 - horizontalSplit.getDividers().get(0).getPosition();
-				if ((double) t1 < 0.98) symTabBtn.setStyle("-fx-background-color: #BDBDBD;");
-				else symTabBtn.setStyle("-fx-background-color: none;");
+				if ((double) t1 < 0.98) symTabBtn.setSelected(true);
+				else symTabBtn.setSelected(false);
 
 				//	Update lexemebtn background based on divider positions
-				if (relativePos > 0.09) lexemeBtn.setStyle("-fx-background-color: #BDBDBD;");
-				else lexemeBtn.setStyle("-fx-background-color: none;");
+				if (relativePos > 0.09) lexemeBtn.setSelected(true);
+				else lexemeBtn.setSelected(false);
 			}
 		});
 	}

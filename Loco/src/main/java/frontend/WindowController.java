@@ -202,7 +202,7 @@ public class WindowController implements Initializable {
     		verticalSplit.setDividerPosition(0, 0.8);
     		consoleTextArea.appendText(evaluator.getEvalDiagnostics() + "\n");
     	}
-    	
+
     	totalTime = System.nanoTime() - startTime;
 		programStatus.setText(fileName + " > Execution completed in " + totalTime / 1000000.0 + " ms");
 
@@ -352,8 +352,7 @@ public class WindowController implements Initializable {
     						"Lolcode is an esoteric programming language based on an internet meme called \"lolcat\"\n" + 
     						"Learn more at: lolcode.org/");
     	alert.setContentText("Github Page:\n" + "https://github.com/jpcarreon/loco");
-    	
-    	
+
     	alert.showAndWait();
     }
     
@@ -390,63 +389,36 @@ public class WindowController implements Initializable {
 
 	@FXML
 	void sidePanelButtons(ActionEvent event) {
-		double dpos = horizontalSplit.getDividers().get(1).getPosition();
+		double dpos1 = horizontalSplit.getDividers().get(1).getPosition();
+		double dpos2 = horizontalSplit.getDividers().get(0).getPosition();
 		ToggleButton btn = (ToggleButton) event.getSource();
+		Stage stage = (Stage) btn.getScene().getWindow();
 
-		if (!btn.isSelected()) {
+		//	Get ideal length divider position relative to the width of the window
+		double length = 1 - 236 / stage.getWidth();
+
+		if (btn.isSelected()) {
 			btn.setSelected(false);
-
-			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos);
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos1 - 236 / stage.getWidth());
 			else if (btn.getText().equals("Symbol Table")) {
-				horizontalSplit.setDividerPosition(1,1);
-				horizontalSplit.layout();
-
-				if (dpos - horizontalSplit.getDividers().get(0).getPosition() > 0.09) horizontalSplit.setDividerPosition(0, 0.8);
-				else horizontalSplit.setDividerPosition(0, 1);
-				horizontalSplit.layout();
+				if (dpos2 > length) horizontalSplit.setDividerPosition(0, length);
+				horizontalSplit.setDividerPosition(1, length);
 			}
-			else verticalSplit.setDividerPosition(0, 1);
+			else verticalSplit.setDividerPosition(0, length);
 		} else {
 			btn.setSelected(true);
-
-			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos - 0.2);
-			else if (btn.getText().equals("Symbol Table")) {
-				horizontalSplit.setDividerPosition(0, 0.8);
-				horizontalSplit.setDividerPosition(1, 0.8);
-			}
-			else verticalSplit.setDividerPosition(0, 0.8);
-		}
-
-		/*
-		Button btn = (Button) event.getSource();
-
-		//	Check if btn is clicked depending on its background color
-		if (btn.getStyle().equals("-fx-background-color: #BDBDBD;")) {
-			btn.setStyle("-fx-background-color: none;");
-
-			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos);
+			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos1);
 			else if (btn.getText().equals("Symbol Table")) {
 				horizontalSplit.setDividerPosition(1,1);
 				horizontalSplit.layout();
 
-				if (dpos - horizontalSplit.getDividers().get(0).getPosition() > 0.09) horizontalSplit.setDividerPosition(0, 0.8);
+				//	Check if the 2 dividers are close to each other
+				if (dpos1 - dpos2 > 0.09) horizontalSplit.setDividerPosition(0, length);
 				else horizontalSplit.setDividerPosition(0, 1);
 				horizontalSplit.layout();
 			}
 			else verticalSplit.setDividerPosition(0, 1);
-
-		} else {
-			btn.setStyle("-fx-background-color: #BDBDBD;");
-
-			if (btn.getText().equals("Lexemes")) horizontalSplit.setDividerPosition(0, dpos - 0.2);
-			else if (btn.getText().equals("Symbol Table")) {
-				horizontalSplit.setDividerPosition(0, 0.8);
-				horizontalSplit.setDividerPosition(1, 0.8);
-			}
-			else verticalSplit.setDividerPosition(0, 0.8);
 		}
-
-		*/
 	}
 
     @FXML
@@ -543,7 +515,10 @@ public class WindowController implements Initializable {
 
 				//	Update lexemebtn background based on divider positions
 				if (relativePos > 0.09) lexemeBtn.setSelected(true);
-				else lexemeBtn.setSelected(false);
+				else {
+					lexemeBtn.setSelected(false);
+					horizontalSplit.getDividers().get(0).setPosition((double) t1 - Double.MIN_VALUE);
+				}
 			}
 		});
 	}
